@@ -1,0 +1,113 @@
+1.2.33
+Changed from paymentType to paymentMethod.
+
+1.2.32
+Added support for separate billing and shipping address
+Upped security in the module
+
+1.2.31
+Improved confirmation page loading when notification is called early.
+
+1.2.30
+Fix for update reference on callback
+
+1.2.29
+Added support for more locales
+
+1.2.28
+Fixe for non seo friendly urls in checkout.
+
+1.2.27
+Fixed tax rate in order item method
+Changed to reserved/captured amount for order validation
+
+1.2.26
+Added fallback to create new payment ID if the stored is broken.
+
+1.2.25
+Added fallback for products missing artnumber.
+
+1.2.24
+Fix for shipping on charge call.
+
+1.2.23
+Added method for order items and order amount
+
+1.2.22
+Vouchers tax amount is now negative.
+
+1.2.21
+Can now restart order process if no carriers.
+Reload page if bad country.
+Fix logging of errors.
+Remove duplicate code.
+Created new version of missing tpl file.
+
+1.2.20
+Can not proceede to payment if no carriers available
+
+1.2.19
+Prestaworks stuff
+
+1.2.18
+Changes in how discounts are processed.
+Change order reference in Easy to match order reference in PrestaShop
+
+1.2.17
+Disable checkout when returning from 3D secure
+
+1.2.16
+Support for currency EUR.
+Freeze checkout while paying with Swish
+
+1.2.15
+JS variable for postalCode and country made available in .js file
+
+1.2.14
+Fix for address when c/o address and company name inserted for B2B
+
+1.2.13
+Added id_carrier data information in .tpl for delivery-options
+
+1.2.12
+Fixed bug webhooks.
+Fixed bug products offline/out of stock
+
+1.2.11
+Some fixes in the configuration page
+
+1.2.10
+Implemented standard thank-you page on order confirmation
+
+1.2.9
+Fix for B2B order confirmation.
+
+1.2.8
+Rebranding, DIBS merges into NETS
+
+1.2.7
+Fix with rounding when creating cart
+
+1.2.6
+Fix with (int) casting and fix multiple voucher bug
+
+1.2.5
+Fix for tax rate on voucher
+
+1.2.4
+Fix for unsupported countries in DIBS
+
+1.2.3
+Central header info
+
+1.2.2
+Fix for links to standard checkout and prefill information
+
+1.2.1
+Fix for handling shipping cost
+
+1.2.0
+Added support for PUSH request
+
+1.0.0
+First version
