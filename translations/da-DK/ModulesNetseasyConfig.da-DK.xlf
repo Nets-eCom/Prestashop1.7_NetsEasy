@@ -1,0 +1,152 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" version="1.2">
+  <file original="admin-dev" source-language="da-DK" target-language="da-DK" datatype="plaintext">
+    <body>
+      <trans-unit id="7529b2051321b1171b6e70ff6ff63b81">
+        <source>nets_webhook_authorization_error</source>
+        <target>Opret venligst en Webhook-autorisation nøgle</target>
+        <note>Line: </note>
+      </trans-unit>
+      <trans-unit id="8a625ee9b5bfe7c26e1b6920d13f3352">
+        <source>nets_webhook_url_error</source>
+        <target>Tilføj webhook-URL</target>
+        <note>Line: </note>
+      </trans-unit>
+      <trans-unit id="abdf09e77f67f3ce8e10ec179571bafd">
+        <source>nets_merchant_terms_url_error</source>
+        <target>Indsæt venligst URL til betingelser</target>
+        <note>Line: </note>
+      </trans-unit>
+      <trans-unit id="199a6cf887267be5a2b9c94119631a25">
+        <source>nets_terms_url_error</source>
+        <target>Indsæt venligst URL til privatpolitik</target>
+        <note>Line: </note>
+      </trans-unit>
+      <trans-unit id="2e2017f058b53051574081e1a3f4bf73">
+        <source>nets_live_secret_key_error</source>
+        <target>Live Secret-Key er påkrævet</target>
+        <note>Line: </note>
+      </trans-unit>
+      <trans-unit id="5373573eb4938d1101af6a9f82abee5c">
+        <source>nets_live_checkout_key_error</source>
+        <target>Live Checkout-Key er påkrævet</target>
+        <note>Line: </note>
+      </trans-unit>
+      <trans-unit id="b3803beaa7002e7c27b54e90653d6eb8">
+        <source>nets_test_secret_key_error</source>
+        <target>Test Secret-Key er påkrævet</target>
+        <note>Line: </note>
+      </trans-unit>
+      <trans-unit id="d4e519ec09f1d2afb0b6f01886342f41">
+        <source>nets_test_checkout_key_error</source>
+        <target>Test Checkout-Key er påkrævet</target>
+        <note>Line: </note>
+      </trans-unit>
+      <trans-unit id="ccd1066343c95877b75b79d47c36bebe">
+        <source>configuration</source>
+        <target>Konfiguration</target>
+        <note>Line: </note>
+      </trans-unit>
+      <trans-unit id="609841d69488e38b1b71688bcb415b22">
+        <source>test_mode</source>
+        <target>Test Mode</target>
+        <note>Line: </note>
+      </trans-unit>
+      <trans-unit id="c76a5e84e4bdee527e274ea30c680d79">
+        <source>active</source>
+        <target>aktiv</target>
+        <note>Line: </note>
+      </trans-unit>
+      <trans-unit id="19d3894f53ce79c3f836f26cf8a3be3b">
+        <source>inactive</source>
+        <target>inaktiv</target>
+        <note>Line: </note>
+      </trans-unit>
+      <trans-unit id="5cfdff1c226acbc36426cf1179775f0b">
+        <source>test_help</source>
+        <target>Aktiver test mode og indstil alle betalinger i test miljø</target>
+        <note>Line: </note>
+      </trans-unit>
+      <trans-unit id="6a439bde61c87412c0672fe84f61a136">
+        <source>test_checkout_key</source>
+        <target>Test Checkout-Key</target>
+        <note>Line: </note>
+      </trans-unit>
+      <trans-unit id="2a954a2bcb955f1e743a2d6327444843">
+        <source>test_secret_key</source>
+        <target>Test Secret-Key</target>
+        <note>Line: </note>
+      </trans-unit>
+      <trans-unit id="d4cf46ccfd2aa2f0295f92deb102d7b8">
+        <source>production_checkout_key</source>
+        <target>Live Checkout-Key</target>
+        <note>Line: </note>
+      </trans-unit>
+      <trans-unit id="cc8e3eaf3a8c5dd76d2f4cfaf4736507">
+        <source>production_secret_key</source>
+        <target>Live Secret-Key</target>
+        <note>Line: </note>
+      </trans-unit>
+      <trans-unit id="150ae78d35ce71fbabb573c9a3b29e8b">
+        <source>integration_type</source>
+        <target>Intergrationstype</target>
+        <note>Line: </note>
+      </trans-unit>
+      <trans-unit id="f17ca2c829680ada2fec9fc87bc5f606">
+        <source>redirect</source>
+        <target>Hosted</target>
+        <note>Line: </note>
+      </trans-unit>
+      <trans-unit id="605abe26d014c72e3df9deb267e73756">
+        <source>embedded</source>
+        <target>Embedded</target>
+        <note>Line: </note>
+      </trans-unit>
+      <trans-unit id="dbecd89e88eefe401d0291b0817b005b">
+        <source>terms_url</source>
+        <target>Handelsbetingelser URL</target>
+        <note>Line: </note>
+      </trans-unit>
+      <trans-unit id="0ef7cb1273391a2fcfac90719c697095">
+        <source>merchant_terms_url</source>
+        <target>Privatpolitik URL</target>
+        <note>Line: </note>
+      </trans-unit>
+      <trans-unit id="5015036c7c0e062feeb5be1fb222b459">
+        <source>icon_url</source>
+        <target>Iconbar URL</target>
+        <note>Line: </note>
+      </trans-unit>
+      <trans-unit id="63560ad9b1587b608179e5d6cafb4b55">
+        <source>auto_capture</source>
+        <target>Auto-capture</target>
+        <note>Line: </note>
+      </trans-unit>
+      <trans-unit id="1475e3ee247f4dca52619ae8a3b3b524">
+        <source>admin_debug_mode</source>
+        <target>admin debug mode</target>
+        <note>Line: </note>
+      </trans-unit>
+      <trans-unit id="68b1f544fca0f86b0cf27c08364a8a5b">
+        <source>frontend_debug_mode</source>
+        <target>frontend debug mode</target>
+        <note>Line: </note>
+      </trans-unit>
+      <trans-unit id="2b93ce0a965a2522a6d13c9a236db31f">
+        <source>webhook_url</source>
+        <target>webhook url</target>
+        <note>Line: </note>
+      </trans-unit>
+      <trans-unit id="f0250d35ea63056adcdf1ced221587d2">
+        <source>webhook_authorization</source>
+        <target>Webhook-autorisation</target>
+        <note>Line: </note>
+      </trans-unit>
+      <trans-unit id="43781db5c40ecc39fd718685594f0956">
+        <source>save</source>
+        <target>Gem</target>
+        <note>Line: </note>
+      </trans-unit>
+    </body>
+  </file>
+</xliff>

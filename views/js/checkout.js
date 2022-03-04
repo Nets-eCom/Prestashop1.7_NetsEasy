@@ -1,319 +1,99 @@
-let pw_postalCode = '';
-let pw_countryCode = '';
-let PS_PURCHASE_FAILED = 'PS_PURCHASE_FAILED';
-
-$(document).ready(function()
-{
-    prestashop.on(
-        'updateCart', function(event) {
-            ajaxPause(1);
-            updateEasyAndDelivery();
+$(document).ready(function () {
+    var place_button = document.querySelectorAll('#payment-confirmation button[type="submit"]');
+    var frame = document.getElementById('nets-checkout-iframe');
+    var payment_option = document.querySelectorAll('input[type=radio][name="payment-option"]');
+    var promo_code_applied = getUrlParameter('updatedTransaction');
+    
+    if (checkCookie('nets_payment_selected')) {
+        deleteCookie("nets_payment_selected");
+    }
+    place_button[0].addEventListener('click', function (e) {
+        var disabled = $('#payment-confirmation button[type="submit"]').hasClass('disabled');
+        if (!disabled) {
+            var name = $('input[type=radio][name="payment-option"]:checked').attr("data-module-name");
+            if (name == "Nets Payment") {
+                setCookie('nets_payment_selected', true, 1);
+                if (frame) {
+                    frame.style.display = '';
+                }
+            } else {
+                if (checkCookie('nets_payment_selected')) {
+                    deleteCookie("nets_payment_selected");
+                }
+                if (frame) {
+                    frame.style.display = 'none';
+                }
+            }
         }
-    );
-    
-    $("#message").on('click', function() {
-        $("#message_container").slideToggle();
-        $("#message h1").toggleClass("easy-trigger--inactive");
+    }, false);
+    for (var i = 0; i < payment_option.length; i++) {
+        payment_option[i].addEventListener('change', function (e) {
+            var name = e.srcElement.getAttribute('data-module-name');
+            if (name == "Nets Payment") {
+                if (frame) {
+                    frame.style.display = '';
+                }
+            } else {
+                if (frame) {
+                    frame.style.display = 'none';
+                }
+            }
+        }, false);
+    }
+    prestashop.on('updatedCart', function (event) {
+        var disabled = $(place_button).hasClass('disabled');
+        var netseasy_selected = $("[data-module-name='Nets Payment']").prop('checked');
+        if (netseasy_selected && disabled == false) {
+            setCookie('nets_payment_selected', true, 1);
+        }
     });
     
-    $("#giftwrapping").on('click', function() {
-        $("#giftwrapping_container").slideToggle();
-        $("giftwrapping h1").toggleClass("easy-trigger--inactive");
-    });
-    
-    $("#savemessagebutton").on('click', function() {
-        var order_message = $("#order_message").val();
-        changeOrderMessage(order_message);
-    });
-    
-    $("#savegiftbutton").on('click', function() {
-        var gift_message = $("#gift_message").val();
-        changeGiftMessage(gift_message);
-    });
+    var container = $('input[type=radio][data-module-name="Nets Payment"]').closest('.payment-option');
+    $('#netseasy_payment_container').appendTo(container);
 });
 
-function updateEasyAndDelivery() {
-    updateDeliveryList();
-    updateIframe();
-    checkProductsAndCarriers();
-}
-
-function checkProductsAndCarriers()
-{
-    $.ajax({
-        type: 'GET',
-        url: pwdc_checkout_url,
-        async: true,
-        cache: false,
-        dataType: 'json',
-        data: '&ajax=1'
-            +'&checkProductsAndCarriers',
-        success: function(data) {
-            var return_status_carrier = data.return_status_carrier;
-            var return_status_product = data.return_status_product;
-            if (return_status_carrier == 'NOK' || return_status_product == 'NOK') {
-                $('#easy-complete-checkout').hide();
-            } else {
-                $('#easy-complete-checkout').show();
-            }
-            
-            if (return_status_carrier == 'NOK') {
-                $('#no_available_easy_carriers').show();
-            } else {
-                $('#no_available_easy_carriers').hide();
-            }
-            if (return_status_product == 'NOK') {
-                $('#no_available_easy_products').show();
-            } else {
-                $('#no_available_easy_products').hide();
-            }
+var getUrlParameter = function getUrlParameter(sParam) {
+    var sPageURL = window.location.search.substring(1),
+        sURLVariables = sPageURL.split('&'),
+        sParameterName,
+        i;
+    for (i = 0; i < sURLVariables.length; i++) {
+        sParameterName = sURLVariables[i].split('=');
+        if (sParameterName[0] === sParam) {
+            return sParameterName[1] === undefined ? true : decodeURIComponent(sParameterName[1]);
         }
-    });
-}
-
-function updateDeliveryList()
-{
-    $.ajax({
-        type: 'GET',
-        url: pwdc_checkout_url,
-        async: true,
-        cache: false,
-        data: 'ajax=1' + '&get_delivery_html',
-        success: function(data) {
-            if (data == 0 || data == PS_PURCHASE_FAILED) {
-                location.reload();
-            }
-            $('#pwdc_deliveryoptions').html(data);
-        }
-    });  
-}
-
-
-function onDeliveryClick(address, key, id)
-{
-    if ($('#' + id).hasClass('selected') == false) {
-        ajaxPause(1);
-        $('li.easy-sel-list__item').removeClass('selected');
-        $('#' + id).addClass('selected');
-        changeDeliveryOption(address, key);
     }
-}
+    return false;
+};
 
-function ajaxPause(state)
-{
-    if (state == 1) {
-        $('#pwc-full-loader').show();
-        checkout.freezeCheckout();
-        $('#dynamic_cart_row').addClass('easy_disable');
-        $('#pwdc_deliveryoptions').addClass('easy_disable');
-        $('#pwdc_messages').addClass('easy_disable');
-    } else if (state == 0) {
-        $('div.shopping_cart').removeClass('easy_disable');
-        $('#dynamic_cart_row').removeClass('easy_disable');
-        $('#pwdc_deliveryoptions').removeClass('easy_disable');
-        $('#pwdc_messages').removeClass('easy_disable');
-        $('#pwc-full-loader').hide(); 
-        checkout.thawCheckout();
+function setCookie(cname, cvalue, exdays) {
+    const d = new Date();
+    d.setTime(d.getTime() + (exdays * 24 * 60 * 60 * 1000));
+    let expires = "expires=" + d.toUTCString();
+    document.cookie = cname + "=" + cvalue + ";" + expires + ";path=/";
+}
+function getCookie(cname) {
+    let name = cname + "=";
+    let ca = document.cookie.split(';');
+    for (let i = 0; i < ca.length; i++) {
+        let c = ca[i];
+        while (c.charAt(0) == ' ') {
+            c = c.substring(1);
+        }
+        if (c.indexOf(name) == 0) {
+            return c.substring(name.length, c.length);
+        }
     }
+    return "";
 }
-
-function changeDeliveryOption(address, key)
-{
-    $.ajax({
-        type: 'GET',
-        url: pwdc_checkout_url,
-        async: true,
-        cache: false,
-        dataType: 'json',
-        data: 'ajax=1' + '&change_delivery_option&new_delivery_option[' + address + ']=' + key,
-        success: function(data) {
-            if (data == 0 || data == PS_PURCHASE_FAILED) {
-                location.reload();
-            }
-            updatePrestaCart();
-        }
-    });
-}
-
-function changeOrderMessage(order_message)
-{
-    ajaxPause(1);
-    $.ajax({
-        type: 'GET',
-        url: pwdc_checkout_url,
-        async: true,
-        cache: false,
-        dataType: 'json',
-        data: 'ajax=1' + '&save_order_message' + '&message=' + encodeURI(order_message),
-        success: function(data) {
-            if (data == 0 || data == PS_PURCHASE_FAILED) {
-                location.reload();
-            }
-            $("#order_message").val(data.message);
-            if ($("#order_message").val() == '') {
-                $("#message_container").fadeToggle();
-                $("#message").addClass("easy-trigger--inactive");
-            }
-            updatePrestaCart();
-        }
-    });
-}
-
-function changeGift()
-{
-    ajaxPause(1);
-    var gift = 0;
-    var message = '';
-    
-    if ($('#gift').is(":checked")) {
-        gift = 1;
-        message = $("#gift_message").val();  
-    }
-    
-    $.ajax({
-        type: 'GET',
-        url: pwdc_checkout_url,
-        async: true,
-        cache: false,
-        dataType: 'json',
-        data: 'ajax=1'
-            +'&change_gift'
-            +'&gift=' + gift
-            +'&gift_message=' + encodeURI(message),
-        success: function(data) {
-            if (data == 0 || data == PS_PURCHASE_FAILED) {
-                location.reload();
-            }
-            $("#gift_message").val(data.message);
-            if (data.gift == 0) {
-                $("#giftwrapping_container").fadeToggle();
-                $("#giftwrapping").addClass("easy-trigger--inactive");
-            }
-            updatePrestaCart();
-        }
-    });
-}
-
-function changeGiftMessage(message)
-{
-    ajaxPause(1);
-    gift = 0;
-    if ($('#gift').is(":checked")) {
-        gift = 1; 
-    }
-    $.ajax({
-        type: 'GET',
-        url: pwdc_checkout_url,
-        async: true,
-        cache: false,
-        dataType: 'json',
-        data: 'ajax=1'
-            +'&change_gift_message'
-            +'&gift=' + gift
-            +'&gift_message=' + encodeURI(message),
-        success: function(data) {
-            if (data == 0 || data == PS_PURCHASE_FAILED) {
-                location.reload();
-            }
-            $("#gift_message").val(data.message);
-            if (data.gift == 1) {
-                $("#uniform-gift span").addClass('checked');
-                $('#gift').attr('checked', 'checked');
-
-            }
-            updatePrestaCart();
-        }
-    });
-}
-
-function updateCartSummary()
-{
-    $.ajax({
-        type: 'GET',
-        url: pwdc_checkout_url,
-        async: true,
-        cache: false,
-        data: 'ajax=1' + '&get_summary_html',
-        success: function(data) {
-            if (data == 0 || data == PS_PURCHASE_FAILED) {
-                location.reload();
-            }
-            $('#pwdc_cart_summary').html(data);
-            pwpcCartReady = 1;
-            ajaxPause(0);
-        }
-    });
-    if (window.ajaxCart !== undefined) {
-        ajaxCart.refresh();
-    }
-}
-
-function updateIframe()
-{
-    $.ajax({
-        type: 'GET',
-        url: pwdc_checkout_url,
-        async: true,
-        cache: false,
-        data: 'ajax=1' + '&update_easy_iframe',
-        success: function(data) {
-            if (data == 0 || data == PS_PURCHASE_FAILED) {
-                location.reload();
-            } else {
-                ajaxPause(0);
-            }
-        }
-    });
-}
-
-function updatePrestaCart() {
-    prestashop.emit('updateCart', {reason: 'orderChange'});
-}
-
-checkout.on('payment-completed', function(response) {
-    hideDynamicContent();
-    $('#waiting-for-redirect').show();
-    window.location = confirmation_url;
-});
-
-checkout.on('pay-initialized', function(response) {
-    freezeCheckoutForSwish();
-});
-
-
-function freezeCheckoutForSwish()
-{
-    $('#dynamic_cart_row').addClass('easy_disable');
-    $('#pwdc_deliveryoptions').addClass('easy_disable');
-    $('#pwdc_messages').addClass('easy_disable');
-    checkout.send('payment-order-finalized', true);
-}
-
-function hideDynamicContent() {
-    $("#dynamic_changes").hide();
-    $(".easy-iframe-grid").hide();
-    $(".easy-iframe-grid").hide();
-    $("#dynamic_changes").empty();    
-    $("#dynamic_cart_row").hide();
-    $("#dynamic_cart_row").empty();   
-    $("#ecster-pay-ctr").empty();   
-}
-
-function loading(state) {
-    if (state == 1) {
-        $('#pwc-full-loader').show();
+function checkCookie(name) {
+    let cookie = getCookie(name);
+    if (cookie != "") {
+        return true;
     } else {
-        $('#pwc-full-loader').hide();
+        return false;
     }
 }
-
-checkout.on('address-changed', function(address) {
-	pw_postalCode = address.postalCode;
-	pw_countryCode = address.countryCode;
-    if (address.countryCode) {
-        if (easy_current_country != address.countryCode) {
-            loading(1);
-            window.location.replace(easycheckout_url + '?changeEasyCountry=' + address.countryCode);
-        }
-    }
-});
+function deleteCookie(name) {
+    document.cookie = name + "=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+}

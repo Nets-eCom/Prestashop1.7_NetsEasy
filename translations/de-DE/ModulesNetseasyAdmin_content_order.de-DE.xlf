@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" version="1.2">
+  <file original="admin-dev" source-language="de-DE" target-language="de-DE" datatype="plaintext">
+    <body>
+      <trans-unit id="783ece8f8481f85a66730fe0e209cebf">
+        <source>nets_payment_status</source>
+        <target>Bezahlstatus</target>
+        <note>Line: </note>
+      </trans-unit>
+      <trans-unit id="ba29be75f71984747640065bd4bec3ed">
+        <source>nets_payment_id</source>
+        <target>Nets Payment-ID</target>
+        <note>Line: </note>
+      </trans-unit>
+      <trans-unit id="dc2e7608b3a34a37dc4465c959eb8b13">
+        <source>nets_quantity</source>
+        <target>Anzahl</target>
+        <note>Line: </note>
+      </trans-unit>
+      <trans-unit id="15aad9415bfc4810912510463faad511">
+        <source>nets_model</source>
+        <target>Model</target>
+        <note>Line: </note>
+      </trans-unit>
+      <trans-unit id="f5ab44ac68771a8702d12d8040fe7d1d">
+        <source>nets_product</source>
+        <target>Produkt</target>
+        <note>Line: </note>
+      </trans-unit>
+      <trans-unit id="beb74b1e32f6c49252f437163558060f">
+        <source>nets_price</source>
+        <target>Preis</target>
+        <note>Line: </note>
+      </trans-unit>
+      <trans-unit id="51ed26f0e8464968ea2bc4d0e5a00d72">
+        <source>nets_action</source>
+        <target>Action</target>
+        <note>Line: </note>
+      </trans-unit>
+      <trans-unit id="97e75e33d268983a668635c0c23e93a9">
+        <source>nets_charge</source>
+        <target>Abbuchen</target>
+        <note>Line: </note>
+      </trans-unit>
+      <trans-unit id="d15d62c17581e2116e8163f8cc6cad77">
+        <source>nets_refund</source>
+        <target>Rückerstatten</target>
+        <note>Line: </note>
+      </trans-unit>
+      <trans-unit id="210da9b254d498b2833348272346a800">
+        <source>nets_cancel_payment</source>
+        <target>Abbrechen</target>
+        <note>Line: </note>
+      </trans-unit>
+      <trans-unit id="887519f804c3bc4f336ba0e461ed8846">
+        <source>nets_payment_reserved</source>
+        <target>Zahlung reserviert</target>
+        <note>Line: </note>
+      </trans-unit>
+      <trans-unit id="3630c181682faee324313b9f2fd31ed5">
+        <source>nets_charge_all</source>
+        <target>Alle abbuchen</target>
+        <note>Line: </note>
+      </trans-unit>
+      <trans-unit id="bbebfc5c973e8573d887e4901ad312cf">
+        <source>nets_payment_charged</source>
+        <target>Zahlung abgebucht</target>
+        <note>Line: </note>
+      </trans-unit>
+      <trans-unit id="c3610a91a24f1e251934fa1544c07b88">
+        <source>nets_refund_all</source>
+        <target>Alle rückerstatten</target>
+        <note>Line: </note>
+      </trans-unit>
+      <trans-unit id="e16820c923d0998011285c9dcc8240b2">
+        <source>nets_payment_refunded</source>
+        <target>rückerstattet</target>
+        <note>Line: </note>
+      </trans-unit>
+      <trans-unit id="d4ec18918e821a80ff4996062f732ae9">
+        <source>nets_payment_refund_pending</source>
+        <target>Rückerstattung ausstehend</target>
+        <note>Line: </note>
+      </trans-unit>
+      <trans-unit id="e03043f126c9df2a6443929fd44445e2">
+        <source>nets_payment_cancelled</source>
+        <target>storniert</target>
+        <note>Line: </note>
+      </trans-unit>
+      <trans-unit id="22cdc0c26c5948e2e6370ab6b52d97b8">
+        <source>nets_payment_failed</source>
+        <target>fehlgeschlagen</target>
+        <note>Line: </note>
+      </trans-unit>
+      <trans-unit id="b8d0ad0ec8f46388da378d3c8906c4b1">
+        <source>nets_charged_products</source>
+        <target>gebuchte Produkte</target>
+        <note>Line: </note>
+      </trans-unit>
+      <trans-unit id="2d6a11bb3ac52a0eb1586ca9f55a7165">
+        <source>nets_refunded_products</source>
+        <target>rückerstattete Produkte</target>
+        <note>Line: </note>
+      </trans-unit>
+    </body>
+  </file>
+</xliff>
