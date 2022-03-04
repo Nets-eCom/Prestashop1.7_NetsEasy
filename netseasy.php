@@ -175,6 +175,7 @@ class Netseasy extends PaymentModule {
             'NETS_INTEGRATION_TYPE' => Configuration::get('NETS_INTEGRATION_TYPE'),
             'NETS_TERMS_URL' => Configuration::get('NETS_TERMS_URL'),
             'NETS_MERCHANT_TERMS_URL' => Configuration::get('NETS_MERCHANT_TERMS_URL'),
+	    'NETS_ICON_URL' => Configuration::get('NETS_ICON_URL'),
             'NETS_ADMIN_DEBUG_MODE' => Configuration::get('NETS_ADMIN_DEBUG_MODE'),
             'NETS_FRONTEND_DEBUG_MODE' => Configuration::get('NETS_FRONTEND_DEBUG_MODE'),
             'NETS_AUTO_CAPTURE' => Configuration::get('NETS_AUTO_CAPTURE'),

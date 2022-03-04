@@ -18,15 +18,15 @@ Follow these steps to install the plugin.
 
 01. Download the plugin from above github link.
 02. Extract the zip file.
-03. Create netseasy folder and copy the extracted files.
-03. Create zip of neteasy folder.
-04. Login to Admin Panel.
-05. Clear Cache.
-06. Click on Modules.
-07. Click on “Module Manager” tab and click on "Upload a module".
-08. Drop your neteasy folder zip archive here or select from your machine.
-09. After installation completed, press “Configure”.
-10. Set your API Credentials and configuration.
+03. Create netseasy folder and copy the files from extracted zip name folder.
+04. Create zip of neteasy folder.
+05. Login to Admin Panel.
+06. Clear Cache.
+07. Click on Modules.
+08. Click on “Module Manager” tab and click on "Upload a module".
+09. Drop your neteasy folder zip archive here or select from your machine.
+10. After installation completed, press “Configure”.
+11. Set your API Credentials and configuration.
 
 ### Features
 01. Supports two different checkout types : Hosted Payment Window | Embedded Checkout.

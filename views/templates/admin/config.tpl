@@ -73,6 +73,12 @@
                     <p class="error text-danger">{l s="nets_merchant_terms_url_error" d="Modules.Netseasy.Config"}</p>
                 </div>
             </div>
+            <!--div class="form-group">
+                <label class="control-label col-lg-4">{l s="icon_url" d="Modules.Netseasy.Config"}</label>
+                <div class="col-lg-4">
+                    <input type="text" name="NETS_ICON_URL" id="NETS_ICON_URL" value="{$NETS_ICON_URL}" class="required" required="required">
+                </div>
+            </div-->
             <div class="form-group">
                 <label class="control-label col-lg-4">{l s="auto_capture" d="Modules.Netseasy.Config"}</label>
                 <div class="col-lg-8">
