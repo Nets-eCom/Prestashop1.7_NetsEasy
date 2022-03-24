@@ -1,3 +1,11 @@
+{if isset($success_nets)}
+    <div class="alert alert-success clearfix">
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+            <span aria-hidden="true"><i class="material-icons">close</i></span>
+        </button>
+        {l s="nets_config_success" d="Modules.Netseasy.Config"}
+    </div>
+{/if}
 <form id="module_form" class="defaultForm form-horizontal" method="post" enctype="multipart/form-data" novalidate="" autocomplete="off">
     <input type="hidden" name="submitNetsModule" value="1">
     <div class="panel" id="fieldset_0">
@@ -37,14 +45,14 @@
             <div class="form-group">
                 <label class="control-label col-lg-4">{l s="production_checkout_key" d="Modules.Netseasy.Config"}</label>
                 <div class="col-lg-4">
-                    <input type="text" name="NETS_LIVE_CHECKOUT_KEY" id="NETS_LIVE_CHECKOUT_KEY" value="" class="" value="{$NETS_LIVE_CHECKOUT_KEY} "placeholder="live-checkout-key-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx" required>
+                    <input type="text" name="NETS_LIVE_CHECKOUT_KEY" id="NETS_LIVE_CHECKOUT_KEY" class="" value="{$NETS_LIVE_CHECKOUT_KEY}" placeholder="live-checkout-key-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx" required>
                      <p class="error text-danger">{l s="nets_live_checkout_key_error" d="Modules.Netseasy.Config"}</p>
                 </div>
             </div>
             <div class="form-group">
                 <label class="control-label col-lg-4">{l s="production_secret_key" d="Modules.Netseasy.Config"}</label>
                 <div class="col-lg-4">
-                    <input type="text" name="NETS_LIVE_SECRET_KEY" id="NETS_LIVE_SECRET_KEY" value="" class="" value="{$NETS_LIVE_SECRET_KEY} "placeholder="live-secret-key-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx" required>
+                    <input type="text" name="NETS_LIVE_SECRET_KEY" id="NETS_LIVE_SECRET_KEY" class="" value="{$NETS_LIVE_SECRET_KEY}" placeholder="live-secret-key-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx" required>
                      <p class="error text-danger">{l s="nets_live_secret_key_error" d="Modules.Netseasy.Config"}</p>
                 </div>
             </div>

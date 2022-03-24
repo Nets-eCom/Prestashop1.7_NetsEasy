@@ -66,6 +66,8 @@ class netseasyReturnModuleFrontController extends ModuleFrontController {
                     }
                 }
             }
+	    //update refre in portal
+	    $refResponse = $this->OrderRefUpdate($orderId, $paymentId);
             setcookie("nets_payment_selected", "", time() - 3600);
             Tools::redirect('index.php?controller=order-confirmation&id_cart=' . $cartId . '&id_module=' . $this->module->id . '&id_order=' . $orderId . '&key=' . $customer->secure_key);
         } else {
@@ -74,6 +76,30 @@ class netseasyReturnModuleFrontController extends ModuleFrontController {
             ));
             return $this->setTemplate('module:' . $this->module->name . '/views/templates/front/payment_error.tpl');
         }
+    }
+	public function OrderRefUpdate($orderId, $paymentId)
+    {
+        $returnResponse = false;
+        $NetsEasy = new Netseasy();
+        //To fetch complet order details with order id.
+        $orderDetails = new Order((int) $orderId);
+        $orderReference = '';
+        if (!empty($orderDetails)) {
+            $orderReference = $orderDetails->reference;            
+            $payIdResponse = $NetsEasy->MakeCurl($NetsEasy->getApiUrl()['backend'] . $paymentId, array(), 'GET');
+            if (!empty($payIdResponse) && !empty($orderReference)) {
+                $requestData = array('checkoutUrl' => $payIdResponse->payment->checkout->url, 'reference' => $orderReference);
+                $NetsEasy->MakeCurl($NetsEasy->getUpdateRefUrl($paymentId), $requestData, 'PUT');
+                $returnResponse = true;
+            } else {
+                $NetsEasy->logger->logError('Return Response :: Failed to fetch Nets Payment Details');
+                Tools::redirect('index.php');
+            }
+        } else {
+            $NetsEasy->logger->logError('Return Response :: Order reference or order details is empty');
+            Tools::redirect('index.php');
+        }
+        return $returnResponse;
     }
 
 }

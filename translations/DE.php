@@ -53,6 +53,7 @@ $_MODULE["<{netseasy}prestashop>config_68b1f544fca0f86b0cf27c08364a8a5b"] = "Fro
 $_MODULE["<{netseasy}prestashop>config_2b93ce0a965a2522a6d13c9a236db31f"] = "Webhook-URL";
 $_MODULE["<{netseasy}prestashop>config_f0250d35ea63056adcdf1ced221587d2"] = "Webhookauthorisierung";
 $_MODULE["<{netseasy}prestashop>config_43781db5c40ecc39fd718685594f0956"] = "Speichern";
+$_MODULE["<{netseasy}prestashop>config_dab44c32307d6cd31fca52ddbf6b61b1"] = "Erfolgreiche Aktualisierung";
 
 $_MODULE["<{netseasy}prestashop>netseasy_ea9cf7e47ff33b2be14e6dd07cbcefc6"] = "Versand";
 $_MODULE["<{netseasy}prestashop>netseasy_e2b7dec8fa4b498156dfee6e4c84b156"] = "Dieses Zahlungsmittel ist nicht verfügbar.";

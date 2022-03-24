@@ -2,6 +2,11 @@
 <xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" version="1.2">
   <file original="admin-dev" source-language="da-DK" target-language="da-DK" datatype="plaintext">
     <body>
+      <trans-unit id="dab44c32307d6cd31fca52ddbf6b61b1">
+        <source>nets_config_success</source>
+        <target>Vellykket opdatering</target>
+        <note>Line: </note>
+      </trans-unit>
       <trans-unit id="7529b2051321b1171b6e70ff6ff63b81">
         <source>nets_webhook_authorization_error</source>
         <target>Opret venligst en Webhook-autorisation nøgle</target>

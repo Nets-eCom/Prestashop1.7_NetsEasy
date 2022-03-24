@@ -3,7 +3,7 @@
     <name>netseasy</name>
     <displayName><![CDATA[Nets Payment]]></displayName>
     <version><![CDATA[1.0]]></version>
-    <description><![CDATA[Sample Payment module developed .]]></description>
+    <description><![CDATA[Nets Secure Payment Made Easy]]></description>
     <author><![CDATA[Nets Easy]]></author>
     <tab><![CDATA[payments_gateways]]></tab>
 	<confirmUninstall><![CDATA[Are you sure you want to uninstall this module?]]></confirmUninstall>

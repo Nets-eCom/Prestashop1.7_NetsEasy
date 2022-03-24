@@ -16,7 +16,7 @@ use PrestaShop\PrestaShop\Adapter\Presenter\Cart\CartPresenter;
 if (!defined('_PS_VERSION_')) {
     exit;
 }
-
+require_once(_PS_ROOT_DIR_ . '/modules/netseasy/Locale.php');
 class Netseasy extends PaymentModule {
     
     public $address;
@@ -95,6 +95,7 @@ class Netseasy extends PaymentModule {
         $this->context->controller->addJS($this->_path . 'views/js/back.js');
         if (((bool) Tools::isSubmit('submitNetsModule')) == true) {
             $this->postProcess();
+            $this->context->smarty->assign('success_nets', '');
         }
 
         if (!Configuration::get('NETS_WEBHOOK_AUTHORIZATION')) {
@@ -103,8 +104,9 @@ class Netseasy extends PaymentModule {
         if (!Configuration::get('NETS_WEBHOOK_URL')) {
             Configuration::updateValue('NETS_WEBHOOK_URL', $this->context->link->getModuleLink($this->name, 'webhook', array(), true));
         }
-
         $this->context->smarty->assign($this->getConfigFormValues());
+        
+        #Tools::dieObject($this->context);
         return $this->display(__FILE__, 'views/templates/admin/config.tpl');
     }
 
@@ -142,7 +144,7 @@ class Netseasy extends PaymentModule {
     }
 
     public function hookHeader() {
-        $this->context->controller->addJS(array($this->_path . 'views/js/checkout.js'));
+        $this->context->controller->addJS(array($this->_path . 'views/js/nets_checkout.js'));
         $this->context->controller->addCSS($this->_path . 'views/css/front.css');
     }
 
@@ -175,7 +177,7 @@ class Netseasy extends PaymentModule {
             'NETS_INTEGRATION_TYPE' => Configuration::get('NETS_INTEGRATION_TYPE'),
             'NETS_TERMS_URL' => Configuration::get('NETS_TERMS_URL'),
             'NETS_MERCHANT_TERMS_URL' => Configuration::get('NETS_MERCHANT_TERMS_URL'),
-	    'NETS_ICON_URL' => Configuration::get('NETS_ICON_URL'),
+			'NETS_ICON_URL' => Configuration::get('NETS_ICON_URL'),
             'NETS_ADMIN_DEBUG_MODE' => Configuration::get('NETS_ADMIN_DEBUG_MODE'),
             'NETS_FRONTEND_DEBUG_MODE' => Configuration::get('NETS_FRONTEND_DEBUG_MODE'),
             'NETS_AUTO_CAPTURE' => Configuration::get('NETS_AUTO_CAPTURE'),
@@ -205,7 +207,7 @@ class Netseasy extends PaymentModule {
         if ($postData) {
             curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($postData));
         }
-
+	$this->logger->logInfo("Request Data : ".json_encode($postData));
         $response = curl_exec($ch);
         $info = curl_getinfo($ch);
         switch ($info['http_code']) {
@@ -262,7 +264,7 @@ class Netseasy extends PaymentModule {
             $grossAmount = round($quantity * ($product * 100));
             $taxAmount = $grossAmount - $netAmount;
             $itemsProductArray[] = array(
-                'reference' => $item['reference'],
+                'reference' => !empty($item['reference'])?$item['reference']:$item['name'],
                 'name' => $item['name'],
                 'quantity' => $quantity,
                 'unit' => 'pcs',
@@ -392,6 +394,7 @@ class Netseasy extends PaymentModule {
             $consumerTypeData['supportedTypes'][] = "B2B";
         }
         $data['checkout']['consumerType'] = $consumerTypeData;
+		$isoCode3 = $GLOBALS['countriesList'][$countryOBJ->iso_code]['alpha_3'];
         $consumerData = array(
             'email' => $customerOBJ->email,
             'shippingAddress' => array(
@@ -399,11 +402,11 @@ class Netseasy extends PaymentModule {
                 'addressLine2' => $addressOBJ->address2,
                 'postalCode' => $addressOBJ->postcode,
                 'city' => $addressOBJ->city,
-                'country' => $countryOBJ->iso_code
+                'country' => "$isoCode3"
             ),
             "$customerType" => $customerTypeArray
         );
-
+		 
         if (isset($addressOBJ->phone_mobile) && $addressOBJ->phone_mobile != '') {
             $consumerData['phoneNumber'] = array(
                 "prefix" => "+" . $countryOBJ->call_prefix,
@@ -415,7 +418,7 @@ class Netseasy extends PaymentModule {
                 "number" => $addressOBJ->phone
             );
         }
-        $data['customer'] = $consumerData;
+        $data['checkout']['consumer'] = $consumerData;
 
         // Webhooks 
         if($_SERVER['SERVER_NAME'] != 'localhost') {
@@ -520,6 +523,7 @@ class Netseasy extends PaymentModule {
     public function hookDisplayPaymentTop(){
         $nets_payment_selected = @$_COOKIE['nets_payment_selected'];
         if (Configuration::get('NETS_INTEGRATION_TYPE') === 'EMBEDDED' && $nets_payment_selected) {
+			
             $payload = $this->createRequestObject($this->context->cart->id);
             $url = $this->getApiUrl()['backend'];
             $checkOut = array(

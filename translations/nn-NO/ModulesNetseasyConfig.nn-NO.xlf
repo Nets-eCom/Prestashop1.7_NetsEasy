@@ -2,6 +2,11 @@
 <xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" version="1.2">
   <file original="admin-dev" source-language="nn-NO" target-language="nn-NO" datatype="plaintext">
     <body>
+      <trans-unit id="dab44c32307d6cd31fca52ddbf6b61b1">
+        <source>nets_config_success</source>
+        <target>Vellykket oppdatering</target>
+        <note>Line: </note>
+      </trans-unit>
       <trans-unit id="ccd1066343c95877b75b79d47c36bebe">
         <source>configuration</source>
         <target>Konfigurasjon</target>

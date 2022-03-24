@@ -66,7 +66,7 @@ class netseasyHostedPaymentModuleFrontController extends ModuleFrontController {
                 Tools::redirect($response->hostedPaymentPageUrl);
             }
         } else {
-            $nets->logger->logError('Invalid request created ' . $response);
+            $nets->logger->logError('Invalid request created ' . json_encode($response));
             Tools::redirect('index.php?controller=order&step=1');
         }
     }

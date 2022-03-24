@@ -1,45 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" version="1.2">
-  <file original="admin-dev" source-language="en-US" target-language="en-US" datatype="plaintext">
+  <file original="admin541hfxisr" source-language="en-US" target-language="en-US" datatype="plaintext">
     <body>
-      <trans-unit id="7529b2051321b1171b6e70ff6ff63b81">
-        <source>nets_webhook_authorization_error</source>
-        <target>Please add Webhook authorization </target>
-        <note>Line: </note>
-      </trans-unit>
-      <trans-unit id="8a625ee9b5bfe7c26e1b6920d13f3352">
-        <source>nets_webhook_url_error</source>
-        <target>Please add webhook URL</target>
-        <note>Line: </note>
-      </trans-unit>
-      <trans-unit id="abdf09e77f67f3ce8e10ec179571bafd">
-        <source>nets_merchant_terms_url_error</source>
-        <target>Please add merchant terms URL </target>
-        <note>Line: </note>
-      </trans-unit>
-      <trans-unit id="199a6cf887267be5a2b9c94119631a25">
-        <source>nets_terms_url_error</source>
-        <target>Please add terms and conditions URL</target>
-        <note>Line: </note>
-      </trans-unit>
-      <trans-unit id="2e2017f058b53051574081e1a3f4bf73">
-        <source>nets_live_secret_key_error</source>
-        <target>Live Secret key is required</target>
-        <note>Line: </note>
-      </trans-unit>
-      <trans-unit id="5373573eb4938d1101af6a9f82abee5c">
-        <source>nets_live_checkout_key_error</source>
-        <target>Live Checkout key is required</target>
-        <note>Line: </note>
-      </trans-unit>
-      <trans-unit id="b3803beaa7002e7c27b54e90653d6eb8">
-        <source>nets_test_secret_key_error</source>
-        <target>Test Secret key is required</target>
-        <note>Line: </note>
-      </trans-unit>
-      <trans-unit id="d4e519ec09f1d2afb0b6f01886342f41">
-        <source>nets_test_checkout_key_error</source>
-        <target>Test Checkout key is required</target>
+      <trans-unit id="dab44c32307d6cd31fca52ddbf6b61b1">
+        <source>nets_config_success</source>
+        <target>Successful update</target>
         <note>Line: </note>
       </trans-unit>
       <trans-unit id="ccd1066343c95877b75b79d47c36bebe">
@@ -72,9 +37,19 @@
         <target>Test Checkout Key</target>
         <note>Line: </note>
       </trans-unit>
+      <trans-unit id="d4e519ec09f1d2afb0b6f01886342f41">
+        <source>nets_test_checkout_key_error</source>
+        <target>Test Checkout key is required</target>
+        <note>Line: </note>
+      </trans-unit>
       <trans-unit id="2a954a2bcb955f1e743a2d6327444843">
         <source>test_secret_key</source>
         <target>Test Secret Key</target>
+        <note>Line: </note>
+      </trans-unit>
+      <trans-unit id="b3803beaa7002e7c27b54e90653d6eb8">
+        <source>nets_test_secret_key_error</source>
+        <target>Test Secret key is required</target>
         <note>Line: </note>
       </trans-unit>
       <trans-unit id="d4cf46ccfd2aa2f0295f92deb102d7b8">
@@ -82,9 +57,19 @@
         <target>Production Checkout Key</target>
         <note>Line: </note>
       </trans-unit>
+      <trans-unit id="5373573eb4938d1101af6a9f82abee5c">
+        <source>nets_live_checkout_key_error</source>
+        <target>Live Checkout key is required</target>
+        <note>Line: </note>
+      </trans-unit>
       <trans-unit id="cc8e3eaf3a8c5dd76d2f4cfaf4736507">
         <source>production_secret_key</source>
         <target>Production Secret Key</target>
+        <note>Line: </note>
+      </trans-unit>
+      <trans-unit id="2e2017f058b53051574081e1a3f4bf73">
+        <source>nets_live_secret_key_error</source>
+        <target>Live Secret key is required</target>
         <note>Line: </note>
       </trans-unit>
       <trans-unit id="150ae78d35ce71fbabb573c9a3b29e8b">
@@ -107,9 +92,19 @@
         <target>Terms Url</target>
         <note>Line: </note>
       </trans-unit>
+      <trans-unit id="199a6cf887267be5a2b9c94119631a25">
+        <source>nets_terms_url_error</source>
+        <target>Please add terms and conditions URL</target>
+        <note>Line: </note>
+      </trans-unit>
       <trans-unit id="0ef7cb1273391a2fcfac90719c697095">
         <source>merchant_terms_url</source>
         <target>Merchant Terms Url</target>
+        <note>Line: </note>
+      </trans-unit>
+      <trans-unit id="abdf09e77f67f3ce8e10ec179571bafd">
+        <source>nets_merchant_terms_url_error</source>
+        <target>Please add merchant terms URL </target>
         <note>Line: </note>
       </trans-unit>
       <trans-unit id="5015036c7c0e062feeb5be1fb222b459">
@@ -137,9 +132,19 @@
         <target>Webhook Url</target>
         <note>Line: </note>
       </trans-unit>
+      <trans-unit id="8a625ee9b5bfe7c26e1b6920d13f3352">
+        <source>nets_webhook_url_error</source>
+        <target>Please add webhook URL</target>
+        <note>Line: </note>
+      </trans-unit>
       <trans-unit id="f0250d35ea63056adcdf1ced221587d2">
         <source>webhook_authorization</source>
         <target>Webhook Authorization</target>
+        <note>Line: </note>
+      </trans-unit>
+      <trans-unit id="7529b2051321b1171b6e70ff6ff63b81">
+        <source>nets_webhook_authorization_error</source>
+        <target>Please add Webhook authorization </target>
         <note>Line: </note>
       </trans-unit>
       <trans-unit id="43781db5c40ecc39fd718685594f0956">
