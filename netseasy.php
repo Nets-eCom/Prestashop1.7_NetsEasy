@@ -17,6 +17,7 @@ if (!defined('_PS_VERSION_')) {
     exit;
 }
 require_once(_PS_ROOT_DIR_ . '/modules/netseasy/Locale.php');
+
 class Netseasy extends PaymentModule {
     
     public $address;
@@ -29,7 +30,7 @@ class Netseasy extends PaymentModule {
     public function __construct() {
         $this->name = 'netseasy';
         $this->tab = 'payments_gateways';
-        $this->version = '1.0';
+        $this->version = '1.1.1';
         $this->author = 'Nets Easy';
         $this->controllers = array('hostedPayment', 'return');
         $this->currencies = true;
@@ -106,8 +107,59 @@ class Netseasy extends PaymentModule {
         }
         $this->context->smarty->assign($this->getConfigFormValues());
         
-        #Tools::dieObject($this->context);
+        // Call api for fetching latest plugin version.
+        if (Configuration::get('NETS_MERCHANT_ID')) {
+            $returnResponse = $this->CallApi();
+            if (!empty($returnResponse)) {
+                $this->context->smarty->assign(['customData' => $returnResponse]);
+            }
+        }
         return $this->display(__FILE__, 'views/templates/admin/config.tpl');
+    }
+
+    /**
+     * This function used for Custom Api service to fetch plugin latest version with notification.
+     * @return type
+     */
+    public function CallApi() {
+        $headers[] = 'Content-Type: application/json';
+        $headers[] = 'Accept: application/json';
+
+        $dataArray = array('merchant_id' => Configuration::get('NETS_MERCHANT_ID'),
+            'plugin_name' => 'Prestashop',
+            'plugin_version' => $this->version,
+            'shop_url' => (_PS_BASE_URL_SSL_),
+            'timestamp' => date('Y-m-d H:i:s')
+        );
+
+        $postData = json_encode($dataArray);
+        $ch = curl_init();
+        curl_setopt($ch, CURLOPT_URL, $this->context->link->getModuleLink('api', 'enquiry', array(), true));
+        curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'POST');
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+        curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+        if ($postData) {
+            curl_setopt($ch, CURLOPT_POSTFIELDS, $postData);
+        }
+        $this->logger->logInfo("API Request Data : " . $postData);
+        $response = curl_exec($ch);
+        $info = curl_getinfo($ch);
+        $responseData = '';
+        $this->logger->logInfo("API Response HTTP Code : " . $info['http_code']);
+        if (curl_error($ch)) {
+            $this->logger->logInfo("API Response Error Data : " . json_encode(curl_error($ch)));
+        }
+
+        if ($info['http_code'] == 200) {
+            if ($response) {
+                $this->logger->logInfo("API Response Data : " . $response);
+		$responseDecoded = json_decode($response);
+		if ($responseDecoded->status == '00' || $responseDecoded->status == '11') {
+                    $responseData = array('status' => $responseDecoded->status, 'data' => json_decode($responseDecoded->data, true));
+                }
+            }
+        }
+        return $responseData;
     }
 
     /**
@@ -169,6 +221,7 @@ class Netseasy extends PaymentModule {
     // get list of module configuration 
     public function getConfigFormValues() {
         return array(
+            'NETS_MERCHANT_ID' => Configuration::get('NETS_MERCHANT_ID'),
             'NETS_TEST_MODE' => Configuration::get('NETS_TEST_MODE'),
             'NETS_TEST_CHECKOUT_KEY' => Configuration::get('NETS_TEST_CHECKOUT_KEY'),
             'NETS_TEST_SECRET_KEY' => Configuration::get('NETS_TEST_SECRET_KEY'),
@@ -207,7 +260,7 @@ class Netseasy extends PaymentModule {
         if ($postData) {
             curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($postData));
         }
-	$this->logger->logInfo("Request Data : ".json_encode($postData));
+        $this->logger->logInfo("Request Data : " . json_encode($postData));
         $response = curl_exec($ch);
         $info = curl_getinfo($ch);
         switch ($info['http_code']) {
@@ -264,7 +317,7 @@ class Netseasy extends PaymentModule {
             $grossAmount = round($quantity * ($product * 100));
             $taxAmount = $grossAmount - $netAmount;
             $itemsProductArray[] = array(
-                'reference' => !empty($item['reference'])?$item['reference']:$item['name'],
+                'reference' => !empty($item['reference']) ? $item['reference'] : $item['name'],
                 'name' => $item['name'],
                 'quantity' => $quantity,
                 'unit' => 'pcs',
@@ -421,7 +474,7 @@ class Netseasy extends PaymentModule {
         $data['checkout']['consumer'] = $consumerData;
 
         // Webhooks 
-        if($_SERVER['SERVER_NAME'] != 'localhost') {
+        if ($_SERVER['SERVER_NAME'] != 'localhost') {
             if (Configuration::get('NETS_WEBHOOK_AUTHORIZATION') != '0') {
                 $webHookUrl = (Configuration::get('NETS_WEBHOOK_URL') ? Configuration::get('NETS_WEBHOOK_URL') : '');
                 $authKey = Configuration::get('NETS_WEBHOOK_AUTHORIZATION');
@@ -520,7 +573,7 @@ class Netseasy extends PaymentModule {
         }
     }
     
-    public function hookDisplayPaymentTop(){
+    public function hookDisplayPaymentTop() {
         $nets_payment_selected = @$_COOKIE['nets_payment_selected'];
         if (Configuration::get('NETS_INTEGRATION_TYPE') === 'EMBEDDED' && $nets_payment_selected) {
 			
@@ -530,7 +583,7 @@ class Netseasy extends PaymentModule {
                 'url' => $this->getApiUrl()['frontend'],
                 'checkoutKey' => $this->getApiKey()['checkoutKey'],
             );
-            $response  = $this->MakeCurl($url, $payload);
+            $response = $this->MakeCurl($url, $payload);
             if ($response && !@$response->errors) {
 		$this->context->smarty->assign([
                     'module' => $this->name,
@@ -575,8 +628,8 @@ class Netseasy extends PaymentModule {
                 'module' => $this->name,
                 'text_test_01' => $this->l('Test - text string one.'),
                 'user_token' => Tools::getAdminTokenLite('AdminNetseasyOrder'),
-                'order_token'=>$_GET['_token'],
-                'adminurl' => Tools::getHttpHost(true) . __PS_BASE_URI__. basename(_PS_ADMIN_DIR_),
+                'order_token' => $_GET['_token'],
+                'adminurl' => Tools::getHttpHost(true) . __PS_BASE_URI__ . basename(_PS_ADMIN_DIR_),
                 'data' => $netsOrderObj->data
             ));
             return $this->display(__FILE__, 'views/templates/hook/admin_order.tpl');
@@ -598,4 +651,5 @@ class Netseasy extends PaymentModule {
         
         return true;
     }
+
 }

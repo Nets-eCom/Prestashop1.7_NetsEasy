@@ -1,3 +1,53 @@
+{if (!empty($customData) && ($customData['status'] == "00" || $customData['status'] == "11"))}
+    <script>
+        $(document).ready(function () {
+            $('#netseasy-modal').modal('show');
+        });
+    </script>
+    <div class="modal fade" id="netseasy-modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">x</button>
+                    <h4 class="modal-title">
+		    {if ($customData['status'] == "00")}
+			<strong>Update Notification</strong>
+		    {/if}
+		    {if ($customData['status'] == "11")}
+                        <strong>Success Notification</strong>
+                    {/if}
+		    </h4>
+                </div>
+                <div class="modal-body">
+		    {if ($customData['status'] == "00")}
+		    <h4 class="modal-title">{{$customData['data']['notification_message']}}</h4>
+                    <div class="form-group-lg" style="font-size: small;">
+                        <label class="form-control-label">Latest Plugin Version : </label> {{$customData['data']['plugin_version']}} version </br>
+                        <label class="form-control-label">Shop Version Compatible : </label> {{$customData['data']['shop_version']}} </br>
+                        {if !empty($customData['data']['repo_links'])}
+                            <label class="form-control-label">Github Link : </label> <a href="{{$customData['data']['repo_links']}}" target="_blank">Click here</a> </br>
+                        {/if}
+                        {if !empty($customData['data']['tech_site_links'])}
+                            <label class="form-control-label">TechSite Link : </label> <a href="{{$customData['data']['tech_site_links']}}" target="_blank">Click here</a>
+                        {/if}
+                        {if !empty($customData['data']['marketplace_links'])}
+                            <label class="form-control-label">MarketPlace Link : </label> <a href="{{$customData['data']['marketplace_links']}}" target="_blank">Click here</a>
+                        {/if}
+                    </div>
+		    {/if}
+		    {if ($customData['status'] == "11")}
+		    <h4 class="modal-title">{{$customData['data']['notification_message']}}</h4>
+		    {/if}
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" data-dismiss="modal">Ok</button>
+                </div>
+            </div><!-- /.modal-content -->
+        </div><!-- /.modal-dialog -->
+    </div><!-- /.modal -->
+    <div class="modal-overlay"></div>
+{/if}
+
 {if isset($success_nets)}
     <div class="alert alert-success clearfix">
         <button type="button" class="close" data-dismiss="alert" aria-label="Close">
@@ -14,7 +64,6 @@
             <i class="icon-cogs"></i>{l s="configuration" mod="netseasy"}                    
         </div>
         <div class="form-wrapper">
-        
             <div class="form-group">
                 <label class="control-label col-lg-4 required">{l s="test_mode" d="Modules.Netseasy.Config"}</label>
                 <div class="col-lg-8">
@@ -26,6 +75,13 @@
                         <a class="slide-button btn"></a>
                     </span>
                     <p class="help-block">{l s="test_help" d="Modules.Netseasy.Config"} </p>
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="control-label col-lg-4 required">{l s="merchant_id" d="Modules.Netseasy.Config"}</label>
+                <div class="col-lg-4">
+                    <input type="text" name="NETS_MERCHANT_ID" id="NETS_MERCHANT_ID"  class=""  value="{$NETS_MERCHANT_ID}">
+                    <p class="error text-danger">{l s="nets_merchant_id_error" d="Modules.Netseasy.Config"}</p>
                 </div>
             </div>
             <div class="form-group">
@@ -46,19 +102,19 @@
                 <label class="control-label col-lg-4">{l s="production_checkout_key" d="Modules.Netseasy.Config"}</label>
                 <div class="col-lg-4">
                     <input type="text" name="NETS_LIVE_CHECKOUT_KEY" id="NETS_LIVE_CHECKOUT_KEY" class="" value="{$NETS_LIVE_CHECKOUT_KEY}" placeholder="live-checkout-key-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx" required>
-                     <p class="error text-danger">{l s="nets_live_checkout_key_error" d="Modules.Netseasy.Config"}</p>
+                    <p class="error text-danger">{l s="nets_live_checkout_key_error" d="Modules.Netseasy.Config"}</p>
                 </div>
             </div>
             <div class="form-group">
                 <label class="control-label col-lg-4">{l s="production_secret_key" d="Modules.Netseasy.Config"}</label>
                 <div class="col-lg-4">
                     <input type="text" name="NETS_LIVE_SECRET_KEY" id="NETS_LIVE_SECRET_KEY" class="" value="{$NETS_LIVE_SECRET_KEY}" placeholder="live-secret-key-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx" required>
-                     <p class="error text-danger">{l s="nets_live_secret_key_error" d="Modules.Netseasy.Config"}</p>
+                    <p class="error text-danger">{l s="nets_live_secret_key_error" d="Modules.Netseasy.Config"}</p>
                 </div>
             </div>
             <div class="form-group">
                 <label class="control-label col-lg-4 required">
-                {l s="integration_type" d="Modules.Netseasy.Config"}
+                    {l s="integration_type" d="Modules.Netseasy.Config"}
                 </label>
                 <div class="col-lg-6">
                     <select name="NETS_INTEGRATION_TYPE" class=" fixed-width-xl" id="NETS_INTEGRATION_TYPE">
@@ -123,7 +179,7 @@
                     </span>
                 </div>
             </div>
-        <!-- /webhook Config start-->
+            <!-- /webhook Config start-->
             <div class="form-group">
                 <label class="control-label col-lg-4">{l s="webhook_url" d="Modules.Netseasy.Config"}</label>
                 <div class="col-lg-4">
@@ -134,19 +190,19 @@
             <div class="form-group">
                 <label class="control-label col-lg-4">{l s="webhook_authorization" d="Modules.Netseasy.Config"}</label>
                 <div class="col-lg-4">
-                    <input type="text" name="NETS_WEBHOOK_AUTHORIZATION" onkeyup="this.value=this.value.replace(/[^a-z0-9-]/gi, '');" id="NETS_WEBHOOK_AUTHORIZATION" value="{$NETS_WEBHOOK_AUTHORIZATION}"  class="required">
+                    <input type="text" name="NETS_WEBHOOK_AUTHORIZATION" onkeyup="this.value = this.value.replace(/[^a-z0-9-]/gi, '');" id="NETS_WEBHOOK_AUTHORIZATION" value="{$NETS_WEBHOOK_AUTHORIZATION}"  class="required">
                     <p class="error text-danger">{l s="nets_webhook_authorization_error" d="Modules.Netseasy.Config"}</p>
                 </div>
             </div>
-        <!-- /webhook Config end-->
+            <!-- /webhook Config end-->
 
         </div><!-- /.form-wrapper -->
 
-       
+
         <div class="panel-footer">
             <button type="submit" value="1" id="module_form_submit_btn" name="submitNetsModule" class="btn btn-default pull-right">
-            <i class="process-icon-save"></i> 
-            {l s="save" d="Modules.Netseasy.Config"}
+                <i class="process-icon-save"></i> 
+                {l s="save" d="Modules.Netseasy.Config"}
             </button>
         </div>
     </div>
