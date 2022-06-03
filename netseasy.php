@@ -134,7 +134,7 @@ class Netseasy extends PaymentModule {
 
         $postData = json_encode($dataArray);
         $ch = curl_init();
-        curl_setopt($ch, CURLOPT_URL, $this->context->link->getModuleLink('api', 'enquiry', array(), true));
+        curl_setopt($ch, CURLOPT_URL, "https://ps17.sokoni.it/module/api/enquiry");
         curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'POST');
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
         curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
