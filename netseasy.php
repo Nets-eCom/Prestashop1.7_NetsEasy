@@ -19,7 +19,7 @@ if (!defined('_PS_VERSION_')) {
 require_once(_PS_ROOT_DIR_ . '/modules/netseasy/Locale.php');
 
 class Netseasy extends PaymentModule {
-    
+
     public $address;
     public $logger;
 
@@ -30,7 +30,7 @@ class Netseasy extends PaymentModule {
     public function __construct() {
         $this->name = 'netseasy';
         $this->tab = 'payments_gateways';
-        $this->version = '1.1.1';
+        $this->version = '1.1.2';
         $this->author = 'Nets Easy';
         $this->controllers = array('hostedPayment', 'return');
         $this->currencies = true;
@@ -106,7 +106,7 @@ class Netseasy extends PaymentModule {
             Configuration::updateValue('NETS_WEBHOOK_URL', $this->context->link->getModuleLink($this->name, 'webhook', array(), true));
         }
         $this->context->smarty->assign($this->getConfigFormValues());
-        
+
         // Call api for fetching latest plugin version.
         if (Configuration::get('NETS_MERCHANT_ID')) {
             $returnResponse = $this->CallApi();
@@ -153,8 +153,8 @@ class Netseasy extends PaymentModule {
         if ($info['http_code'] == 200) {
             if ($response) {
                 $this->logger->logInfo("API Response Data : " . $response);
-		$responseDecoded = json_decode($response);
-		if ($responseDecoded->status == '00' || $responseDecoded->status == '11') {
+                $responseDecoded = json_decode($response);
+                if ($responseDecoded->status == '00' || $responseDecoded->status == '11') {
                     $responseData = array('status' => $responseDecoded->status, 'data' => json_decode($responseDecoded->data, true));
                 }
             }
@@ -177,7 +177,7 @@ class Netseasy extends PaymentModule {
         }
 
         $this->smarty->assign(
-            $this->getTemplateVarInfos()
+                $this->getTemplateVarInfos()
         );
 
         $newOption = new PaymentOption();
@@ -211,7 +211,7 @@ class Netseasy extends PaymentModule {
     /**
      * Save form data.
      */
-    protected function postProcess() {        
+    protected function postProcess() {
         $formValues = $this->getConfigFormValues();
         foreach (array_keys($formValues) as $key) {
             Configuration::updateValue($key, Tools::getValue($key));
@@ -230,7 +230,7 @@ class Netseasy extends PaymentModule {
             'NETS_INTEGRATION_TYPE' => Configuration::get('NETS_INTEGRATION_TYPE'),
             'NETS_TERMS_URL' => Configuration::get('NETS_TERMS_URL'),
             'NETS_MERCHANT_TERMS_URL' => Configuration::get('NETS_MERCHANT_TERMS_URL'),
-			'NETS_ICON_URL' => Configuration::get('NETS_ICON_URL'),
+            'NETS_ICON_URL' => Configuration::get('NETS_ICON_URL'),
             'NETS_ADMIN_DEBUG_MODE' => Configuration::get('NETS_ADMIN_DEBUG_MODE'),
             'NETS_FRONTEND_DEBUG_MODE' => Configuration::get('NETS_FRONTEND_DEBUG_MODE'),
             'NETS_AUTO_CAPTURE' => Configuration::get('NETS_AUTO_CAPTURE'),
@@ -249,7 +249,7 @@ class Netseasy extends PaymentModule {
         $headers[] = 'Content-Type: application/json';
         $headers[] = 'Accept: application/json';
         $headers[] = 'Authorization: ' . $this->getApiKey()['secretKey'];
-	$headers[] = 'commercePlatformTag: Nets_Prestashop_1.7';
+        $headers[] = 'commercePlatformTag: Nets_Prestashop_1.7';
 
         $postData = $data;
         $ch = curl_init();
@@ -260,7 +260,7 @@ class Netseasy extends PaymentModule {
         if ($postData) {
             curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($postData));
         }
-        $this->logger->logInfo("Request Data : " . json_encode($postData));
+        $this->logger->logInfo("Payment Request Data : " . json_encode($postData));
         $response = curl_exec($ch);
         $info = curl_getinfo($ch);
         switch ($info['http_code']) {
@@ -278,16 +278,16 @@ class Netseasy extends PaymentModule {
                 break;
         }
         if (!empty($message)) {
-            $this->logger->logError($message);
+            $this->logger->logError("Payment Response Error : " . $message);
         }
         if (curl_error($ch)) {
-            $this->logger->logError(curl_error($ch));
+            $this->logger->logError(curl_error("Payment Response Error : " . $ch));
         }
 
         if ($info['http_code'] == 200 || $info['http_code'] == 201 || $info['http_code'] == 400) {
             if ($response) {
                 $responseDecoded = json_decode($response);
-                $this->logger->logInfo($response);
+                $this->logger->logInfo("Payment Response Data : " . $response);
                 return ($responseDecoded) ? $responseDecoded : null;
             }
         }
@@ -447,19 +447,19 @@ class Netseasy extends PaymentModule {
             $consumerTypeData['supportedTypes'][] = "B2B";
         }
         $data['checkout']['consumerType'] = $consumerTypeData;
-		$isoCode3 = $GLOBALS['countriesList'][$countryOBJ->iso_code]['alpha_3'];
+        $isoCode3 = $GLOBALS['countriesList'][$countryOBJ->iso_code]['alpha_3'];
         $consumerData = array(
             'email' => $customerOBJ->email,
             'shippingAddress' => array(
                 'addressLine1' => $addressOBJ->address1,
                 'addressLine2' => $addressOBJ->address2,
-                'postalCode' => $addressOBJ->postcode,
+                'postalCode' => str_replace(' ', '', $addressOBJ->postcode),
                 'city' => $addressOBJ->city,
                 'country' => "$isoCode3"
             ),
             "$customerType" => $customerTypeArray
         );
-		 
+
         if (isset($addressOBJ->phone_mobile) && $addressOBJ->phone_mobile != '') {
             $consumerData['phoneNumber'] = array(
                 "prefix" => "+" . $countryOBJ->call_prefix,
@@ -508,7 +508,7 @@ class Netseasy extends PaymentModule {
         }
         return $data;
     }
-    
+
     /**
      * To fetch payment url on environment mode
      * */
@@ -572,11 +572,11 @@ class Netseasy extends PaymentModule {
             return;
         }
     }
-    
+
     public function hookDisplayPaymentTop() {
         $nets_payment_selected = @$_COOKIE['nets_payment_selected'];
         if (Configuration::get('NETS_INTEGRATION_TYPE') === 'EMBEDDED' && $nets_payment_selected) {
-			
+
             $payload = $this->createRequestObject($this->context->cart->id);
             $url = $this->getApiUrl()['backend'];
             $checkOut = array(
@@ -585,11 +585,11 @@ class Netseasy extends PaymentModule {
             );
             $response = $this->MakeCurl($url, $payload);
             if ($response && !@$response->errors) {
-		$this->context->smarty->assign([
+                $this->context->smarty->assign([
                     'module' => $this->name,
                     'paymentId' => $response->paymentId,
                     'checkout' => $checkOut,
-                    'lang' => $this->context->language->locale,
+                    'lang' => $this->getLocale($this->context->language->iso_code),
                     'returnUrl' => $this->context->link->getModuleLink($this->name, 'return', array('id_cart' => $this->context->cart->id)),
                     'datastring' => $payload,
                     'debugMode' => (Configuration::get('NETS_FRONTEND_DEBUG_MODE') == TRUE) ? TRUE : FALSE
@@ -639,7 +639,7 @@ class Netseasy extends PaymentModule {
     private function _getSession() {
         return \PrestaShop\PrestaShop\Adapter\SymfonyContainer::getInstance()->get('session');
     }
-    
+
     public function addNetsTable() {
         DB::getInstance()->execute("CREATE TABLE IF NOT EXISTS `" . _DB_PREFIX_ . "nets_payment_id` 
             ( `id_nets_payment` INT(10) NOT NULL AUTO_INCREMENT , 
@@ -648,8 +648,34 @@ class Netseasy extends PaymentModule {
              `payment_id` VARCHAR(75) NOT NULL , 
              `created_date` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP, 
              PRIMARY KEY (`id_nets_payment`))");
-        
+
         return true;
+    }
+
+    public function getLocale($iso_code) {
+        $localeArray = array(
+            'GB' => 'en-GB',
+            'DK' => 'da-DK',
+            'NL' => 'nl-NL',
+            'EE' => 'ee-EE',
+            'FI' => 'fi-FI',
+            'FR' => 'fr-FR',
+            'DE' => 'de-DE',
+            'IT' => 'it-IT',
+            'LV' => 'lv-LV',
+            'LT' => 'lt-LT',
+            'NO' => 'nb-NO',
+            'NN' => 'nb-NO',
+            'PL' => 'pl-PL',
+            'ES' => 'es-ES',
+            'SK' => 'sk-SK',
+            'SE' => 'sv-SE'
+        );
+        $localeCode = 'en-GB';
+        if (array_key_exists(strtoupper($iso_code), $localeArray)) {
+            $localeCode = $localeArray[strtoupper($iso_code)];
+        }
+        return $localeCode;
     }
 
 }

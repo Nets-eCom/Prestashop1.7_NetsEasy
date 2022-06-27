@@ -6,11 +6,15 @@
 |Author | `Nets eCom`
 |Prefix | `EASY-PS1.7`
 |Shop Version | `1.7+`
-|Version | `1.1.1`
+|Version | `1.1.2`
 |Guide | https://tech.nets.eu/shopmodules
 |Github | https://github.com/Nets-eCom/prestashop-PS1.7
 
 ## CHANGELOG
+
+### Version 1.1.2 - Released 2022-06-27
+* Fixed : Admin Order Nets Easy details cancel button issue has been fixed.
+* Fixed : Payment Nets Checkout issue for norwegian language locale has been fixed.
 
 ### Version 1.1.1 - Released 2022-06-03
 * New : A new API call is introduced allowing Nets to receive information about the plugin version used by the PrestaShop store and return potential plugin upgrade instructions.

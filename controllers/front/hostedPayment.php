@@ -59,7 +59,8 @@ class netseasyHostedPaymentModuleFrontController extends ModuleFrontController {
         $response = $nets->MakeCurl($nets->getApiUrl()['backend'], $requestObj);
 
         if ($response && !@$response->errors) {
-            $lang = @$this->context->language->locale;
+            //$lang = @$this->context->language->locale;
+            $lang = $nets->getLocale($this->context->language->iso_code);
             if ($lang) {
                 Tools::redirect($response->hostedPaymentPageUrl . "&language=$lang");
             } else {
@@ -70,4 +71,5 @@ class netseasyHostedPaymentModuleFrontController extends ModuleFrontController {
             Tools::redirect('index.php?controller=order&step=1');
         }
     }
+
 }

@@ -15,7 +15,7 @@ class AdminNetseasyOrderController extends ModuleAdminController {
 
     public function __construct() {
         $this->logger = new FileLogger();
-        $this->logger->setFilename(_PS_ROOT_DIR_ . "/var/logs/nets.log");      
+        $this->logger->setFilename(_PS_ROOT_DIR_ . "/var/logs/nets.log");
         // IF NOT EXISTS !!
         $result = DB::getInstance()->execute("CREATE TABLE IF NOT EXISTS " . _DB_PREFIX_ . "nets_payment (
 		`id` int(10) unsigned NOT NULL auto_increment,		
@@ -38,7 +38,7 @@ class AdminNetseasyOrderController extends ModuleAdminController {
         $this->data['responseItems'] = $this->checkPartialItems($this->orderId);
         $status = $this->is_easy($this->orderId);
         $this->data['status'] = $status;
-		//Handle charge and refund done from portal
+        //Handle charge and refund done from portal
         $this->managePortalChargeAndRefund();
         $this->data['paymentId'] = $this->paymentId;
         $this->data['oID'] = $this->orderId;
@@ -55,6 +55,7 @@ class AdminNetseasyOrderController extends ModuleAdminController {
      * @param $order_id
      * @return nets payment id
      */
+
     public function getPaymentId($order_id) {
         $query = DB::getInstance()->executeS("SELECT payment_id FROM `" . _DB_PREFIX_ . "nets_payment_id`  WHERE id_order = '" . (int) $order_id . "'");
         $this->paymentId = reset($query)['payment_id'];
@@ -66,6 +67,7 @@ class AdminNetseasyOrderController extends ModuleAdminController {
      * @param $orderid alphanumeric
      * @return array order items and amount
      */
+
     public function getOrderItems($orderId) {
         //get order products          
         $taxRateShipping = $order_total = 0;
@@ -87,7 +89,7 @@ class AdminNetseasyOrderController extends ModuleAdminController {
 
                 $taxRate = number_format($taxRate, 2) * 100;
                 $itemsArray[] = array(
-                    'reference' => $prows['product_reference'],
+                    'reference' => !empty($prows['product_reference']) ? $prows['product_reference'] : $prows['product_name'],
                     'name' => $prows['product_name'],
                     'quantity' => $quantity,
                     'unit' => 'pcs',
@@ -105,11 +107,11 @@ class AdminNetseasyOrderController extends ModuleAdminController {
         $query = DB::getInstance()->executeS("SELECT total_shipping,total_paid,id_carrier FROM `" . _DB_PREFIX_ . "orders`  WHERE id_order = '" . (int) $orderId . "'");
         $shippingCost = reset($query)['total_shipping'];
         $order_total = reset($query)['total_paid'];
-		$id_carrier = reset($query)['id_carrier'];
-		
-		$query = DB::getInstance()->executeS("SELECT name FROM `" . _DB_PREFIX_ . "carrier` WHERE id_carrier = '" . (int) $id_carrier . "'");
+        $id_carrier = reset($query)['id_carrier'];
+
+        $query = DB::getInstance()->executeS("SELECT name FROM `" . _DB_PREFIX_ . "carrier` WHERE id_carrier = '" . (int) $id_carrier . "'");
         $shippingReference = reset($query)['name'];
-		
+
         if (!empty($shippingCost) && $shippingCost > 0) {
             //easy calc method  
             $quantity = 1;
@@ -154,6 +156,7 @@ class AdminNetseasyOrderController extends ModuleAdminController {
      * @param order id
      * @return array of reserved, partial charged,partial refunded items
      */
+
     public function checkPartialItems($orderId) {
         $orderItems = $this->getOrderItems($orderId);
         $products = [];
@@ -375,7 +378,7 @@ class AdminNetseasyOrderController extends ModuleAdminController {
             $current_state = reset($query)['current_state'];
             // if order is cancelled and payment is not updated as cancelled, call nets cancel payment api
             if ($current_state === '6') {
-                $data = $this->getOrderItems($oder_id);				
+                $data = $this->getOrderItems($oder_id);
                 // call cancel api here
                 $cancelUrl = $this->getVoidPaymentUrl($this->paymentId);
                 $cancelBody = [
@@ -472,11 +475,12 @@ class AdminNetseasyOrderController extends ModuleAdminController {
      * Function to capture nets transaction - calls charge API
      * redirects to admin overview listing page
      */
+
     public function processCharge() {
 
         $token = Tools::getValue('ordertoken');
         $orderid = Tools::getValue('orderid');
-        $ref = Tools::getValue('reference');
+        $ref = !empty(Tools::getValue('reference')) ? Tools::getValue('reference') : Tools::getValue('name');
         $name = Tools::getValue('name');
         $chargeQty = Tools::getValue('single');
         $unitPrice = Tools::getValue('price');
@@ -502,20 +506,20 @@ class AdminNetseasyOrderController extends ModuleAdminController {
                 }
             }
             $body = [
-                'amount' => $totalAmount,
+                'amount' => round($totalAmount),
                 'orderItems' => $itemList
             ];
         } else {
             $body = [
-                'amount' => $data['order']['amount'] * 100,
+                'amount' => round($data['order']['amount'] * 100),
                 'orderItems' => $data['order']['items']
             ];
         }
-
+        $this->logger->logInfo("[" . $payment_id . "] Nets_Order_Overview getorder charge request sent");
         $api_return = $this->getCurlResponse($chargeUrl, 'POST', json_encode($body));
         $response = json_decode($api_return, true);
 
-        $this->logger->logInfo("Nets_Order_Overview getorder charge" . $api_return);
+        $this->logger->logInfo("[" . $payment_id . "] Nets_Order_Overview getorder charge response" . $api_return);
         //save charge details in db for partial refund
         if (isset($ref) && isset($response['chargeId'])) {
             $charge_query = "insert into " . _DB_PREFIX_ . "nets_payment (`payment_id`, `charge_id`,  `product_ref`, `charge_qty`, `charge_left_qty`,`created`) "
@@ -538,14 +542,16 @@ class AdminNetseasyOrderController extends ModuleAdminController {
      * Function to refund nets transaction - calls Refund API
      * redirects to admin overview listing page
      */
+
     public function processRefund() {
         $token = Tools::getValue('ordertoken');
         $orderid = Tools::getValue('orderid');
-        $ref = Tools::getValue('reference');
+        $ref = !empty(Tools::getValue('reference')) ? Tools::getValue('reference') : Tools::getValue('name');
         $name = Tools::getValue('name');
         $refundQty = Tools::getValue('single');
 
         $taxRate = (int) Tools::getValue('taxrate');
+        $payment_id = $this->getPaymentId($orderid);
         $data = $this->getOrderItems($orderid);
         $api_return = $this->getCurlResponse($this->getApiUrl() . $this->getPaymentId($orderid), 'GET');
         $chargeResponse = json_decode($api_return, true);
@@ -580,8 +586,9 @@ class AdminNetseasyOrderController extends ModuleAdminController {
                             $body = $this->getItemForRefund($ref, $value, $data);
 
                             $refundUrl = $this->getRefundPaymentUrl($key);
-                            $this->getCurlResponse($refundUrl, 'POST', json_encode($body));
-                            $this->logger->logInfo("Nets_Order_Overview getorder refund" . json_encode($body));
+                            $this->logger->logInfo("[" . $payment_id . "] Nets_Order_Overview getorder refund request sent");
+                            $api_return = $this->getCurlResponse($refundUrl, 'POST', json_encode($body));
+                            $this->logger->logInfo("[" . $payment_id . "] Nets_Order_Overview getorder refund response" . $api_return);
                             //update for left charge quantity
                             $singlecharge_query = DB::getInstance()->executeS(
                                     "SELECT  `charge_left_qty` FROM " . _DB_PREFIX_ . "nets_payment WHERE payment_id = '" . $this->paymentId . "' AND charge_id = '" . $key . "' AND product_ref = '" . $ref . "' AND charge_left_qty !=0 "
@@ -631,23 +638,24 @@ class AdminNetseasyOrderController extends ModuleAdminController {
                     'amount' => $itemsGrossPriceSumma,
                     'orderItems' => $itemsArray
                 ];
-
                 //For Refund all				                
                 $refundUrl = $this->getRefundPaymentUrl($val['chargeId']);
+                $this->logger->logInfo("[" . $payment_id . "] Nets_Order_Overview getorder refund request sent");
                 $api_return = $this->getCurlResponse($refundUrl, 'POST', json_encode($body));
                 $response = json_decode($api_return, true);
-                $this->logger->logInfo("Nets_Order_Overview getorder refund" . $api_return);
+                $this->logger->logInfo("[" . $payment_id . "] Nets_Order_Overview getorder refund response" . $api_return);
             }
         }
         Tools::redirectAdmin('sell/orders/' . $orderid . '/view?_token=' . $token);
     }
 
     /* Get order Items to refund and pass them to refund api */
+
     public function getItemForRefund($ref, $refundQty, $data) {
         $totalAmount = 0;
-		$itemList = array();
-        foreach ($data['order']['items'] as $key => $value) {			
-            if (in_array($ref, $value) && preg_replace('/\s+/', '',$ref) == preg_replace('/\s+/', '',$value['reference']) ) {
+        $itemList = array();
+        foreach ($data['order']['items'] as $key => $value) {
+            if (in_array($ref, $value) && preg_replace('/\s+/', '', $ref) == preg_replace('/\s+/', '', $value['reference'])) {
                 $unitPrice = $value['unitPrice'];
                 $taxAmountPerProduct = $value['taxAmount'] / $value['quantity'];
 
@@ -662,12 +670,12 @@ class AdminNetseasyOrderController extends ModuleAdminController {
                 $itemList[] = $value;
                 $totalAmount += $grossAmount;
             }
-        } 
+        }
         $body = [
             'amount' => $totalAmount,
             'orderItems' => $itemList
         ];
-		 
+
         return $body;
     }
 
@@ -675,6 +683,7 @@ class AdminNetseasyOrderController extends ModuleAdminController {
      * Function to capture nets transaction - calls Cancel API
      * redirects to admin overview listing page
      */
+
     public function processCancel() {
         $token = Tools::getValue('ordertoken');
         $orderid = Tools::getValue('orderid');
@@ -683,12 +692,11 @@ class AdminNetseasyOrderController extends ModuleAdminController {
         // call cancel api here
         $cancelUrl = $this->getVoidPaymentUrl($payment_id);
         $body = [
-            'amount' => $data['order']['amount'] * 100,
+            'amount' => round($data['order']['amount'] * 100),
             'orderItems' => $data['order']['items']
         ];
         $api_return = $this->getCurlResponse($cancelUrl, 'POST', json_encode($body));
         $response = json_decode($api_return, true);
-
         Tools::redirectAdmin('sell/orders/' . $orderid . '/view?_token=' . $token);
     }
 
@@ -709,24 +717,20 @@ class AdminNetseasyOrderController extends ModuleAdminController {
 
         switch ($info['http_code']) {
             case 401:
-                $error_message = 'NETS Easy authorization failed. Check your secret/checkout keys';
-                $this->logger->logError($error_message);
+                $message = 'NETS Easy authorization failed. Check your keys';
                 break;
             case 400:
-                $error_message = 'NETS Easy Bad request: Please check request params/headers ';
-                $this->logger->logError($error_message);
+                $message = 'NETS Easy. Bad request: ' . $result;
                 break;
-            case 402:
-                $error_message = 'Payment Required';
-                $this->logger->logError($error_message);
+            case 404:
+                $message = 'Payment or charge not found';
                 break;
             case 500:
-                $error_message = 'Unexpected error';
-                $this->logger->logError($error_message);
+                $message = 'Unexpected error';
                 break;
         }
-        if (!empty($error_message)) {
-            $this->logger->logError($error_message);
+        if (!empty($message)) {
+            $this->logger->logError("Response Error : " . $message);
         }
 
         curl_close($oCurl);
@@ -739,6 +743,7 @@ class AdminNetseasyOrderController extends ModuleAdminController {
      *
      * @return payment api url
      */
+
     public function getApiUrl() {
 
         if (Configuration::get('NETS_TEST_MODE')) {
@@ -753,6 +758,7 @@ class AdminNetseasyOrderController extends ModuleAdminController {
      * @param $orderid
      * @return nets charge id
      */
+
     private function getChargeId($orderid) {
         $api_return = $this->getCurlResponse($this->getApiUrl() . $this->getPaymentId($orderid), 'GET');
         $response = json_decode($api_return, true);
@@ -770,6 +776,7 @@ class AdminNetseasyOrderController extends ModuleAdminController {
      * Function to fetch headers to be passed in guzzle http request
      * @return headers array
      */
+
     private function getHeaders() {
         return [
             "Content-Type: " . self::RESPONSE_TYPE,
@@ -782,6 +789,7 @@ class AdminNetseasyOrderController extends ModuleAdminController {
      * Function to fetch secret key to pass as authorization
      * @return secret key
      */
+
     public function getSecretKey() {
         if (Configuration::get('NETS_TEST_MODE')) {
             $secretKey = Configuration::get('NETS_TEST_SECRET_KEY');
@@ -796,6 +804,7 @@ class AdminNetseasyOrderController extends ModuleAdminController {
      * @param $paymentId
      * @return charge api url
      */
+
     public function getChargePaymentUrl($paymentId) {
         return (Configuration::get('NETS_TEST_MODE') ) ? self::ENDPOINT_TEST . $paymentId . '/charges' : self::ENDPOINT_LIVE . $paymentId . '/charges';
     }
@@ -805,6 +814,7 @@ class AdminNetseasyOrderController extends ModuleAdminController {
      * @param $paymentId
      * @return cancel api url
      */
+
     public function getVoidPaymentUrl($paymentId) {
         return (Configuration::get('NETS_TEST_MODE') ) ? self::ENDPOINT_TEST . $paymentId . '/cancels' : self::ENDPOINT_LIVE . $paymentId . '/cancels';
     }
@@ -814,6 +824,7 @@ class AdminNetseasyOrderController extends ModuleAdminController {
      * @param $chargeId
      * @return refund api url
      */
+
     public function getRefundPaymentUrl($chargeId) {
         return (Configuration::get('NETS_TEST_MODE')) ? self::ENDPOINT_TEST_CHARGES . $chargeId . '/refunds' : self::ENDPOINT_LIVE_CHARGES . $chargeId . '/refunds';
     }
@@ -823,6 +834,7 @@ class AdminNetseasyOrderController extends ModuleAdminController {
      * @param $this->paymentId	
      * @return null
      */
+
     public function managePortalChargeAndRefund() {
         //get reqeust response
         $api_return = $this->getCurlResponse($this->getApiUrl() . $this->paymentId, 'GET');
