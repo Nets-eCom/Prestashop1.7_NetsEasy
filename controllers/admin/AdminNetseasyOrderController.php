@@ -74,6 +74,7 @@ class AdminNetseasyOrderController extends ModuleAdminController {
         $product_query = DB::getInstance()->executeS(
                 "SELECT product_id,product_reference,product_name,product_price,tax_rate,product_quantity,total_price_tax_incl,total_shipping_price_tax_incl FROM " . _DB_PREFIX_ . "order_detail WHERE id_order = '" . (int) $orderId . "'"
         );
+
         if (!empty(DB::getInstance()->numRows($product_query))) {
             foreach ($product_query as $prows) {
                 //get product tax rate                 
@@ -159,6 +160,7 @@ class AdminNetseasyOrderController extends ModuleAdminController {
 
     public function checkPartialItems($orderId) {
         $orderItems = $this->getOrderItems($orderId);
+
         $products = [];
         $chargedItems = [];
         $refundedItems = [];
@@ -182,6 +184,7 @@ class AdminNetseasyOrderController extends ModuleAdminController {
 
         $api_return = $this->getCurlResponse($this->getApiUrl() . $this->paymentId, 'GET');
         $response = json_decode($api_return, true);
+        $paymentType = isset($response['payment']['paymentDetails']['paymentType']) ? $response['payment']['paymentDetails']['paymentType'] : '';
 
         if (!empty($response['payment']['charges'])) {
             $qty = 0;
@@ -189,9 +192,7 @@ class AdminNetseasyOrderController extends ModuleAdminController {
             $grossprice = 0;
 
             foreach ($response['payment']['charges'] as $key => $values) {
-
                 for ($i = 0; $i < count($values['orderItems']); $i++) {
-
                     if (array_key_exists($values['orderItems'][$i]['reference'], $chargedItems)) {
                         $qty = $chargedItems[$values['orderItems'][$i]['reference']]['quantity'] + $values['orderItems'][$i]['quantity'];
                         $price = $chargedItems[$values['orderItems'][$i]['reference']]['grossprice'] + number_format((float) ($values['orderItems'][$i]['grossTotalAmount'] / 100), 2, '.', '');
@@ -240,12 +241,12 @@ class AdminNetseasyOrderController extends ModuleAdminController {
                     if (array_key_exists($values['orderItems'][$i]['reference'], $refundedItems)) {
                         $qty = $refundedItems[$values['orderItems'][$i]['reference']]['quantity'] + $values['orderItems'][$i]['quantity'];
                         $netprice = $values['orderItems'][$i]['unitPrice'] * $qty;
-                        $grossprice = ($refundedItems[$values['orderItems'][$i]['reference']]['grossprice'] + ($values['orderItems'][$i]['grossTotalAmount'] / 100 ));
+                        $grossprice = ($refundedItems[$values['orderItems'][$i]['reference']]['grossprice'] + ($values['orderItems'][$i]['grossTotalAmount'] / 100));
                         $refundedItems[$values['orderItems'][$i]['reference']] = array(
                             'reference' => $values['orderItems'][$i]['reference'],
                             'name' => $values['orderItems'][$i]['name'],
                             'quantity' => $qty,
-                            'grossprice' => number_format((float) (($grossprice )), 2, '.', ''),
+                            'grossprice' => number_format((float) (($grossprice)), 2, '.', ''),
                             'currency' => $response['payment']['orderDetails']['currency']
                         );
                     } else {
@@ -282,7 +283,7 @@ class AdminNetseasyOrderController extends ModuleAdminController {
                 );
             }
         }
-        if (!isset($response['payment']['summary']['reservedAmount'])) {
+        if (!isset($response['payment']['summary']['reservedAmount']) && $paymentType != 'A2A') {
             foreach ($orderItems['order']['items'] as $items) {
                 $failedItems[$items['reference']] = array(
                     'name' => $items['name'],
@@ -351,6 +352,11 @@ class AdminNetseasyOrderController extends ModuleAdminController {
         if (count($chargedItems) > 0 && $reserved === $charged) {
             $lists['chargedItems'] = $chargedItems;
         }
+
+        if (count($chargedItems) > 0 && $paymentType == "A2A") {
+            $lists['chargedItems'] = $chargedItems;
+        }
+
         if ($reserved != $charged && $reserved != $cancelled) {
             $lists['chargedItemsOnly'] = $chargedItems;
         }
@@ -401,6 +407,8 @@ class AdminNetseasyOrderController extends ModuleAdminController {
             }
             $dbPayStatus = '';
             $paymentStatus = $cancelled = $reserved = $charged = $refunded = $pending = $chargeid = $chargedate = '';
+            $paymentType = isset($response['payment']['paymentDetails']['paymentType']) ? $response['payment']['paymentDetails']['paymentType'] : '';
+
             if (isset($response['payment']['summary']['cancelledAmount'])) {
                 $cancelled = $response['payment']['summary']['cancelledAmount'];
             }
@@ -425,22 +433,25 @@ class AdminNetseasyOrderController extends ModuleAdminController {
                 $chargedate = $response['payment']['charges'][0]['created'];
             }
 
-            if ($reserved) {
+            if ($reserved || $paymentType == "A2A") {
                 if ($cancelled) {
                     $langStatus = "cancel";
                     $paymentStatus = "Canceled";
                     $dbPayStatus = 1; // For payment status as cancelled in psnets_payment db table
                 } elseif ($charged && $pending !== 'Pending') {
-
-                    if ($reserved != $charged) {
+                    if ($reserved != $charged && $paymentType != "A2A") {
                         $paymentStatus = "Partial Charged";
                         $langStatus = "partial_charge";
                         $dbPayStatus = 3; // For payment status as Partial Charged in psnets_payment db table                         
                     } else if ($refunded) {
-                        if ($reserved != $refunded) {
+                        if ($reserved != $refunded && $paymentType != "A2A") {
                             $paymentStatus = "Partial Refunded";
                             $langStatus = "partial_refund";
                             $dbPayStatus = 5; // For payment status as Partial Charged in psnets_payment db table                             
+                        } else if ($paymentType == "A2A" && $refunded != $charged) {
+                            $paymentStatus = "Partial Refunded";
+                            $langStatus = "partial_refund";
+                            $dbPayStatus = 5;
                         } else {
                             $paymentStatus = "Refunded";
                             $langStatus = "refunded";
@@ -487,6 +498,7 @@ class AdminNetseasyOrderController extends ModuleAdminController {
         $taxRate = (int) Tools::getValue('taxrate');
         $payment_id = $this->getPaymentId($orderid);
         $data = $this->getOrderItems($orderid);
+
         // call charge api here
         $chargeUrl = $this->getChargePaymentUrl($payment_id);
         if (!empty($ref) && !empty($chargeQty)) {
@@ -515,13 +527,14 @@ class AdminNetseasyOrderController extends ModuleAdminController {
                 'orderItems' => $data['order']['items']
             ];
         }
+
         $this->logger->logInfo("[" . $payment_id . "] Nets_Order_Overview getorder charge request sent");
         $api_return = $this->getCurlResponse($chargeUrl, 'POST', json_encode($body));
         $response = json_decode($api_return, true);
 
         $this->logger->logInfo("[" . $payment_id . "] Nets_Order_Overview getorder charge response" . $api_return);
         //save charge details in db for partial refund
-        if (isset($ref) && isset($response['chargeId'])) {
+        if ((isset($ref) && !empty($ref)) && isset($response['chargeId'])) {
             $charge_query = "insert into " . _DB_PREFIX_ . "nets_payment (`payment_id`, `charge_id`,  `product_ref`, `charge_qty`, `charge_left_qty`,`created`) "
                     . "values ('" . $this->paymentId . "', '" . $response['chargeId'] . "', '" . $ref . "', '" . $chargeQty . "', '" . $chargeQty . "',now())";
             DB::getInstance()->execute($charge_query);
@@ -553,6 +566,7 @@ class AdminNetseasyOrderController extends ModuleAdminController {
         $taxRate = (int) Tools::getValue('taxrate');
         $payment_id = $this->getPaymentId($orderid);
         $data = $this->getOrderItems($orderid);
+
         $api_return = $this->getCurlResponse($this->getApiUrl() . $this->getPaymentId($orderid), 'GET');
         $chargeResponse = json_decode($api_return, true);
         $refundEachQtyArr = array();
@@ -565,29 +579,34 @@ class AdminNetseasyOrderController extends ModuleAdminController {
                         $refExist = true;
                     }
                 }
+
                 if ($refExist) {
-                    //from charge tabe deside charge id for refund						
                     $charge_query = DB::getInstance()->executeS(
                             "SELECT `payment_id`, `charge_id`,  `product_ref`, `charge_qty`, `charge_left_qty` FROM " . _DB_PREFIX_ . "nets_payment WHERE payment_id = '" . $this->paymentId . "' AND charge_id = '" . $val['chargeId'] . "' AND product_ref = '" . $ref . "' AND charge_left_qty !=0"
                     );
+
                     if (!empty(DB::getInstance()->numRows($charge_query))) {
                         foreach ($charge_query as $crows) {
                             $table_charge_left_qty = $refundEachQtyArr[$val['chargeId']] = $crows['charge_left_qty'];
                         }
                     }
+
                     if ($refundQty <= array_sum($refundEachQtyArr)) {
                         $leftqtyFromArr = array_sum($refundEachQtyArr) - $refundQty;
                         $leftqty = $table_charge_left_qty - $leftqtyFromArr;
                         $refundEachQtyArr[$val['chargeId']] = $leftqty;
                         $breakloop = true;
                     }
+
                     if ($breakloop) {
+
                         foreach ($refundEachQtyArr as $key => $value) {
                             $body = $this->getItemForRefund($ref, $value, $data);
-
                             $refundUrl = $this->getRefundPaymentUrl($key);
+
+                            $this->logger->logInfo('body' . json_encode($body));
                             $this->logger->logInfo("[" . $payment_id . "] Nets_Order_Overview getorder refund request sent");
-                            $api_return = $this->getCurlResponse($refundUrl, 'POST', json_encode($body));
+                            $api_return = $this->getCurlResponse1($refundUrl, 'POST', json_encode($body));
                             $this->logger->logInfo("[" . $payment_id . "] Nets_Order_Overview getorder refund response" . $api_return);
                             //update for left charge quantity
                             $singlecharge_query = DB::getInstance()->executeS(
@@ -611,9 +630,10 @@ class AdminNetseasyOrderController extends ModuleAdminController {
                 }
             }
         } else {
-            //update for left charge quantity			
+            //update for left charge quantity        
             foreach ($chargeResponse['payment']['charges'] as $ky => $val) {
                 $itemsArray = array();
+
                 foreach ($val['orderItems'] as $key => $value) {
                     $itemsArray[] = array(
                         'reference' => $value['reference'],
@@ -640,6 +660,7 @@ class AdminNetseasyOrderController extends ModuleAdminController {
                 ];
                 //For Refund all				                
                 $refundUrl = $this->getRefundPaymentUrl($val['chargeId']);
+
                 $this->logger->logInfo("[" . $payment_id . "] Nets_Order_Overview getorder refund request sent");
                 $api_return = $this->getCurlResponse($refundUrl, 'POST', json_encode($body));
                 $response = json_decode($api_return, true);
@@ -659,7 +680,7 @@ class AdminNetseasyOrderController extends ModuleAdminController {
                 $unitPrice = $value['unitPrice'];
                 $taxAmountPerProduct = $value['taxAmount'] / $value['quantity'];
 
-                $value['taxAmount'] = $taxAmountPerProduct * $refundQty;
+                $value['taxAmount'] = round($taxAmountPerProduct * $refundQty);
                 $netAmount = $refundQty * $unitPrice;
                 $grossAmount = $netAmount + $value['taxAmount'];
 
@@ -675,7 +696,6 @@ class AdminNetseasyOrderController extends ModuleAdminController {
             'amount' => $totalAmount,
             'orderItems' => $itemList
         ];
-
         return $body;
     }
 
@@ -698,6 +718,44 @@ class AdminNetseasyOrderController extends ModuleAdminController {
         $api_return = $this->getCurlResponse($cancelUrl, 'POST', json_encode($body));
         $response = json_decode($api_return, true);
         Tools::redirectAdmin('sell/orders/' . $orderid . '/view?_token=' . $token);
+    }
+
+    public function getCurlResponse1($url, $method = "POST", $bodyParams = NULL) {
+        $result = '';
+        // initiating curl request to call api's
+        $oCurl = curl_init();
+        curl_setopt($oCurl, CURLOPT_URL, $url);
+        curl_setopt($oCurl, CURLOPT_CUSTOMREQUEST, $method);
+        curl_setopt($oCurl, CURLOPT_RETURNTRANSFER, 1);
+        curl_setopt($oCurl, CURLOPT_HTTPHEADER, $this->getHeaders());
+        if ($method == "POST" || $method == "PUT") {
+            curl_setopt($oCurl, CURLOPT_POSTFIELDS, $bodyParams);
+        }
+
+        $result = curl_exec($oCurl);
+        $info = curl_getinfo($oCurl);
+
+        switch ($info['http_code']) {
+            case 401:
+                $message = 'NETS Easy authorization failed. Check your keys';
+                break;
+            case 400:
+                $message = 'NETS Easy. Bad request: ' . $result;
+                break;
+            case 404:
+                $message = 'Payment or charge not found';
+                break;
+            case 500:
+                $message = 'Unexpected error';
+                break;
+        }
+        if (!empty($message)) {
+            $this->logger->logError("Response Error : " . $message);
+        }
+
+        curl_close($oCurl);
+
+        return $result;
     }
 
     public function getCurlResponse($url, $method = "POST", $bodyParams = NULL) {
@@ -806,7 +864,7 @@ class AdminNetseasyOrderController extends ModuleAdminController {
      */
 
     public function getChargePaymentUrl($paymentId) {
-        return (Configuration::get('NETS_TEST_MODE') ) ? self::ENDPOINT_TEST . $paymentId . '/charges' : self::ENDPOINT_LIVE . $paymentId . '/charges';
+        return (Configuration::get('NETS_TEST_MODE')) ? self::ENDPOINT_TEST . $paymentId . '/charges' : self::ENDPOINT_LIVE . $paymentId . '/charges';
     }
 
     /*
@@ -816,7 +874,7 @@ class AdminNetseasyOrderController extends ModuleAdminController {
      */
 
     public function getVoidPaymentUrl($paymentId) {
-        return (Configuration::get('NETS_TEST_MODE') ) ? self::ENDPOINT_TEST . $paymentId . '/cancels' : self::ENDPOINT_LIVE . $paymentId . '/cancels';
+        return (Configuration::get('NETS_TEST_MODE')) ? self::ENDPOINT_TEST . $paymentId . '/cancels' : self::ENDPOINT_LIVE . $paymentId . '/cancels';
     }
 
     /*

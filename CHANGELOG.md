@@ -6,11 +6,17 @@
 |Author | `Nets eCom`
 |Prefix | `EASY-PS1.7`
 |Shop Version | `1.7+`
-|Version | `1.1.2`
+|Version | `1.1.3`
 |Guide | https://tech.nets.eu/shopmodules
 |Github | https://github.com/Nets-eCom/prestashop-PS1.7
 
 ## CHANGELOG
+
+### Version 1.1.3 - Released 2022-09-08
+* New : Custom Payment Name display on checkout page.
+* New : Display payment name with payment method in Admin Order List.
+* Fixed : Improved A2A Payment Methods compatibility.
+* Fixed : Improved Nets plugin latest version notification on configure page.
 
 ### Version 1.1.2 - Released 2022-06-27
 * Fixed : Admin Order Nets Easy details cancel button issue has been fixed.

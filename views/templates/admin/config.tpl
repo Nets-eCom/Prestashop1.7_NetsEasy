@@ -10,34 +10,34 @@
                 <div class="modal-header">
                     <button type="button" class="close" data-dismiss="modal" aria-hidden="true">x</button>
                     <h4 class="modal-title">
-		    {if ($customData['status'] == "00")}
-			<strong>Update Notification</strong>
-		    {/if}
-		    {if ($customData['status'] == "11")}
-                        <strong>Success Notification</strong>
-                    {/if}
-		    </h4>
+                        {if ($customData['status'] == "00")}
+                            <strong>Update Notification</strong>
+                        {/if}
+                        {if ($customData['status'] == "11")}
+                            <strong>Success Notification</strong>
+                        {/if}
+                    </h4>
                 </div>
                 <div class="modal-body">
-		    {if ($customData['status'] == "00")}
-		    <h4 class="modal-title">{{$customData['data']['notification_message']}}</h4>
-                    <div class="form-group-lg" style="font-size: small;">
-                        <label class="form-control-label">Latest Plugin Version : </label> {{$customData['data']['plugin_version']}} version </br>
-                        <label class="form-control-label">Shop Version Compatible : </label> {{$customData['data']['shop_version']}} </br>
-                        {if !empty($customData['data']['repo_links'])}
-                            <label class="form-control-label">Github Link : </label> <a href="{{$customData['data']['repo_links']}}" target="_blank">Click here</a> </br>
-                        {/if}
-                        {if !empty($customData['data']['tech_site_links'])}
-                            <label class="form-control-label">TechSite Link : </label> <a href="{{$customData['data']['tech_site_links']}}" target="_blank">Click here</a>
-                        {/if}
-                        {if !empty($customData['data']['marketplace_links'])}
-                            <label class="form-control-label">MarketPlace Link : </label> <a href="{{$customData['data']['marketplace_links']}}" target="_blank">Click here</a>
-                        {/if}
-                    </div>
-		    {/if}
-		    {if ($customData['status'] == "11")}
-		    <h4 class="modal-title">{{$customData['data']['notification_message']}}</h4>
-		    {/if}
+                    {if ($customData['status'] == "00")}
+                        <h4 class="modal-title">{{$customData['data']['notification_message']}}</h4>
+                        <div class="form-group-lg" style="font-size: small;">
+                            <label class="form-control-label">Latest Plugin Version : </label> {{$customData['data']['plugin_version']}} version </br>
+                            <label class="form-control-label">Shop Version Compatible : </label> {{$customData['data']['shop_version']}} </br>
+                            {if !empty($customData['data']['repo_links'])}
+                                <label class="form-control-label">Github Link : </label> <a href="{{$customData['data']['repo_links']}}" target="_blank">Click here</a> </br>
+                            {/if}
+                            {if !empty($customData['data']['tech_site_links'])}
+                                <label class="form-control-label">TechSite Link : </label> <a href="{{$customData['data']['tech_site_links']}}" target="_blank">Click here</a>
+                            {/if}
+                            {if !empty($customData['data']['marketplace_links'])}
+                                <label class="form-control-label">MarketPlace Link : </label> <a href="{{$customData['data']['marketplace_links']}}" target="_blank">Click here</a>
+                            {/if}
+                        </div>
+                    {/if}
+                    {if ($customData['status'] == "11")}
+                        <h4 class="modal-title">{{$customData['data']['notification_message']}}</h4>
+                    {/if}
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-primary" data-dismiss="modal">Ok</button>
@@ -85,6 +85,20 @@
                 </div>
             </div>
             <div class="form-group">
+                <label class="control-label col-lg-4 required">{l s="merchant_email_id" d="Modules.Netseasy.Config"}</label>
+                <div class="col-lg-4">
+                    <input type="text" name="NETS_MERCHANT_EMAIL_ID" id="NETS_MERCHANT_EMAIL_ID"  class=""  value="{$NETS_MERCHANT_EMAIL_ID}">
+                    <p class="error text-danger">{l s="nets_merchant_email_id_error" d="Modules.Netseasy.Config"}</p>
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="control-label col-lg-4 required">{l s="payment_name" d="Modules.Netseasy.Config"}</label>
+                <div class="col-lg-4">
+                    <input type="text" name="NETS_PAYMENT_NAME" id="NETS_PAYMENT_NAME"  class=""  value="{$NETS_PAYMENT_NAME}">
+                    <p class="error text-danger">{l s="nets_payment_name_error" d="Modules.Netseasy.Config"}</p>
+                </div>
+            </div>
+            <div class="form-group">
                 <label class="control-label col-lg-4">{l s="test_checkout_key" d="Modules.Netseasy.Config"}</label>
                 <div class="col-lg-4">
                     <input type="text" name="NETS_TEST_CHECKOUT_KEY" id="NETS_TEST_CHECKOUT_KEY"  class=""  value="{$NETS_TEST_CHECKOUT_KEY}" placeholder="test-checkout-key-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx">
@@ -124,25 +138,19 @@
                 </div>
             </div>
             <div class="form-group">
-                <label class="control-label col-lg-4">{l s="terms_url" d="Modules.Netseasy.Config"}</label>
+                <label class="control-label col-lg-4 required">{l s="terms_url" d="Modules.Netseasy.Config"}</label>
                 <div class="col-lg-4">
                     <input type="text" name="NETS_TERMS_URL" id="NETS_TERMS_URL" value="{$NETS_TERMS_URL}" class="">
                     <p class="error text-danger">{l s="nets_terms_url_error" d="Modules.Netseasy.Config"}</p>
                 </div>
             </div>
             <div class="form-group">
-                <label class="control-label col-lg-4">{l s="merchant_terms_url" d="Modules.Netseasy.Config"}</label>
+                <label class="control-label col-lg-4 required">{l s="merchant_terms_url" d="Modules.Netseasy.Config"}</label>
                 <div class="col-lg-4">
                     <input type="text" name="NETS_MERCHANT_TERMS_URL" id="NETS_MERCHANT_TERMS_URL" value="{$NETS_MERCHANT_TERMS_URL}" class="">
                     <p class="error text-danger">{l s="nets_merchant_terms_url_error" d="Modules.Netseasy.Config"}</p>
                 </div>
             </div>
-            <!--div class="form-group">
-                <label class="control-label col-lg-4">{l s="icon_url" d="Modules.Netseasy.Config"}</label>
-                <div class="col-lg-4">
-                    <input type="text" name="NETS_ICON_URL" id="NETS_ICON_URL" value="{$NETS_ICON_URL}" class="required" required="required">
-                </div>
-            </div-->
             <div class="form-group">
                 <label class="control-label col-lg-4">{l s="auto_capture" d="Modules.Netseasy.Config"}</label>
                 <div class="col-lg-8">

@@ -30,13 +30,13 @@ class Netseasy extends PaymentModule {
     public function __construct() {
         $this->name = 'netseasy';
         $this->tab = 'payments_gateways';
-        $this->version = '1.1.2';
+        $this->version = '1.1.3';
         $this->author = 'Nets Easy';
         $this->controllers = array('hostedPayment', 'return');
         $this->currencies = true;
         $this->currencies_mode = 'checkbox';
         $this->bootstrap = true;
-        $this->displayName = 'Nets Payment';
+        $this->displayName = Configuration::get('NETS_PAYMENT_NAME');
         $this->description = 'Nets Secure Payment Made Easy';
         $this->confirmUninstall = 'Are you sure you want to uninstall this module?';
         $this->ps_versions_compliancy = array('min' => '1.7.0', 'max' => _PS_VERSION_);
@@ -108,7 +108,7 @@ class Netseasy extends PaymentModule {
         $this->context->smarty->assign($this->getConfigFormValues());
 
         // Call api for fetching latest plugin version.
-        if (Configuration::get('NETS_MERCHANT_ID')) {
+        if (Configuration::get('NETS_MERCHANT_ID') && Configuration::get('NETS_MERCHANT_EMAIL_ID')) {
             $returnResponse = $this->CallApi();
             if (!empty($returnResponse)) {
                 $this->context->smarty->assign(['customData' => $returnResponse]);
@@ -125,14 +125,17 @@ class Netseasy extends PaymentModule {
         $headers[] = 'Content-Type: application/json';
         $headers[] = 'Accept: application/json';
 
-        $dataArray = array('merchant_id' => Configuration::get('NETS_MERCHANT_ID'),
-            'plugin_name' => 'Prestashop',
-            'plugin_version' => $this->version,
-            'shop_url' => (_PS_BASE_URL_SSL_),
-            'timestamp' => date('Y-m-d H:i:s')
-        );
+        $dataArray = [
+            "merchant_id" => Configuration::get('NETS_MERCHANT_ID'),
+            "merchant_email_id" => Configuration::get('NETS_MERCHANT_EMAIL_ID'),
+            "plugin_name" => "Prestashop",
+            "plugin_version" => $this->version,
+            "shop_url" => (_PS_BASE_URL_SSL_),
+            "timestamp" => date('Y-m-d H:i:s')
+        ];
 
         $postData = json_encode($dataArray);
+
         $ch = curl_init();
         curl_setopt($ch, CURLOPT_URL, "https://ps17.sokoni.it/module/api/enquiry");
         curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'POST');
@@ -152,7 +155,7 @@ class Netseasy extends PaymentModule {
 
         if ($info['http_code'] == 200) {
             if ($response) {
-                $this->logger->logInfo("API Response Data : " . $response);
+                $this->logger->logInfo("API Response Data : " . stripslashes($response));
                 $responseDecoded = json_decode($response);
                 if ($responseDecoded->status == '00' || $responseDecoded->status == '11') {
                     $responseData = array('status' => $responseDecoded->status, 'data' => json_decode($responseDecoded->data, true));
@@ -186,7 +189,7 @@ class Netseasy extends PaymentModule {
                     ->setCallToActionText($this->trans($this->displayName, array()))
                     ->setAction($this->context->link->getModuleLink($this->name, 'hostedPayment', array(), true));
         } else {
-            $newOption->setModuleName($this->displayName)
+            $newOption->setModuleName($this->name)
                     ->setCallToActionText($this->trans($this->displayName, array()));
         }
         $paymentOptions = array(
@@ -222,6 +225,8 @@ class Netseasy extends PaymentModule {
     public function getConfigFormValues() {
         return array(
             'NETS_MERCHANT_ID' => Configuration::get('NETS_MERCHANT_ID'),
+            'NETS_MERCHANT_EMAIL_ID' => Configuration::get('NETS_MERCHANT_EMAIL_ID'),
+            'NETS_PAYMENT_NAME' => Configuration::get('NETS_PAYMENT_NAME'),
             'NETS_TEST_MODE' => Configuration::get('NETS_TEST_MODE'),
             'NETS_TEST_CHECKOUT_KEY' => Configuration::get('NETS_TEST_CHECKOUT_KEY'),
             'NETS_TEST_SECRET_KEY' => Configuration::get('NETS_TEST_SECRET_KEY'),
@@ -260,7 +265,7 @@ class Netseasy extends PaymentModule {
         if ($postData) {
             curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($postData));
         }
-        $this->logger->logInfo("Payment Request Data : " . json_encode($postData));
+        $this->logger->logInfo("Request Data : " . json_encode($postData));
         $response = curl_exec($ch);
         $info = curl_getinfo($ch);
         switch ($info['http_code']) {
@@ -278,16 +283,16 @@ class Netseasy extends PaymentModule {
                 break;
         }
         if (!empty($message)) {
-            $this->logger->logError("Payment Response Error : " . $message);
+            $this->logger->logError("Response Error : " . $message);
         }
         if (curl_error($ch)) {
-            $this->logger->logError(curl_error("Payment Response Error : " . $ch));
+            $this->logger->logError(curl_error("Response Error : " . $ch));
         }
 
         if ($info['http_code'] == 200 || $info['http_code'] == 201 || $info['http_code'] == 400) {
             if ($response) {
                 $responseDecoded = json_decode($response);
-                $this->logger->logInfo("Payment Response Data : " . $response);
+                $this->logger->logInfo("Response Data : " . $response);
                 return ($responseDecoded) ? $responseDecoded : null;
             }
         }
@@ -497,6 +502,16 @@ class Netseasy extends PaymentModule {
                         ),
                         array(
                             'eventName' => 'payment.cancel.created',
+                            'url' => $webHookUrl,
+                            'authorization' => $authKey
+                        ),
+                        array(
+                            'eventName' => 'payment.charge.created.v2',
+                            'url' => $webHookUrl,
+                            'authorization' => $authKey
+                        ),
+                        array(
+                            'eventName' => 'payment.refund.initiated.v2',
                             'url' => $webHookUrl,
                             'authorization' => $authKey
                         )

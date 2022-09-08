@@ -6,6 +6,8 @@ $(document).ready(function () {
     $('#module_form').on('submit', function (e) {
         e.preventDefault();
         merchant_id = $.trim($('#NETS_MERCHANT_ID').val());
+        merchant_email_id = $.trim($('#NETS_MERCHANT_EMAIL_ID').val());
+        payment_name = $.trim($('#NETS_PAYMENT_NAME').val());
         test_mode = $('#NETS_TEST_MODE_on').prop('checked');
         test_checkout_key = $.trim($('#NETS_TEST_CHECKOUT_KEY').val());
         test_secret_key = $.trim($('#NETS_TEST_SECRET_KEY').val());
@@ -17,6 +19,10 @@ $(document).ready(function () {
         webhook_authorization = $.trim($('#NETS_WEBHOOK_AUTHORIZATION').val());
         if (merchant_id == '') {
             $('#NETS_MERCHANT_ID').focus().next('.error').css('display', 'inline-block');
+        } else if (merchant_email_id == '') {
+            $('#NETS_MERCHANT_EMAIL_ID').focus().next('.error').css('display', 'inline-block');
+        } else if (payment_name == '') {
+            $('#NETS_PAYMENT_NAME').focus().next('.error').css('display', 'inline-block');
         } else if (test_mode == true && test_checkout_key == '') {
             $('#NETS_TEST_CHECKOUT_KEY').focus().next('.error').css('display', 'inline-block');
         } else if (test_mode == true && test_secret_key == '') {

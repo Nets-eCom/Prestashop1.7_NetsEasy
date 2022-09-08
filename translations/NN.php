@@ -24,6 +24,12 @@ $_MODULE["<{netseasy}prestashop>admin_content_order_22cdc0c26c5948e2e6370ab6b52d
 $_MODULE["<{netseasy}prestashop>admin_content_order_b8d0ad0ec8f46388da378d3c8906c4b1"] = "Gjennomførte produkter";
 $_MODULE["<{netseasy}prestashop>admin_content_order_2d6a11bb3ac52a0eb1586ca9f55a7165"] = "Refunderte produkter";
 
+$_MODULE["<{netseasy}prestashop>config_e6928937d511fc7622abbc1cd4e599dc"] = "Navn på betalingsgateway kreves";
+$_MODULE["<{netseasy}prestashop>config_7c1a38f104c2a7d733ac766a635f9e08"] = "Navn på betalingsgateway";
+$_MODULE["<{netseasy}prestashop>config_2bfddeac754c1b6067251ed1748e407d"] = "Merchant Id";
+$_MODULE["<{netseasy}prestashop>config_253cc62c5f7636f9ae639c96792992b3"] = "Merchant Id kreves";
+$_MODULE["<{netseasy}prestashop>config_5c34078823b68654064c5d7a105a4cb0"] = "Merchant Email Id kreves";
+$_MODULE["<{netseasy}prestashop>config_91aa9c707c962ade8e2c34ade2923037"] = "Merchant Email Id";
 $_MODULE["<{netseasy}prestashop>config_7529b2051321b1171b6e70ff6ff63b81"] = "Vennligst legg til webhook authentisering";
 $_MODULE["<{netseasy}prestashop>config_8a625ee9b5bfe7c26e1b6920d13f3352"] = "Vennligst spesifiser webhook URL";
 $_MODULE["<{netseasy}prestashop>config_abdf09e77f67f3ce8e10ec179571bafd"] = "Vennligst spesifiser brukerstedets kjøpsbetingelser ";

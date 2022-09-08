@@ -2,14 +2,34 @@
 <xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" version="1.2">
     <file original="admin-dev" source-language="nn-NO" target-language="nn-NO" datatype="plaintext">
         <body>
+            <trans-unit id="e6928937d511fc7622abbc1cd4e599dc">
+                <source>nets_payment_name_error</source>
+                <target>Navn på betalingsgateway kreves</target>
+                <note>Line: </note>
+            </trans-unit>
+            <trans-unit id="7c1a38f104c2a7d733ac766a635f9e08">
+                <source>payment_name</source>
+                <target>Navn på betalingsgateway</target>
+                <note>Line: </note>
+            </trans-unit>
             <trans-unit id="253cc62c5f7636f9ae639c96792992b3">
                 <source>nets_merchant_id_error</source>
-                <target>Selger-ID er påkrevd</target>
+                <target>Merchant Id kreves</target>
                 <note>Line: </note>
             </trans-unit>
             <trans-unit id="2bfddeac754c1b6067251ed1748e407d">
                 <source>merchant_id</source>
-                <target>Selger-ID</target>
+                <target>Merchant Id</target>
+                <note>Line: </note>
+            </trans-unit>
+            <trans-unit id="5c34078823b68654064c5d7a105a4cb0">
+                <source>nets_merchant_email_id_error</source>
+                <target>Merchant Email Id kreves</target>
+                <note>Line: </note>
+            </trans-unit>
+            <trans-unit id="91aa9c707c962ade8e2c34ade2923037">
+                <source>merchant_email_id</source>
+                <target>Merchant Email Id</target>
                 <note>Line: </note>
             </trans-unit>
             <trans-unit id="dab44c32307d6cd31fca52ddbf6b61b1">

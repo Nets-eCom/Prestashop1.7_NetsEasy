@@ -6,8 +6,8 @@
 |Author       | `Nets eCom`
 |Prefix       | `EASY-PS1.7`
 |Shop Version | `1.7+`
-|Version      | `1.1.2`
-|Guide        | [https://tech.nets.eu/shopmodules](https://developers.nets.eu/nets-easy/en-EU/docs/nets-easy-for-prestashop/nets-easy-for-prestashop-prestashop-17/)
+|Version      | `1.1.3`
+|Guide        | (https://developers.nets.eu/nets-easy/en-EU/docs/nets-easy-for-prestashop/nets-easy-for-prestashop-prestashop-17/)
 |Github       | https://github.com/Nets-eCom/prestashop1.7_easy
 
 ## INSTALLATION

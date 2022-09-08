@@ -1,22 +1,22 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" version="1.2">
-  <file original="admin541hfxisr" source-language="en-US" target-language="en-US" datatype="plaintext">
-    <body>
-      <trans-unit id="1a1423630bbd21914b851bfa404c9ab0">
-        <source>Test - text string one.</source>
-        <target>Test - text string one.</target>
-        <note>Line: </note>
-      </trans-unit>
-      <trans-unit id="e2b7dec8fa4b498156dfee6e4c84b156">
-        <source>This payment method is not available.</source>
-        <target>This payment method is not available.</target>
-        <note>Line: </note>
-      </trans-unit>
-      <trans-unit id="ea9cf7e47ff33b2be14e6dd07cbcefc6">
-        <source>Shipping</source>
-        <target>Shipping</target>
-        <note>Line: </note>
-      </trans-unit>
-    </body>
-  </file>
+    <file original="admin541hfxisr" source-language="en-US" target-language="en-US" datatype="plaintext">
+        <body>
+            <trans-unit id="e2b7dec8fa4b498156dfee6e4c84b156">
+                <source>This payment method is not available.</source>
+                <target>This payment method is not available.</target>
+                <note>Line: </note>
+            </trans-unit>
+            <trans-unit id="ea9cf7e47ff33b2be14e6dd07cbcefc6">
+                <source>Shipping</source>
+                <target>Shipping</target>
+                <note>Line: </note>
+            </trans-unit>
+            <trans-unit id="1a1423630bbd21914b851bfa404c9ab0">
+                <source>Test - text string one.</source>
+                <target>Test - text string one.</target>
+                <note>Line: </note>
+            </trans-unit>
+        </body>
+    </file>
 </xliff>

@@ -3,16 +3,16 @@ $(document).ready(function () {
     var frame = document.getElementById('nets-checkout-iframe');
     var payment_option = document.querySelectorAll('input[type=radio][name="payment-option"]');
     var promo_code_applied = getUrlParameter('updatedTransaction');
-    
+
     if (checkCookie('nets_payment_selected')) {
         deleteCookie("nets_payment_selected");
     }
-    if(place_button.length != 0 ){
+    if (place_button.length != 0) {
         place_button[0].addEventListener('click', function (e) {
             var disabled = $('#payment-confirmation button[type="submit"]').hasClass('disabled');
             if (!disabled) {
                 var name = $('input[type=radio][name="payment-option"]:checked').attr("data-module-name");
-                if (name == "Nets Payment") {
+                if (name == "netseasy") {
                     setCookie('nets_payment_selected', true, 1);
                     if (frame) {
                         frame.style.display = '';
@@ -29,11 +29,11 @@ $(document).ready(function () {
         }, false);
     }
 
-    if(payment_option.length != 0 ){
-    for (var i = 0; i < payment_option.length; i++) {
+    if (payment_option.length != 0) {
+        for (var i = 0; i < payment_option.length; i++) {
             payment_option[i].addEventListener('change', function (e) {
                 var name = e.srcElement.getAttribute('data-module-name');
-                if (name == "Nets Payment") {
+                if (name == "netseasy") {
                     if (frame) {
                         frame.style.display = '';
                     }
@@ -47,21 +47,20 @@ $(document).ready(function () {
     }
     prestashop.on('updatedCart', function (event) {
         var disabled = $(place_button).hasClass('disabled');
-        var netseasy_selected = $("[data-module-name='Nets Payment']").prop('checked');
+        var netseasy_selected = $("[data-module-name='netseasy']").prop('checked');
         if (netseasy_selected && disabled == false) {
             setCookie('nets_payment_selected', true, 1);
         }
     });
-    
-    var container = $('input[type=radio][data-module-name="Nets Payment"]').closest('.payment-option');
-    $('#netseasy_payment_container').appendTo(container);
+
+    $('#netseasy_payment_container').appendTo($('input[type=radio][data-module-name="netseasy"]').closest('.payment-option'));
 });
 
 var getUrlParameter = function getUrlParameter(sParam) {
     var sPageURL = window.location.search.substring(1),
-        sURLVariables = sPageURL.split('&'),
-        sParameterName,
-        i;
+            sURLVariables = sPageURL.split('&'),
+            sParameterName,
+            i;
     for (i = 0; i < sURLVariables.length; i++) {
         sParameterName = sURLVariables[i].split('=');
         if (sParameterName[0] === sParam) {

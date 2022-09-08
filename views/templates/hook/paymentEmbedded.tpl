@@ -25,7 +25,7 @@
                 window.location = '{$returnUrl}&paymentid={$paymentId}';
         });
         $(document).ready(function(){
-            $('input[type=radio][data-module-name="Nets Payment"]').prop('checked',true);
+            $('input[type=radio][data-module-name="{$module}"]').prop('checked',true);
             $('#payment-confirmation button[type="submit"]').removeClass('disabled');
         });
         </script>

@@ -1,60 +1,20 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" version="1.2">
-    <file original="admin-dev" source-language="da-DK" target-language="da-DK" datatype="plaintext">
+    <file original="admin541hfxisr" source-language="da-DK" target-language="da-DK" datatype="plaintext">
         <body>
-            <trans-unit id="253cc62c5f7636f9ae639c96792992b3">
-                <source>nets_merchant_id_error</source>
-                <target>Merchant Id er påkrævet</target>
+            <trans-unit id="e6928937d511fc7622abbc1cd4e599dc">
+                <source>nets_payment_name_error</source>
+                <target>Navn på betalingsgateway er påkrævet</target>
                 <note>Line: </note>
             </trans-unit>
-            <trans-unit id="2bfddeac754c1b6067251ed1748e407d">
-                <source>merchant_id</source>
-                <target>Merchant Id</target>
+            <trans-unit id="7c1a38f104c2a7d733ac766a635f9e08">
+                <source>payment_name</source>
+                <target>Navn på betalingsgateway</target>
                 <note>Line: </note>
             </trans-unit>
             <trans-unit id="dab44c32307d6cd31fca52ddbf6b61b1">
                 <source>nets_config_success</source>
                 <target>Vellykket opdatering</target>
-                <note>Line: </note>
-            </trans-unit>
-            <trans-unit id="7529b2051321b1171b6e70ff6ff63b81">
-                <source>nets_webhook_authorization_error</source>
-                <target>Opret venligst en Webhook-autorisation nøgle</target>
-                <note>Line: </note>
-            </trans-unit>
-            <trans-unit id="8a625ee9b5bfe7c26e1b6920d13f3352">
-                <source>nets_webhook_url_error</source>
-                <target>Tilføj webhook-URL</target>
-                <note>Line: </note>
-            </trans-unit>
-            <trans-unit id="abdf09e77f67f3ce8e10ec179571bafd">
-                <source>nets_merchant_terms_url_error</source>
-                <target>Indsæt venligst URL til betingelser</target>
-                <note>Line: </note>
-            </trans-unit>
-            <trans-unit id="199a6cf887267be5a2b9c94119631a25">
-                <source>nets_terms_url_error</source>
-                <target>Indsæt venligst URL til privatpolitik</target>
-                <note>Line: </note>
-            </trans-unit>
-            <trans-unit id="2e2017f058b53051574081e1a3f4bf73">
-                <source>nets_live_secret_key_error</source>
-                <target>Live Secret-Key er påkrævet</target>
-                <note>Line: </note>
-            </trans-unit>
-            <trans-unit id="5373573eb4938d1101af6a9f82abee5c">
-                <source>nets_live_checkout_key_error</source>
-                <target>Live Checkout-Key er påkrævet</target>
-                <note>Line: </note>
-            </trans-unit>
-            <trans-unit id="b3803beaa7002e7c27b54e90653d6eb8">
-                <source>nets_test_secret_key_error</source>
-                <target>Test Secret-Key er påkrævet</target>
-                <note>Line: </note>
-            </trans-unit>
-            <trans-unit id="d4e519ec09f1d2afb0b6f01886342f41">
-                <source>nets_test_checkout_key_error</source>
-                <target>Test Checkout-Key er påkrævet</target>
                 <note>Line: </note>
             </trans-unit>
             <trans-unit id="ccd1066343c95877b75b79d47c36bebe">
@@ -82,9 +42,34 @@
                 <target>Aktiver test mode og indstil alle betalinger i test miljø</target>
                 <note>Line: </note>
             </trans-unit>
+            <trans-unit id="2bfddeac754c1b6067251ed1748e407d">
+                <source>merchant_id</source>
+                <target>Merchant ID</target>
+                <note>Line: </note>
+            </trans-unit>
+            <trans-unit id="253cc62c5f7636f9ae639c96792992b3">
+                <source>nets_merchant_id_error</source>
+                <target>Merchant ID er påkrævet</target>
+                <note>Line: </note>
+            </trans-unit>
+            <trans-unit id="5c34078823b68654064c5d7a105a4cb0">
+                <source>nets_merchant_email_id_error</source>
+                <target>Merchant Email Id er påkrævet</target>
+                <note>Line: </note>
+            </trans-unit>
+            <trans-unit id="91aa9c707c962ade8e2c34ade2923037">
+                <source>merchant_email_id</source>
+                <target>Merchant Email Id</target>
+                <note>Line: </note>
+            </trans-unit>
             <trans-unit id="6a439bde61c87412c0672fe84f61a136">
                 <source>test_checkout_key</source>
                 <target>Test Checkout-Key</target>
+                <note>Line: </note>
+            </trans-unit>
+            <trans-unit id="d4e519ec09f1d2afb0b6f01886342f41">
+                <source>nets_test_checkout_key_error</source>
+                <target>Test Checkout-Key er påkrævet</target>
                 <note>Line: </note>
             </trans-unit>
             <trans-unit id="2a954a2bcb955f1e743a2d6327444843">
@@ -92,14 +77,29 @@
                 <target>Test Secret-Key</target>
                 <note>Line: </note>
             </trans-unit>
+            <trans-unit id="b3803beaa7002e7c27b54e90653d6eb8">
+                <source>nets_test_secret_key_error</source>
+                <target>Test Secret-Key er påkrævet</target>
+                <note>Line: </note>
+            </trans-unit>
             <trans-unit id="d4cf46ccfd2aa2f0295f92deb102d7b8">
                 <source>production_checkout_key</source>
                 <target>Live Checkout-Key</target>
                 <note>Line: </note>
             </trans-unit>
+            <trans-unit id="5373573eb4938d1101af6a9f82abee5c">
+                <source>nets_live_checkout_key_error</source>
+                <target>Live Checkout-Key er påkrævet</target>
+                <note>Line: </note>
+            </trans-unit>
             <trans-unit id="cc8e3eaf3a8c5dd76d2f4cfaf4736507">
                 <source>production_secret_key</source>
                 <target>Live Secret-Key</target>
+                <note>Line: </note>
+            </trans-unit>
+            <trans-unit id="2e2017f058b53051574081e1a3f4bf73">
+                <source>nets_live_secret_key_error</source>
+                <target>Live Secret-Key er påkrævet</target>
                 <note>Line: </note>
             </trans-unit>
             <trans-unit id="150ae78d35ce71fbabb573c9a3b29e8b">
@@ -122,9 +122,19 @@
                 <target>Handelsbetingelser URL</target>
                 <note>Line: </note>
             </trans-unit>
+            <trans-unit id="199a6cf887267be5a2b9c94119631a25">
+                <source>nets_terms_url_error</source>
+                <target>Indsæt venligst URL til privatpolitik</target>
+                <note>Line: </note>
+            </trans-unit>
             <trans-unit id="0ef7cb1273391a2fcfac90719c697095">
                 <source>merchant_terms_url</source>
                 <target>Privatpolitik URL</target>
+                <note>Line: </note>
+            </trans-unit>
+            <trans-unit id="abdf09e77f67f3ce8e10ec179571bafd">
+                <source>nets_merchant_terms_url_error</source>
+                <target>Indsæt venligst URL til betingelser</target>
                 <note>Line: </note>
             </trans-unit>
             <trans-unit id="5015036c7c0e062feeb5be1fb222b459">
@@ -152,9 +162,19 @@
                 <target>webhook url</target>
                 <note>Line: </note>
             </trans-unit>
+            <trans-unit id="8a625ee9b5bfe7c26e1b6920d13f3352">
+                <source>nets_webhook_url_error</source>
+                <target>Tilføj webhook-URL</target>
+                <note>Line: </note>
+            </trans-unit>
             <trans-unit id="f0250d35ea63056adcdf1ced221587d2">
                 <source>webhook_authorization</source>
                 <target>Webhook-autorisation</target>
+                <note>Line: </note>
+            </trans-unit>
+            <trans-unit id="7529b2051321b1171b6e70ff6ff63b81">
+                <source>nets_webhook_authorization_error</source>
+                <target>Opret venligst en Webhook-autorisation nøgle</target>
                 <note>Line: </note>
             </trans-unit>
             <trans-unit id="43781db5c40ecc39fd718685594f0956">
