@@ -6,11 +6,16 @@
 |Author | `Nets eCom`
 |Prefix | `EASY-PS1.7`
 |Shop Version | `1.7+`
-|Version | `1.1.3`
+|Version | `1.1.4`
 |Guide | https://tech.nets.eu/shopmodules
 |Github | https://github.com/Nets-eCom/prestashop-PS1.7
 
 ## CHANGELOG
+
+### Version 1.1.4 - Released 2022-11-11
+* Fixed : Improved Nets plugin latest version notification on configure page.
+* Fixed : Phone number issue on checkout.
+
 
 ### Version 1.1.3 - Released 2022-09-08
 * New : Custom Payment Name display on checkout page.

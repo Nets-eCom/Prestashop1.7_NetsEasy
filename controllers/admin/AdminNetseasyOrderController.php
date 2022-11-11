@@ -17,7 +17,7 @@ class AdminNetseasyOrderController extends ModuleAdminController {
         $this->logger = new FileLogger();
         $this->logger->setFilename(_PS_ROOT_DIR_ . "/var/logs/nets.log");
         // IF NOT EXISTS !!
-        $result = DB::getInstance()->execute("CREATE TABLE IF NOT EXISTS " . _DB_PREFIX_ . "nets_payment (
+        DB::getInstance()->execute("CREATE TABLE IF NOT EXISTS " . _DB_PREFIX_ . "nets_payment (
 		`id` int(10) unsigned NOT NULL auto_increment,		
 		`payment_id` varchar(50) default NULL,
 		`charge_id` varchar(50) default NULL,
@@ -35,15 +35,21 @@ class AdminNetseasyOrderController extends ModuleAdminController {
     public function getPaymentRequest() {
         $this->orderId = $this->_getSession()->get('orderId');
         $this->getPaymentId($this->orderId);
-        $this->data['responseItems'] = $this->checkPartialItems($this->orderId);
+
+        $this->data['paymentId'] = $this->paymentId;
+        $this->data['oID'] = $this->orderId;
+
+        $this->logger->logInfo("[Payment Request][" . $this->paymentId . "] Admin Retrieve Payment Request");
+        $api_return = $this->getCurlResponse($this->getApiUrl() . $this->paymentId, 'GET');
+        $this->logger->logInfo("[Payment Request][" . $this->paymentId . "] Admin Retrieve Payment Response : " . $api_return);
+        $response = json_decode($api_return, true);
+
+        $this->data['responseItems'] = $this->checkPartialItems($this->orderId, $api_return);
         $status = $this->is_easy($this->orderId);
         $this->data['status'] = $status;
         //Handle charge and refund done from portal
-        $this->managePortalChargeAndRefund();
-        $this->data['paymentId'] = $this->paymentId;
-        $this->data['oID'] = $this->orderId;
-        $api_return = $this->getCurlResponse($this->getApiUrl() . $this->paymentId, 'GET');
-        $response = json_decode($api_return, true);
+        $this->managePortalChargeAndRefund($api_return);
+
         $response['payment']['checkout'] = "";
         $this->data['apiGetRequest'] = "Api Get Request: " . print_r($response, true);
         $this->data['printResponseItems'] = "Response Items: " . print_r($this->data['responseItems'], true);
@@ -158,7 +164,7 @@ class AdminNetseasyOrderController extends ModuleAdminController {
      * @return array of reserved, partial charged,partial refunded items
      */
 
-    public function checkPartialItems($orderId) {
+    public function checkPartialItems($orderId, $apiReturn) {
         $orderItems = $this->getOrderItems($orderId);
 
         $products = [];
@@ -182,8 +188,7 @@ class AdminNetseasyOrderController extends ModuleAdminController {
             }
         }
 
-        $api_return = $this->getCurlResponse($this->getApiUrl() . $this->paymentId, 'GET');
-        $response = json_decode($api_return, true);
+        $response = json_decode($apiReturn, true);
         $paymentType = isset($response['payment']['paymentDetails']['paymentType']) ? $response['payment']['paymentDetails']['paymentType'] : '';
 
         if (!empty($response['payment']['charges'])) {
@@ -392,17 +397,23 @@ class AdminNetseasyOrderController extends ModuleAdminController {
                     'orderItems' => $data['order']['items']
                 ];
                 try {
+                    $this->logger->logInfo("[Check Payment Status][" . $this->paymentId . "] Admin Cancel Payment Request : " . json_encode($cancelBody));
                     $this->getCurlResponse($cancelUrl, 'POST', json_encode($cancelBody));
+                    $this->logger->logInfo("[Check Payment Status][" . $this->paymentId . "] Admin Cancel Payment Response");
                 } catch (Exception $e) {
+                    $this->logger->logError("[Check Payment Status][" . $this->paymentId . "] Admin Cancel Payment Exception : " . json_encode($e->getMessage()));
                     return $e->getMessage();
                 }
             }
 
             try {
                 // Get payment status from nets payments api
+                $this->logger->logInfo("[Check Payment Status][" . $this->paymentId . "] Admin Retrieve Payment Request");
                 $api_return = $this->getCurlResponse($this->getApiUrl() . $this->paymentId, 'GET');
+                $this->logger->logInfo("[Check Payment Status][" . $this->paymentId . "] Admin Retrieve Payment Response");
                 $response = json_decode($api_return, true);
             } catch (Exception $e) {
+                $this->logger->logError("[Check Payment Status][" . $this->paymentId . "] Admin Retrieve Payment Exception : " . json_encode($e->getMessage()));
                 return $e->getMessage();
             }
             $dbPayStatus = '';
@@ -528,11 +539,11 @@ class AdminNetseasyOrderController extends ModuleAdminController {
             ];
         }
 
-        $this->logger->logInfo("[" . $payment_id . "] Nets_Order_Overview getorder charge request sent");
+        $this->logger->logInfo("[Charge Process][" . $payment_id . "] Admin Charge Payment Request : " . json_encode($body));
         $api_return = $this->getCurlResponse($chargeUrl, 'POST', json_encode($body));
-        $response = json_decode($api_return, true);
+        $this->logger->logInfo("[Charge Process][" . $payment_id . "] Admin Charge Payment Response : " . $api_return);
 
-        $this->logger->logInfo("[" . $payment_id . "] Nets_Order_Overview getorder charge response" . $api_return);
+        $response = json_decode($api_return, true);
         //save charge details in db for partial refund
         if ((isset($ref) && !empty($ref)) && isset($response['chargeId'])) {
             $charge_query = "insert into " . _DB_PREFIX_ . "nets_payment (`payment_id`, `charge_id`,  `product_ref`, `charge_qty`, `charge_left_qty`,`created`) "
@@ -567,7 +578,10 @@ class AdminNetseasyOrderController extends ModuleAdminController {
         $payment_id = $this->getPaymentId($orderid);
         $data = $this->getOrderItems($orderid);
 
+        $this->logger->logInfo("[Refund Process][" . $this->getPaymentId($orderid) . "] Admin Retrieve Payment Request");
         $api_return = $this->getCurlResponse($this->getApiUrl() . $this->getPaymentId($orderid), 'GET');
+        $this->logger->logInfo("[Refund Process][" . $this->getPaymentId($orderid) . "] Admin Retrieve Payment Response");
+
         $chargeResponse = json_decode($api_return, true);
         $refundEachQtyArr = array();
         $breakloop = $refExist = false;
@@ -604,10 +618,10 @@ class AdminNetseasyOrderController extends ModuleAdminController {
                             $body = $this->getItemForRefund($ref, $value, $data);
                             $refundUrl = $this->getRefundPaymentUrl($key);
 
-                            $this->logger->logInfo('body' . json_encode($body));
-                            $this->logger->logInfo("[" . $payment_id . "] Nets_Order_Overview getorder refund request sent");
+                            $this->logger->logInfo("[Refund Process][" . $this->paymentId . "] Admin Partial Refund Payment Request : " . json_encode($body));
                             $api_return = $this->getCurlResponse1($refundUrl, 'POST', json_encode($body));
-                            $this->logger->logInfo("[" . $payment_id . "] Nets_Order_Overview getorder refund response" . $api_return);
+                            $this->logger->logInfo("[Refund Process][" . $this->paymentId . "] Admin Partial Refund Payment Response : " . $api_return);
+
                             //update for left charge quantity
                             $singlecharge_query = DB::getInstance()->executeS(
                                     "SELECT  `charge_left_qty` FROM " . _DB_PREFIX_ . "nets_payment WHERE payment_id = '" . $this->paymentId . "' AND charge_id = '" . $key . "' AND product_ref = '" . $ref . "' AND charge_left_qty !=0 "
@@ -661,10 +675,11 @@ class AdminNetseasyOrderController extends ModuleAdminController {
                 //For Refund all				                
                 $refundUrl = $this->getRefundPaymentUrl($val['chargeId']);
 
-                $this->logger->logInfo("[" . $payment_id . "] Nets_Order_Overview getorder refund request sent");
+                $this->logger->logInfo("[Refund Process][" . $this->paymentId . "] Admin Refund Payment Request : " . json_encode($body));
                 $api_return = $this->getCurlResponse($refundUrl, 'POST', json_encode($body));
+                $this->logger->logInfo("[Refund Process][" . $this->paymentId . "] Admin Refund Payment Response : " . $api_return);
+
                 $response = json_decode($api_return, true);
-                $this->logger->logInfo("[" . $payment_id . "] Nets_Order_Overview getorder refund response" . $api_return);
             }
         }
         Tools::redirectAdmin('sell/orders/' . $orderid . '/view?_token=' . $token);
@@ -715,7 +730,12 @@ class AdminNetseasyOrderController extends ModuleAdminController {
             'amount' => round($data['order']['amount'] * 100),
             'orderItems' => $data['order']['items']
         ];
+
+        $this->logger->logInfo("[Cancel Process][" . $payment_id . "] Admin Cancel Payment Request");
+        $this->logger->logInfo("[Cancel Process][" . $payment_id . "] " . json_encode($body));
         $api_return = $this->getCurlResponse($cancelUrl, 'POST', json_encode($body));
+        $this->logger->logInfo("[Cancel Process][" . $payment_id . "] Admin Cancel Payment Response");
+
         $response = json_decode($api_return, true);
         Tools::redirectAdmin('sell/orders/' . $orderid . '/view?_token=' . $token);
     }
@@ -893,10 +913,8 @@ class AdminNetseasyOrderController extends ModuleAdminController {
      * @return null
      */
 
-    public function managePortalChargeAndRefund() {
-        //get reqeust response
-        $api_return = $this->getCurlResponse($this->getApiUrl() . $this->paymentId, 'GET');
-        $response = json_decode($api_return, true);
+    public function managePortalChargeAndRefund($apiReturn) {
+        $response = json_decode($apiReturn, true);
         if (!empty($response['payment']['charges'])) {
 
             foreach ($response['payment']['charges'] as $key => $values) {

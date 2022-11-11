@@ -30,7 +30,7 @@ class Netseasy extends PaymentModule {
     public function __construct() {
         $this->name = 'netseasy';
         $this->tab = 'payments_gateways';
-        $this->version = '1.1.3';
+        $this->version = '1.1.4';
         $this->author = 'Nets Easy';
         $this->controllers = array('hostedPayment', 'return');
         $this->currencies = true;
@@ -130,6 +130,7 @@ class Netseasy extends PaymentModule {
             "merchant_email_id" => Configuration::get('NETS_MERCHANT_EMAIL_ID'),
             "plugin_name" => "Prestashop",
             "plugin_version" => $this->version,
+            "integration_type" => Configuration::get('NETS_INTEGRATION_TYPE'),
             "shop_url" => (_PS_BASE_URL_SSL_),
             "timestamp" => date('Y-m-d H:i:s')
         ];
@@ -137,7 +138,7 @@ class Netseasy extends PaymentModule {
         $postData = json_encode($dataArray);
 
         $ch = curl_init();
-        curl_setopt($ch, CURLOPT_URL, "https://ps17.sokoni.it/module/api/enquiry");
+        curl_setopt($ch, CURLOPT_URL, "https://reporting.sokoni.it/enquiry");
         curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'POST');
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
         curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
@@ -265,8 +266,9 @@ class Netseasy extends PaymentModule {
         if ($postData) {
             curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($postData));
         }
-        $this->logger->logInfo("Request Data : " . json_encode($postData));
+        
         $response = curl_exec($ch);
+        
         $info = curl_getinfo($ch);
         switch ($info['http_code']) {
             case 401:
@@ -282,9 +284,7 @@ class Netseasy extends PaymentModule {
                 $message = 'Unexpected error';
                 break;
         }
-        if (!empty($message)) {
-            $this->logger->logError("Response Error : " . $message);
-        }
+        
         if (curl_error($ch)) {
             $this->logger->logError(curl_error("Response Error : " . $ch));
         }
@@ -292,7 +292,6 @@ class Netseasy extends PaymentModule {
         if ($info['http_code'] == 200 || $info['http_code'] == 201 || $info['http_code'] == 400) {
             if ($response) {
                 $responseDecoded = json_decode($response);
-                $this->logger->logInfo("Response Data : " . $response);
                 return ($responseDecoded) ? $responseDecoded : null;
             }
         }
@@ -466,16 +465,19 @@ class Netseasy extends PaymentModule {
         );
 
         if (isset($addressOBJ->phone_mobile) && $addressOBJ->phone_mobile != '') {
+            $phone = preg_replace('/-|\s/i', '', $addressOBJ->phone_mobile);
             $consumerData['phoneNumber'] = array(
                 "prefix" => "+" . $countryOBJ->call_prefix,
-                "number" => $addressOBJ->phone_mobile
+                "number" => str_replace("+" . $countryOBJ->call_prefix, '', $phone)
             );
         } elseif (isset($addressOBJ->phone) && $addressOBJ->phone != '') {
+            $mobile = preg_replace('/-|\s/i', '', $addressOBJ->phone);
             $consumerData['phoneNumber'] = array(
                 "prefix" => "+" . $countryOBJ->call_prefix,
-                "number" => $addressOBJ->phone
+                "number" => str_replace("+" . $countryOBJ->call_prefix, '', $mobile)
             );
         }
+
         $data['checkout']['consumer'] = $consumerData;
 
         // Webhooks 
@@ -598,8 +600,11 @@ class Netseasy extends PaymentModule {
                 'url' => $this->getApiUrl()['frontend'],
                 'checkoutKey' => $this->getApiKey()['checkoutKey'],
             );
+
+            $this->logger->logInfo("Payment Request for Embedded : " . json_encode($payload));
             $response = $this->MakeCurl($url, $payload);
-            if ($response && !@$response->errors) {
+            $this->logger->logInfo("Payment Response for Embedded : " . json_encode($response));
+            if ($response && !isset($response->errors)) {
                 $this->context->smarty->assign([
                     'module' => $this->name,
                     'paymentId' => $response->paymentId,

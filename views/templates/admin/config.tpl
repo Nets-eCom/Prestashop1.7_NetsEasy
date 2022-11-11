@@ -1,6 +1,12 @@
 {if (!empty($customData) && ($customData['status'] == "00" || $customData['status'] == "11"))}
     <script>
         $(document).ready(function () {
+            $('.notification_message h3').css('margin-left','0');
+            $('.notification_message h3').css('margin-right','0');
+            $('.notification_message h3').css('margin-top','0');
+            $('.notification_message h3').css('border-bottom','0');
+            $('.notification_message p:first').css('margin-bottom','20px');
+            
             $('#netseasy-modal').modal('show');
         });
     </script>
@@ -20,7 +26,7 @@
                 </div>
                 <div class="modal-body">
                     {if ($customData['status'] == "00")}
-                        <h4 class="modal-title">{{$customData['data']['notification_message']}}</h4>
+                        <div class="modal-title notification_message">{{$customData['data']['notification_message']}}</div>
                         <div class="form-group-lg" style="font-size: small;">
                             <label class="form-control-label">Latest Plugin Version : </label> {{$customData['data']['plugin_version']}} version </br>
                             <label class="form-control-label">Shop Version Compatible : </label> {{$customData['data']['shop_version']}} </br>

@@ -30,13 +30,9 @@ class netseasyWebhookModuleFrontController extends ModuleFrontController
         
         if ($json) {
             sleep(40);
-            $this->logger->logInfo('----In webhooks----');
-            $this->logger->logInfo($hookResponse);
             $paymentId = $json->data->paymentId;
             $event = $json->event;
-            $response = preg_replace('/\s/', '', (json_encode($json->data)));
-            $timestamp = $json->timestamp;
-            $now = date('Y-m-d H:i:s');
+            $this->logger->logInfo("[".$paymentId."][".$event."] Response : ".$hookResponse."\n");
             // preparping a controlled sorting order, since sorting a webhook by timestamp in general tend to be unreliable.
             if ($event == 'payment.created') {
                 $order = 0;

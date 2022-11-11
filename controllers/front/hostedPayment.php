@@ -56,9 +56,10 @@ class netseasyHostedPaymentModuleFrontController extends ModuleFrontController {
         }
 
         $requestObj = $nets->createRequestObject($this->context->cart->id);
+        $nets->logger->logInfo("Payment Request for Host : " . json_encode($requestObj));
         $response = $nets->MakeCurl($nets->getApiUrl()['backend'], $requestObj);
-
-        if ($response && !@$response->errors) {
+        $nets->logger->logInfo("Payment Response for Host : " . json_encode($response));
+        if ($response && !isset($response->errors)) {
             //$lang = @$this->context->language->locale;
             $lang = $nets->getLocale($this->context->language->iso_code);
             if ($lang) {
@@ -67,7 +68,8 @@ class netseasyHostedPaymentModuleFrontController extends ModuleFrontController {
                 Tools::redirect($response->hostedPaymentPageUrl);
             }
         } else {
-            $nets->logger->logError('Invalid request created ' . json_encode($response));
+            setcookie("nets_transaction_error", 'Unable to create payment request for you. Try again with different data', time() + 3600,'/');
+            $nets->logger->logError('Invalid request created for hosted payment redirecting to order controller step 1'. json_encode($requestObj));
             Tools::redirect('index.php?controller=order&step=1');
         }
     }
