@@ -54,7 +54,7 @@ $(document).ready(function () {
     prestashop.on('updatedCart', function (event) {
         var disabled = $(place_button).hasClass('disabled');
         var netseasy_selected = $("[data-module-name='netseasy']").prop('checked');
-        if (netseasy_selected && disabled == false) {
+        if (netseasy_selected) {
             setCookie('nets_payment_selected', true, 1);
         }
     });

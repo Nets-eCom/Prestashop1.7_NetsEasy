@@ -30,13 +30,13 @@ class Netseasy extends PaymentModule {
     public function __construct() {
         $this->name = 'netseasy';
         $this->tab = 'payments_gateways';
-        $this->version = '1.1.4';
+        $this->version = '1.1.5';
         $this->author = 'Nets Easy';
         $this->controllers = array('hostedPayment', 'return');
         $this->currencies = true;
         $this->currencies_mode = 'checkbox';
         $this->bootstrap = true;
-        $this->displayName = Configuration::get('NETS_PAYMENT_NAME');
+        $this->displayName = empty(Configuration::get('NETS_PAYMENT_NAME')) ? 'NetsEasy' : Configuration::get('NETS_PAYMENT_NAME');
         $this->description = 'Nets Secure Payment Made Easy';
         $this->confirmUninstall = 'Are you sure you want to uninstall this module?';
         $this->ps_versions_compliancy = array('min' => '1.7.0', 'max' => _PS_VERSION_);
@@ -266,9 +266,9 @@ class Netseasy extends PaymentModule {
         if ($postData) {
             curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($postData));
         }
-        
+
         $response = curl_exec($ch);
-        
+
         $info = curl_getinfo($ch);
         switch ($info['http_code']) {
             case 401:
@@ -284,7 +284,7 @@ class Netseasy extends PaymentModule {
                 $message = 'Unexpected error';
                 break;
         }
-        
+
         if (curl_error($ch)) {
             $this->logger->logError(curl_error("Response Error : " . $ch));
         }
@@ -465,16 +465,16 @@ class Netseasy extends PaymentModule {
         );
 
         if (isset($addressOBJ->phone_mobile) && $addressOBJ->phone_mobile != '') {
-            $phone = preg_replace('/-|\s/i', '', $addressOBJ->phone_mobile);
+            $replace_array = array('/', '-', ' ', "+" . $countryOBJ->call_prefix);
             $consumerData['phoneNumber'] = array(
                 "prefix" => "+" . $countryOBJ->call_prefix,
-                "number" => str_replace("+" . $countryOBJ->call_prefix, '', $phone)
+                "number" => str_replace($replace_array, '', $addressOBJ->phone_mobile)
             );
         } elseif (isset($addressOBJ->phone) && $addressOBJ->phone != '') {
-            $mobile = preg_replace('/-|\s/i', '', $addressOBJ->phone);
+            $replace_array = array('/', '-', ' ', "+" . $countryOBJ->call_prefix);
             $consumerData['phoneNumber'] = array(
                 "prefix" => "+" . $countryOBJ->call_prefix,
-                "number" => str_replace("+" . $countryOBJ->call_prefix, '', $mobile)
+                "number" => str_replace($replace_array, '', $addressOBJ->phone)
             );
         }
 
@@ -668,6 +668,30 @@ class Netseasy extends PaymentModule {
              `payment_id` VARCHAR(75) NOT NULL , 
              `created_date` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP, 
              PRIMARY KEY (`id_nets_payment`))");
+
+        DB::getInstance()->execute("CREATE TABLE IF NOT EXISTS " . _DB_PREFIX_ . "nets_payment (
+            `id` int(10) unsigned NOT NULL auto_increment,		
+            `payment_id` varchar(50) default NULL,
+            `charge_id` varchar(50) default NULL,
+            `product_ref` varchar(55) collate latin1_general_ci default NULL,
+            `charge_qty` int(11) default NULL,
+            `charge_left_qty` int(11) default NULL,
+            `updated` int(2) unsigned default '0',
+            `created` datetime NOT NULL,
+            `timestamp` timestamp NOT NULL default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP,
+            PRIMARY KEY (`id`)
+            )");
+
+        DB::getInstance()->execute("CREATE TABLE IF NOT EXISTS `" . _DB_PREFIX_ . "nets_payment_status` (
+            `id` int(10) unsigned NOT NULL auto_increment,		
+            `order_id` varchar(50) default NULL,
+            `payment_id` varchar(50) default NULL,
+            `status` varchar(50) default NULL,	
+            `updated` int(2) unsigned default '0',
+            `created` datetime NOT NULL,
+            `timestamp` timestamp NOT NULL default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP,
+            PRIMARY KEY (`id`)
+            )");
 
         return true;
     }

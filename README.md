@@ -1,12 +1,12 @@
-# NETS A/S - Prestashop 1.7 Payment Module
+# NETS A/S - Prestashop 1.7 to 8 Payment Module
 ============================================
 
-|Module       | Nets Easy Payment Module for Prestashop 1.7
+|Module       | Nets Easy Payment Module for Prestashop 1.7 to 8
 |----------------------------------------------------
 |Author       | `Nets eCom`
 |Prefix       | `EASY-PS1.7`
-|Shop Version | `1.7+`
-|Version      | `1.1.4`
+|Shop Version | `1.7+ to 8.0.2`
+|Version      | `1.1.5`
 |Guide        | (https://developers.nets.eu/nets-easy/en-EU/docs/nets-easy-for-prestashop/nets-easy-for-prestashop-prestashop-17/)
 |Github       | https://github.com/Nets-eCom/prestashop1.7_easy
 

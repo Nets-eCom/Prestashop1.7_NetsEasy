@@ -43,7 +43,6 @@ class AdminNetseasyOrderController extends ModuleAdminController {
         $api_return = $this->getCurlResponse($this->getApiUrl() . $this->paymentId, 'GET');
         $this->logger->logInfo("[Payment Request][" . $this->paymentId . "] Admin Retrieve Payment Response : " . $api_return);
         $response = json_decode($api_return, true);
-
         $this->data['responseItems'] = $this->checkPartialItems($this->orderId, $api_return);
         $status = $this->is_easy($this->orderId);
         $this->data['status'] = $status;
@@ -142,6 +141,43 @@ class AdminNetseasyOrderController extends ModuleAdminController {
                 'netTotalAmount' => $netAmount
             );
         }
+        
+        //discount items     
+        $discountQuery = DB::getInstance()->executeS("SELECT name, value, value_tax_excl  FROM `" . _DB_PREFIX_ . "order_cart_rule` WHERE id_order = '" . (int) $orderId . "'");
+        if (!empty(DB::getInstance()->numRows($discountQuery))) {
+            //easy calc method  
+            $quantity = 1;
+            $unitPrice = 0;
+            $grossAmount = 0;
+            $netAmount = 0;
+            foreach ($discountQuery as $prows) {
+                $discountCost = $prows['value'];
+                    
+                if (!empty($discountCost) && $discountCost > 0) {
+                    $discount = (isset($discountCost)) ? -$discountCost : 0; // shipping price incl. VAT in DB format 
+                    $discountUnitPrice = round(($discount * 100));               
+                    $discountNetAmount = round($quantity * $discountUnitPrice);
+                    $discountGrossAmount = round($quantity * ($discount * 100));
+                    
+                    $unitPrice = $unitPrice + $discountUnitPrice;         
+                    $grossAmount = $grossAmount + $discountGrossAmount;       
+                    $netAmount = $netAmount + $discountNetAmount;         
+                    
+                }
+            }
+            $itemsArray[] = array(
+                'reference' => 'discount',
+                'name' => 'Discount',
+                'quantity' => $quantity,
+                'unit' => 'pcs',
+                'unitPrice' => $unitPrice,
+                'taxRate' => 0,
+                'taxAmount' => 0,
+                'grossTotalAmount' => $grossAmount,
+                'netTotalAmount' => $netAmount
+            );
+        }
+        
         // items total sum
         $itemsGrossPriceSumma = 0;
         foreach ($itemsArray as $total) {
@@ -435,8 +471,8 @@ class AdminNetseasyOrderController extends ModuleAdminController {
             if (isset($response['payment']['refunds'][0]['state']) && $response['payment']['refunds'][0]['state'] == 'Pending') {
                 $pending = "Pending";
             }
-            $partialc = $reserved - $charged;
-            $partialr = $reserved - $refunded;
+             $partialc = $reserved - (int)$charged;
+            $partialr = $reserved - (int)$refunded;
             if (isset($response['payment']['charges'][0]['chargeId'])) {
                 $chargeid = $response['payment']['charges'][0]['chargeId'];
             }
@@ -728,7 +764,6 @@ class AdminNetseasyOrderController extends ModuleAdminController {
         $cancelUrl = $this->getVoidPaymentUrl($payment_id);
         $body = [
             'amount' => round($data['order']['amount'] * 100),
-            'orderItems' => $data['order']['items']
         ];
 
         $this->logger->logInfo("[Cancel Process][" . $payment_id . "] Admin Cancel Payment Request");
