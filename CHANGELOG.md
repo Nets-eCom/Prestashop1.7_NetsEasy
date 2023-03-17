@@ -12,7 +12,7 @@
 
 ## CHANGELOG
 
-### Version 1.1.5 - Released 2022-03-17
+### Version 1.1.5 - Released 2023-03-17
 * Fixed : Compatibilty check plugin with prestashop 8 version.
 
 ### Version 1.1.4 - Released 2022-11-11
