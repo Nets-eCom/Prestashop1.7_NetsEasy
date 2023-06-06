@@ -1,7 +1,7 @@
 {if $module == 'netseasy'}
     {if $debugMode}
         <div class="col-md-12">
-        <pre class="nets">{$returnUrl|print_r}{$datastring|print_r}</pre>
+            <pre class="nets">{$returnUrl|print_r}{$datastring|print_r}</pre>
         </div>
     {/if}
     <div id="netseasy_payment_container" class="content">
@@ -12,22 +12,22 @@
 
 
         <script>
-        var checkoutOptions = {
+            var checkoutOptions = {
                 checkoutKey: "{$checkout.checkoutKey}",
-                paymentId : "{$paymentId}",
-                containerId : "nets-complete-checkout",
+                paymentId: "{$paymentId}",
+                containerId: "nets-complete-checkout",
                 language: "{$lang}"
-        };
+            };
 
-        var checkout = new Dibs.Checkout(checkoutOptions);
-	
-        checkout.on('payment-completed', function(response) {
+            var checkout = new Dibs.Checkout(checkoutOptions);
+
+            checkout.on('payment-completed', function (response) {
                 window.location = '{$returnUrl}&paymentid={$paymentId}';
-        });
-        $(document).ready(function(){
-            $('input[type=radio][data-module-name="{$module}"]').prop('checked',true);
-            $('#payment-confirmation button[type="submit"]').removeClass('disabled');
-        });
+                    });
+                    $(document).ready(function () {
+                        $('input[type=radio][data-module-name="{$payment_split_type}"]').prop('checked', true);
+                        $('#payment-confirmation button[type="submit"]').removeClass('disabled');
+                    });
         </script>
-  </div>
+    </div>
 {/if}

@@ -23,6 +23,19 @@ class Netseasy extends PaymentModule {
     public $address;
     public $logger;
 
+    const PAY_METHODS = array(
+        'NETS_CARD',
+        'NETS_MOBILEPAY',
+        'NETS_VIPPS',
+        'NETS_SWISH',
+        'NETS_SOFORT',
+        'NETS_TRUSTLY',
+        'NETS_AFTERPAY_INVOICE',
+        'NETS_AFTERPAY_INSTALLMENT',
+        'NETS_RATEPAY_INSTALLMENT',
+        'NETS_PAYPAL'
+    );
+
     /**
      * Netseasy constructor.
      * Set the information about this module
@@ -30,13 +43,14 @@ class Netseasy extends PaymentModule {
     public function __construct() {
         $this->name = 'netseasy';
         $this->tab = 'payments_gateways';
-        $this->version = '1.1.5';
+        $this->version = '1.1.6';
         $this->author = 'Nets Easy';
+        $this->displayPaymentName = 'Nets Easy';
         $this->controllers = array('hostedPayment', 'return');
         $this->currencies = true;
         $this->currencies_mode = 'checkbox';
         $this->bootstrap = true;
-        $this->displayName = empty(Configuration::get('NETS_PAYMENT_NAME')) ? 'NetsEasy' : Configuration::get('NETS_PAYMENT_NAME');
+        $this->displayName = empty(Configuration::get('NETS_PAYMENT_NAME')) ? 'Nets Easy' : Configuration::get('NETS_PAYMENT_NAME');
         $this->description = 'Nets Secure Payment Made Easy';
         $this->confirmUninstall = 'Are you sure you want to uninstall this module?';
         $this->ps_versions_compliancy = array('min' => '1.7.0', 'max' => _PS_VERSION_);
@@ -53,6 +67,12 @@ class Netseasy extends PaymentModule {
         foreach ($moduleConfiguration as $key => $value) {
             Configuration::deleteByName($key);
         }
+        foreach (self::PAY_METHODS as $key => $value) {
+            $moduleConfiguration = $this->getConfigFormValues($value);
+            foreach ($moduleConfiguration as $key => $value) {
+                Configuration::deleteByName($key);
+            }
+        }
     }
 
     /**
@@ -64,6 +84,12 @@ class Netseasy extends PaymentModule {
         $moduleConfiguration = $this->getConfigFormValues();
         foreach ($moduleConfiguration as $key => $value) {
             Configuration::updateValue($key, '');
+        }
+        foreach (self::PAY_METHODS as $key => $value) {
+            $moduleConfiguration = $this->getConfigFormValues($value);
+            foreach ($moduleConfiguration as $key => $value) {
+                Configuration::updateValue($key, '');
+            }
         }
         if (!Configuration::hasKey('NETS_WEBHOOK_AUTHORIZATION')) {
             Configuration::set('NETS_WEBHOOK_AUTHORIZATION', 'AZ-12345678-az');
@@ -94,9 +120,19 @@ class Netseasy extends PaymentModule {
          * If values have been submitted in the form, process.
          */
         $this->context->controller->addJS($this->_path . 'views/js/back.js');
+        $this->context->controller->addJS($this->_path . 'views/js/select2.min.js');
+        $this->context->controller->addCSS($this->_path . 'views/css/select2.min.css');
+
         if (((bool) Tools::isSubmit('submitNetsModule')) == true) {
             $this->postProcess();
             $this->context->smarty->assign('success_nets', '');
+        }
+
+        foreach (self::PAY_METHODS as $key => $value) {
+            if (((bool) Tools::isSubmit('submit_' . $value)) == true) {
+                $this->postProcess($value);
+                $this->context->smarty->assign('form_success', $value);
+            }
         }
 
         if (!Configuration::get('NETS_WEBHOOK_AUTHORIZATION')) {
@@ -105,7 +141,20 @@ class Netseasy extends PaymentModule {
         if (!Configuration::get('NETS_WEBHOOK_URL')) {
             Configuration::updateValue('NETS_WEBHOOK_URL', $this->context->link->getModuleLink($this->name, 'webhook', array(), true));
         }
+        $country_list = Country::getCountries((int) Context::getContext()->language->id, false);
+        $currency_list = Currency::getCurrencies(true, false, true);
+        foreach($currency_list as $key => $value) {
+            $currency_list[$key] = (array)$value;
+        }
+        
         $this->context->smarty->assign($this->getConfigFormValues());
+        foreach (self::PAY_METHODS as $key => $value) {
+            $data = $this->getConfigFormValues($value);
+            $this->context->smarty->assign($data);
+        }
+        $this->context->smarty->assign('pay_type_list', self::PAY_METHODS);
+        $this->context->smarty->assign('country_list', $country_list);
+        $this->context->smarty->assign('currency_list', $currency_list);
 
         // Call api for fetching latest plugin version.
         if (Configuration::get('NETS_MERCHANT_ID') && Configuration::get('NETS_MERCHANT_EMAIL_ID')) {
@@ -185,23 +234,69 @@ class Netseasy extends PaymentModule {
         );
 
         $newOption = new PaymentOption();
+        $paymentOptions = [];
+        $split_enabled = false;
+
         if (Configuration::get('NETS_INTEGRATION_TYPE') === 'REDIRECT') {
-            $newOption->setModuleName($this->displayName)
+            if(Configuration::get('NETS_PAYMENT_SPLIT')) {
+                foreach (self::PAY_METHODS as $key => $value) {   
+                    if ($this->is_valid_paymethod($value)) {
+                        $split_enabled = true;
+                        ${$value . "Option"} = new PaymentOption();
+                        ${$value . "Option"}->setModuleName($this->name)
+                                ->setCallToActionText( empty(trim(Configuration::get($value . '_CUSTOM_NAME'))) ? $this->trans($value, array(), 'Modules.Netseasy.Config') : Configuration::get($value . '_CUSTOM_NAME'))
+                                ->setAction($this->context->link->getModuleLink($this->name, 'hostedPayment', array("payType" => $value), true));
+                        $paymentOptions[] = ${$value . "Option"};
+                    }
+                }
+            } else {
+                $newOption->setModuleName($this->name)
                     ->setCallToActionText($this->trans($this->displayName, array()))
                     ->setAction($this->context->link->getModuleLink($this->name, 'hostedPayment', array(), true));
+                $paymentOptions[] = $newOption;
+            }
         } else {
-            $newOption->setModuleName($this->name)
+            if(Configuration::get('NETS_PAYMENT_SPLIT')) {
+                foreach (self::PAY_METHODS as $key => $value) {
+                    if ($this->is_valid_paymethod($value)) {
+                        $split_enabled = true;
+                        ${$value . "Option"} = new PaymentOption();
+                        ${$value . "Option"}->setModuleName($value)
+                        ->setCallToActionText( empty(trim(Configuration::get($value . '_CUSTOM_NAME'))) ? $this->trans($value, array(), 'Modules.Netseasy.Config') : Configuration::get($value . '_CUSTOM_NAME'));
+                        $paymentOptions[] = ${$value . "Option"};
+                    }
+                }
+            } else {
+                $newOption->setModuleName($this->name)
                     ->setCallToActionText($this->trans($this->displayName, array()));
+                $paymentOptions[] = $newOption;
+            }
         }
-        $paymentOptions = array(
-            $newOption
-        );
+
         return $paymentOptions;
     }
 
+    public function is_valid_paymethod($paymethod) {
+        $config = $this->getConfigFormValues($paymethod);
+        $addressOBJ = new Address($this->context->cart->id_address_delivery);
+        $country_id = $addressOBJ->id_country;
+        $currency_id = $this->context->cart->id_currency;
+        if (!$config[$paymethod . '_ENABLED']) {
+            return false;
+        } else if (!in_array($country_id, explode(',', $config[$paymethod . '_COUNTRY_IDS']))) {
+            return false;
+        } else if (!in_array($currency_id, explode(',', $config[$paymethod . '_CURRENCY_IDS']))) {
+            return false;
+        } else {
+            return true;
+        }
+    }
+    
     public function hookHeader() {
-        $this->context->controller->addJS(array($this->_path . 'views/js/nets_checkout.js'));
-        $this->context->controller->addCSS($this->_path . 'views/css/front.css');
+        if (Configuration::get('NETS_INTEGRATION_TYPE') === 'EMBEDDED') {
+            $this->context->controller->addJS(array($this->_path . 'views/js/nets_checkout.js'));
+            $this->context->controller->addCSS($this->_path . 'views/css/front.css');
+        }
     }
 
     /**
@@ -215,34 +310,56 @@ class Netseasy extends PaymentModule {
     /**
      * Save form data.
      */
-    protected function postProcess() {
-        $formValues = $this->getConfigFormValues();
-        foreach (array_keys($formValues) as $key) {
-            Configuration::updateValue($key, Tools::getValue($key));
+    protected function postProcess($paytype = null) {
+        if ($paytype != null) {
+            $formValues = $this->getConfigFormValues($paytype);
+            foreach (array_keys($formValues) as $key) {
+                if (is_array(Tools::getValue($key))) {
+                    $ids = strval(implode(',', Tools::getValue($key)));
+                    Configuration::updateValue($key, $ids);
+                } else {
+                    Configuration::updateValue($key, Tools::getValue($key));
+                }
+            }
+        } else {
+            $formValues = $this->getConfigFormValues();
+            foreach (array_keys($formValues) as $key) {
+                Configuration::updateValue($key, Tools::getValue($key));
+            }
         }
     }
 
     // get list of module configuration 
-    public function getConfigFormValues() {
-        return array(
-            'NETS_MERCHANT_ID' => Configuration::get('NETS_MERCHANT_ID'),
-            'NETS_MERCHANT_EMAIL_ID' => Configuration::get('NETS_MERCHANT_EMAIL_ID'),
-            'NETS_PAYMENT_NAME' => Configuration::get('NETS_PAYMENT_NAME'),
-            'NETS_TEST_MODE' => Configuration::get('NETS_TEST_MODE'),
-            'NETS_TEST_CHECKOUT_KEY' => Configuration::get('NETS_TEST_CHECKOUT_KEY'),
-            'NETS_TEST_SECRET_KEY' => Configuration::get('NETS_TEST_SECRET_KEY'),
-            'NETS_LIVE_CHECKOUT_KEY' => Configuration::get('NETS_LIVE_CHECKOUT_KEY'),
-            'NETS_LIVE_SECRET_KEY' => Configuration::get('NETS_LIVE_SECRET_KEY'),
-            'NETS_INTEGRATION_TYPE' => Configuration::get('NETS_INTEGRATION_TYPE'),
-            'NETS_TERMS_URL' => Configuration::get('NETS_TERMS_URL'),
-            'NETS_MERCHANT_TERMS_URL' => Configuration::get('NETS_MERCHANT_TERMS_URL'),
-            'NETS_ICON_URL' => Configuration::get('NETS_ICON_URL'),
-            'NETS_ADMIN_DEBUG_MODE' => Configuration::get('NETS_ADMIN_DEBUG_MODE'),
-            'NETS_FRONTEND_DEBUG_MODE' => Configuration::get('NETS_FRONTEND_DEBUG_MODE'),
-            'NETS_AUTO_CAPTURE' => Configuration::get('NETS_AUTO_CAPTURE'),
-            'NETS_WEBHOOK_URL' => Configuration::get('NETS_WEBHOOK_URL'),
-            'NETS_WEBHOOK_AUTHORIZATION' => Configuration::get('NETS_WEBHOOK_AUTHORIZATION'),
-        );
+    public function getConfigFormValues($paytype = null) {
+        if ($paytype != null) {
+            return array(
+                $paytype . '_ENABLED' => Configuration::get($paytype . '_ENABLED'),
+                $paytype . '_COUNTRY_IDS' => Configuration::get($paytype . '_COUNTRY_IDS'),
+                $paytype . '_CURRENCY_IDS' => Configuration::get($paytype . '_CURRENCY_IDS'),
+                $paytype . '_CUSTOM_NAME' => Configuration::get($paytype . '_CUSTOM_NAME'),
+            );
+        } else if ($paytype == null) {
+            return array(
+                'NETS_MERCHANT_ID' => Configuration::get('NETS_MERCHANT_ID'),
+                'NETS_MERCHANT_EMAIL_ID' => Configuration::get('NETS_MERCHANT_EMAIL_ID'),
+                'NETS_PAYMENT_NAME' => Configuration::get('NETS_PAYMENT_NAME'),
+                'NETS_TEST_MODE' => Configuration::get('NETS_TEST_MODE'),
+                'NETS_TEST_CHECKOUT_KEY' => Configuration::get('NETS_TEST_CHECKOUT_KEY'),
+                'NETS_TEST_SECRET_KEY' => Configuration::get('NETS_TEST_SECRET_KEY'),
+                'NETS_LIVE_CHECKOUT_KEY' => Configuration::get('NETS_LIVE_CHECKOUT_KEY'),
+                'NETS_LIVE_SECRET_KEY' => Configuration::get('NETS_LIVE_SECRET_KEY'),
+                'NETS_INTEGRATION_TYPE' => Configuration::get('NETS_INTEGRATION_TYPE'),
+                'NETS_TERMS_URL' => Configuration::get('NETS_TERMS_URL'),
+                'NETS_MERCHANT_TERMS_URL' => Configuration::get('NETS_MERCHANT_TERMS_URL'),
+                'NETS_ICON_URL' => Configuration::get('NETS_ICON_URL'),
+                'NETS_ADMIN_DEBUG_MODE' => Configuration::get('NETS_ADMIN_DEBUG_MODE'),
+                'NETS_FRONTEND_DEBUG_MODE' => Configuration::get('NETS_FRONTEND_DEBUG_MODE'),
+                'NETS_PAYMENT_SPLIT' => Configuration::get('NETS_PAYMENT_SPLIT'),
+                'NETS_AUTO_CAPTURE' => Configuration::get('NETS_AUTO_CAPTURE'),
+                'NETS_WEBHOOK_URL' => Configuration::get('NETS_WEBHOOK_URL'),
+                'NETS_WEBHOOK_AUTHORIZATION' => Configuration::get('NETS_WEBHOOK_AUTHORIZATION')
+            );
+        }
     }
 
     /**
@@ -300,8 +417,9 @@ class Netseasy extends PaymentModule {
     /**
      * To create request for passing in API request
      * @param array $params
+     * @param string $split_payment
      * */
-    public function createRequestObject($cartId) {
+    public function createRequestObject($cartId, $split_payment = '') {
         $cart = new Cart($cartId);
         $currency = new Currency($cart->id_currency);
         $customerOBJ = new Customer($cart->id_customer);
@@ -523,6 +641,15 @@ class Netseasy extends PaymentModule {
             $logger = new FileLogger();
             $logger->setFilename(_PS_ROOT_DIR_ . "/var/logs/nets_webhook.log");
         }
+
+        if (!empty($split_payment)) {
+            $paymentMethodName = $this->getMethodName($split_payment);
+            $split_payment_data[] = array(
+                "name" => $paymentMethodName,
+                "enabled" => true
+            );
+            $data['paymentMethodsConfiguration'] = $split_payment_data;
+        }
         return $data;
     }
 
@@ -590,11 +717,15 @@ class Netseasy extends PaymentModule {
         }
     }
 
+
+
     public function hookDisplayPaymentTop() {
         $nets_payment_selected = @$_COOKIE['nets_payment_selected'];
+        $payment_split_type = @$_COOKIE['split_type'];
+        
         if (Configuration::get('NETS_INTEGRATION_TYPE') === 'EMBEDDED' && $nets_payment_selected) {
 
-            $payload = $this->createRequestObject($this->context->cart->id);
+            $payload = $this->createRequestObject($this->context->cart->id, $payment_split_type);
             $url = $this->getApiUrl()['backend'];
             $checkOut = array(
                 'url' => $this->getApiUrl()['frontend'],
@@ -607,12 +738,14 @@ class Netseasy extends PaymentModule {
             if ($response && !isset($response->errors)) {
                 $this->context->smarty->assign([
                     'module' => $this->name,
+                    'payment_split_type' => !empty($payment_split_type) ? $payment_split_type : $this->name,
                     'paymentId' => $response->paymentId,
                     'checkout' => $checkOut,
                     'lang' => $this->getLocale($this->context->language->iso_code),
                     'returnUrl' => $this->context->link->getModuleLink($this->name, 'return', array('id_cart' => $this->context->cart->id)),
                     'datastring' => $payload,
-                    'debugMode' => (Configuration::get('NETS_FRONTEND_DEBUG_MODE') == TRUE) ? TRUE : FALSE
+                    'debugMode' => (Configuration::get('NETS_FRONTEND_DEBUG_MODE') == TRUE) ? TRUE : FALSE,
+                    'payment_options' => self::PAY_METHODS
                 ]);
                 return $this->display(__FILE__, 'views/templates/hook/paymentEmbedded.tpl');
             } else {
@@ -631,10 +764,11 @@ class Netseasy extends PaymentModule {
         $url = Tools::getHttpHost(true) . __PS_BASE_URI__ . 'modules/' . $this->name;
 
         if ($order->module == $this->name) {
+
             $order_token = Tools::getAdminToken('AdminOrders' . (int) Tab::getIdFromClassName('AdminOrders') . (int) $this->context->employee->id);
             $nets = Db::getInstance()->getRow('SELECT * FROM ' . _DB_PREFIX_ . 'nets_payment_status WHERE order_id = ' . (int) $orderId);
 
-            require_once(_PS_ROOT_DIR_ . _MODULE_DIR_ . '/netseasy/controllers/admin/AdminNetseasyOrderController.php');
+            require_once(_PS_MODULE_DIR_ . $this->name . '/controllers/admin/AdminNetseasyOrderController.php');
             $netsOrderObj = new AdminNetseasyOrderController();
             $netsOrderObj->getPaymentRequest();
 
@@ -646,7 +780,7 @@ class Netseasy extends PaymentModule {
                 'url' => $url,
                 'path' => $this->_path,
                 'module' => $this->name,
-                'text_test_01' => $this->l('Test - text string one.'),
+                'moduleName' => $this->displayPaymentName,
                 'user_token' => Tools::getAdminTokenLite('AdminNetseasyOrder'),
                 'order_token' => $_GET['_token'],
                 'adminurl' => Tools::getHttpHost(true) . __PS_BASE_URI__ . basename(_PS_ADMIN_DIR_),
@@ -720,6 +854,42 @@ class Netseasy extends PaymentModule {
             $localeCode = $localeArray[strtoupper($iso_code)];
         }
         return $localeCode;
+    }
+
+    public function getMethodName($paymentMethod) {
+        switch ($paymentMethod) {
+            case 'NETS_CARD':
+                $paymentName = "Card";
+                break;
+            case 'NETS_MOBILEPAY':
+                $paymentName = "MobilePay";
+                break;
+            case 'NETS_VIPPS':
+                $paymentName = "Vipps";
+                break;
+            case 'NETS_SWISH':
+                $paymentName = "Swish";
+                break;
+            case 'NETS_SOFORT':
+                $paymentName = "Sofort";
+                break;
+            case 'NETS_TRUSTLY':
+                $paymentName = "Trustly";
+                break;
+            case 'NETS_AFTERPAY_INVOICE':
+                $paymentName = "EasyInvoice";
+                break;
+            case 'NETS_AFTERPAY_INSTALLMENT':
+                $paymentName = "EasyInstallment";
+                break;
+            case 'NETS_RATEPAY_INSTALLMENT':
+                $paymentName = "RatePayInstallment";
+                break;
+            case 'NETS_PAYPAL':
+                $paymentName = "PayPal";
+                break;
+        }
+        return $paymentName;
     }
 
 }

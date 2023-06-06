@@ -6,7 +6,7 @@
 |Author       | `Nets eCom`
 |Prefix       | `EASY-PS1.7`
 |Shop Version | `1.7+ to 8.0.2`
-|Version      | `1.1.5`
+|Version      | `1.1.6`
 |Guide        | (https://developers.nets.eu/nets-easy/en-EU/docs/nets-easy-for-prestashop/nets-easy-for-prestashop-prestashop-17/)
 |Github       | https://github.com/Nets-eCom/prestashop1.7_easy
 
@@ -18,15 +18,13 @@ Follow these steps to install the plugin.
 
 01. Download the plugin from above github link.
 02. Extract the zip file.
-03. Create netseasy folder and copy the files from extracted zip name folder.
-04. Create zip of neteasy folder.
+03. Rename extract folder name to netseasy with folder name
+04. Create zip of netseasy folder.
 05. Login to Admin Panel.
-06. Clear Cache.
-07. Click on Modules.
-08. Click on "Module Manager" tab and click on "Upload a module".
-09. Drop your neteasy folder zip archive here or select from your machine.
-10. After installation completed, press "Configure".
-11. Set your API Credentials and configuration.
+06. Click on Modules >> Module Manager tab and click on "Upload a module".
+07. Drop your netseasy folder zip archive here or select from your machine.
+08. After installation completed, press “Configure”.
+09. Set your API Credentials and configuration.
 
 ### Features
 01. Supports two different checkout types : Hosted Payment Window | Embedded Checkout.

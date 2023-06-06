@@ -16,7 +16,8 @@ class netseasyReturnModuleFrontController extends ModuleFrontController {
         $nets->logger->logInfo("Response Received : " . json_encode($_GET));
         $paymentDetails = null;
 
-        if (isset($_GET['id_cart']) && (isset($_GET['paymentId']) || !empty($_GET['paymentid']))) {
+        if (isset($_GET['id_cart']) && (isset($_GET['paymentId']) && !isset($_GET['paymentFailed']) || !empty($_GET['paymentid']) )) {
+
             $cartId = (int) ($_GET['id_cart']);
             $paymentId = isset($_GET['paymentid']) ? $_GET['paymentid'] : $_GET['paymentId'];
 
@@ -115,7 +116,7 @@ class netseasyReturnModuleFrontController extends ModuleFrontController {
     }
 
     public function GetPaymentMethod($paymentDetails) {
-        $payment_name = "Nets Easy";
+        $payment_name = $this->module->displayPaymentName;
         if (isset($paymentDetails->payment->paymentDetails->paymentMethod)) {
             if (!empty($paymentDetails->payment->paymentDetails->paymentMethod)) {
                 $payment_name .= ' - ' . $paymentDetails->payment->paymentDetails->paymentMethod;

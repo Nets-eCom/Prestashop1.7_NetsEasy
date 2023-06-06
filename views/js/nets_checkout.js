@@ -2,64 +2,96 @@ $(document).ready(function () {
 
     //check if transaction_error
     if (checkCookie('nets_transaction_error')) {
-        alert(decodeURI(getCookie('nets_transaction_error'))) 
+        alert(decodeURI(getCookie('nets_transaction_error')))
         deleteCookie("nets_transaction_error");
     }
-    var place_button = document.querySelectorAll('#payment-confirmation button[type="submit"]');
+    
     var frame = document.getElementById('nets-checkout-iframe');
     var payment_option = document.querySelectorAll('input[type=radio][name="payment-option"]');
-    var promo_code_applied = getUrlParameter('updatedTransaction');
+    var selected_payment = $('input[type=radio][name="payment-option"]:checked').attr("data-module-name");
+    
+    if (selected_payment == "netseasy") { 
+        $('#conditions-to-approve').css("display", "none"); 
+        $('#payment-confirmation').css("display", "none");
+    } else if (get_payment_options(selected_payment)) {        
+        $('#conditions-to-approve').css("display", "none"); 
+        $('#payment-confirmation').css("display", "none");
+    }
 
-    if (checkCookie('nets_payment_selected')) {
+    if (checkCookie('nets_payment_selected') && !checkCookie('single_timer')) {
         deleteCookie("nets_payment_selected");
+        deleteCookie("split_type");
     }
-    if (place_button.length != 0) {
-        place_button[0].addEventListener('click', function (e) {
-            var disabled = $('#payment-confirmation button[type="submit"]').hasClass('disabled');
-            if (!disabled) {
-                var name = $('input[type=radio][name="payment-option"]:checked').attr("data-module-name");
-                if (name == "netseasy") {
-                    setCookie('nets_payment_selected', true, 1);
-                    if (frame) {
-                        frame.style.display = '';
-                    }
-                } else {
-                    if (checkCookie('nets_payment_selected')) {
-                        deleteCookie("nets_payment_selected");
-                    }
-                    if (frame) {
-                        frame.style.display = 'none';
-                    }
-                }
+    
+    // append Iframe to selected radio if single payment
+    if (payment_option.length == 1 && (selected_payment == "netseasy" || get_payment_options(selected_payment)) ) {
+        if(!checkCookie('single_timer'))
+        {
+            setCookie('nets_payment_selected', true, 1);
+            if(get_payment_options(selected_payment)) {
+                setCookie("split_type", selected_payment, 1);
             }
-        }, false);
+            setCookie('single_timer', true, 1);
+            if (frame) {
+                frame.style.display = 'none';
+            }                             
+            $('#conditions-to-approve').css("display", "none");
+            $('#conditions-to-approve').submit();
+        }
+    } else {
+        deleteCookie("single_timer");
     }
-
+    // append Iframe to selected radio if multiple payment
     if (payment_option.length != 0) {
         for (var i = 0; i < payment_option.length; i++) {
             payment_option[i].addEventListener('change', function (e) {
                 var name = e.srcElement.getAttribute('data-module-name');
-                if (name == "netseasy") {
+                if (name == "netseasy") { 
+                    setCookie('nets_payment_selected', true, 1);
+                    deleteCookie("split_type");
                     if (frame) {
-                        frame.style.display = '';
-                    }
+                        frame.style.display = 'none';
+                    }                             
+                    $('#conditions-to-approve').css("display", "none");
+                    $('#conditions-to-approve').submit(); 
+                } else if (get_payment_options(name)) {
+                    setCookie('nets_payment_selected', true, 1);
+                    setCookie("split_type", name, 1);
+                    if (frame) {
+                        frame.style.display = 'none';
+                    }     
+                    $('#conditions-to-approve').css("display", "none");
+                    $('#conditions-to-approve').submit();
                 } else {
+                    if (checkCookie('nets_payment_selected')) {
+                        deleteCookie("nets_payment_selected");
+                        deleteCookie("split_type");
+                    }
                     if (frame) {
                         frame.style.display = 'none';
                     }
+                    $('#conditions-to-approve').css("display", "block"); 
+                    $('#payment-confirmation').css("display", "block"); 
                 }
             }, false);
         }
     }
+
+    var default_selected = $('input[type=radio][name="payment-option"]:checked').attr("data-module-name");
+    $('#netseasy_payment_container').appendTo($('input[type=radio][data-module-name="' + default_selected + '"]').closest('.payment-option'));
+
     prestashop.on('updatedCart', function (event) {
-        var disabled = $(place_button).hasClass('disabled');
         var netseasy_selected = $("[data-module-name='netseasy']").prop('checked');
-        if (netseasy_selected) {
+        var selected = $('input[type=radio][name="payment-option"]:checked').attr("data-module-name");
+        if (netseasy_selected && typeof checkoutOptions != "undefined") {
+            setCookie('nets_payment_selected', true, 1);
+        }
+        if (get_payment_options(selected) && typeof checkoutOptions != "undefined") {
+            setCookie("split_type", selected, 1);
             setCookie('nets_payment_selected', true, 1);
         }
     });
 
-    $('#netseasy_payment_container').appendTo($('input[type=radio][data-module-name="netseasy"]').closest('.payment-option'));
 });
 
 var getUrlParameter = function getUrlParameter(sParam) {
@@ -106,4 +138,9 @@ function checkCookie(name) {
 }
 function deleteCookie(name) {
     document.cookie = name + "=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+}
+payment_options = ['NETS_CARD', 'NETS_MOBILEPAY', 'NETS_VIPPS', 'NETS_SWISH', 'NETS_SOFORT', 'NETS_TRUSTLY', 'NETS_AFTERPAY_INVOICE', 'NETS_AFTERPAY_INSTALLMENT', 'NETS_RATEPAY_INSTALLMENT', 'NETS_PAYPAL'];
+
+function get_payment_options(pay_method) {
+    return payment_options.includes(pay_method);
 }

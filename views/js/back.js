@@ -1,8 +1,28 @@
 $(document).ready(function () {
+    $('.payment_method_country').select2();
+    $('.payment_method_currency').select2();
+
     $('.error').css('display', 'none');
     $('input').on('keyup', function () {
         $(this).next('.error').css('display', 'none');
     });
+    
+    $('input[name="NETS_PAYMENT_SPLIT"]').on('click', function () {
+        pay_split_check = $('#NETS_PAYMENT_SPLIT_on').is(':checked');
+        if(pay_split_check) {
+            $('.pay_split').css('display', 'block');
+        } else {
+            $('.pay_split').css('display', 'none');
+        }
+    });
+    
+    payment_split = $('#NETS_PAYMENT_SPLIT_on').prop('checked');
+    if(payment_split == true) {
+        $('.pay_split').css('display', 'block');
+    } else {
+        $('.pay_split').css('display', 'none');
+    }
+    
     $('#module_form').on('submit', function (e) {
         e.preventDefault();
         merchant_id = $.trim($('#NETS_MERCHANT_ID').val());

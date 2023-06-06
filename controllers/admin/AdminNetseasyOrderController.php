@@ -483,7 +483,7 @@ class AdminNetseasyOrderController extends ModuleAdminController {
             if ($reserved || $paymentType == "A2A") {
                 if ($cancelled) {
                     $langStatus = "cancel";
-                    $paymentStatus = "Canceled";
+                    $paymentStatus = "Cancelled";
                     $dbPayStatus = 1; // For payment status as cancelled in psnets_payment db table
                 } elseif ($charged && $pending !== 'Pending') {
                     if ($reserved != $charged && $paymentType != "A2A") {

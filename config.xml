@@ -2,7 +2,7 @@
 <module>
     <name>netseasy</name>
     <displayName><![CDATA[Nets Easy Checkout]]></displayName>
-    <version><![CDATA[1.1.4]]></version>
+    <version><![CDATA[1.1.6]]></version>
     <description><![CDATA[Nets Secure Payment Made Easy]]></description>
     <author><![CDATA[Nets Easy]]></author>
     <tab><![CDATA[payments_gateways]]></tab>

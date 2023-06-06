@@ -17,7 +17,7 @@
     <div id="orderNetsOriginalPosition">
         <div id="orderNetsPanel" class="card">
             <div class="card-header">
-                <h3 class="card-header-title">Nets Easy </h3>
+                <h3 class="card-header-title">{$moduleName}</h3>
             </div>
             <div class="card-body"> 
                 <div class="nets-container">
@@ -324,7 +324,7 @@
                                     </tr>
                                 {/if}
 
-                            {elseif $data.status.payStatus == "Canceled"}
+                            {elseif $data.status.payStatus == "Cancelled"}
                                 <tr class="">
                                     <td class="listing top cancel" colspan="5" align="center">
                                         <div class="nets-status">{l s="nets_payment_cancelled" d="Modules.Netseasy.Admin_content_order"}</div>

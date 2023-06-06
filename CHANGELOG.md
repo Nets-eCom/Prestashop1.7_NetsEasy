@@ -6,11 +6,14 @@
 |Author | `Nets eCom`
 |Prefix | `EASY-PS1.7`
 |Shop Version | `1.7+ to 8.0.2`
-|Version | `1.1.5`
+|Version | `1.1.6`
 |Guide | https://tech.nets.eu/shopmodules
 |Github | https://github.com/Nets-eCom/prestashop-PS1.7
 
 ## CHANGELOG
+
+### Version 1.1.6 - Released 2023-06-06
+* New : New setting introduce Payment Split for each payment method as separate option.
 
 ### Version 1.1.5 - Released 2023-03-17
 * Fixed : Compatibilty check plugin with prestashop 8 version.

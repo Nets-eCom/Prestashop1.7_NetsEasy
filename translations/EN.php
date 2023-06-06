@@ -23,6 +23,7 @@ $_MODULE["<{netseasy}prestashop>admin_content_order_e03043f126c9df2a6443929fd444
 $_MODULE["<{netseasy}prestashop>admin_content_order_22cdc0c26c5948e2e6370ab6b52d97b8"] = "failed";
 $_MODULE["<{netseasy}prestashop>admin_content_order_b8d0ad0ec8f46388da378d3c8906c4b1"] = "charged products";
 $_MODULE["<{netseasy}prestashop>admin_content_order_2d6a11bb3ac52a0eb1586ca9f55a7165"] = "refunded products";
+$_MODULE["<{netseasy}prestashop>admin_content_order_0cbc6611f5540bd0809a388dc95a615b"] = "Test";
 
 $_MODULE["<{netseasy}prestashop>config_e6928937d511fc7622abbc1cd4e599dc"] = "Name of Payment Gateway is required";
 $_MODULE["<{netseasy}prestashop>config_7c1a38f104c2a7d733ac766a635f9e08"] = "Name of Payment Gateway";
@@ -60,6 +61,33 @@ $_MODULE["<{netseasy}prestashop>config_2b93ce0a965a2522a6d13c9a236db31f"] = "Web
 $_MODULE["<{netseasy}prestashop>config_f0250d35ea63056adcdf1ced221587d2"] = "Webhook Authorization";
 $_MODULE["<{netseasy}prestashop>config_43781db5c40ecc39fd718685594f0956"] = "Save";
 $_MODULE["<{netseasy}prestashop>config_dab44c32307d6cd31fca52ddbf6b61b1"] = "Successful update";
+$_MODULE["<{netseasy}prestashop>config_d643783c8865cbabe97ef27f1ace8c5c"] = "Payment Split";
+
+$_MODULE["<{netseasy}prestashop>config_c7d94f29165f8dfb6fea92790964d6e6"] = "Card";
+$_MODULE["<{netseasy}prestashop>config_64742981aec33f512015dca8042b3f93"] = "AfterPay Invoice";
+$_MODULE["<{netseasy}prestashop>config_39c4adf9c54f3b31ddc6b41353951a87"] = "AfterPay Installment";
+$_MODULE["<{netseasy}prestashop>config_d5f7bdbbabb2669f1d037f3f4fe670b7"] = "RatePay Installment";
+$_MODULE["<{netseasy}prestashop>config_03ae80ce4bf52f901a93e7f2e2020b23"] = "MobilePay";
+$_MODULE["<{netseasy}prestashop>config_9996923c4059f201fc2b9f66dc2ad483"] = "Vipps";
+$_MODULE["<{netseasy}prestashop>config_9ab1b37d825d4d8b299b685e979c690d"] = "Swish";
+$_MODULE["<{netseasy}prestashop>config_817cad28dc0ab3b0eaa6d6f6ef2694e3"] = "Sofort";
+$_MODULE["<{netseasy}prestashop>config_1fad0fa581e58816117816bc9d7fa3f5"] = "Trustly";
+$_MODULE["<{netseasy}prestashop>config_6670df9c4bdd1b8723ca55ccfc5f6485"] = "PayPal";
+$_MODULE["<{netseasy}prestashop>config_5f8ffb19719f01745d356213c84d4338"] = "Payment Option";
+$_MODULE["<{netseasy}prestashop>config_2faec1f9f8cc7f8f40d521c4dd574f49"] = "Enable";
+$_MODULE["<{netseasy}prestashop>config_36adbe056f388c6e195d6dfeaf2261f0"] = "Select Country for";
+$_MODULE["<{netseasy}prestashop>config_949d86bfa33e7071e8061ee15ecbe3ee"] = "Select Currency for";
+$_MODULE["<{netseasy}prestashop>config_7dc22b2c6a992f0232345df41303f5ea"] = "Setting";
+$_MODULE["<{netseasy}prestashop>config_13bd6e8a348477be7a9b0d12793306fe"] = "Setting saved succesfully for";
+$_MODULE["<{netseasy}prestashop>config_9f08919660d2918e32cb15a109971241"] = "Select country for which you want to show the payment method";
+$_MODULE["<{netseasy}prestashop>config_d6bb4031ff084dbee4859d5b5de8d204"] = "Select currency for which you want to show the payment method";
+$_MODULE["<{netseasy}prestashop>config_d465a1eca0bae2ca5f27477e299201e7"] = "Update Notification";
+$_MODULE["<{netseasy}prestashop>config_5b71f2279042947a861762691c99712f"] = "Success Notification";
+$_MODULE["<{netseasy}prestashop>config_fe763278c58dbcf3eeed9c72eb604ffb"] = "Latest Plugin Version";
+$_MODULE["<{netseasy}prestashop>config_bb282e8169b4a94f03059933e73a099c"] = "Shop Version Compatible";
+$_MODULE["<{netseasy}prestashop>config_b5b93bea94a3e199abdfa926a881eb39"] = "Github Link";
+$_MODULE["<{netseasy}prestashop>config_d61e5dae7f9e96bbe01a004d1e3b4f8e"] = "TechSite Link";
+$_MODULE["<{netseasy}prestashop>config_ed563637ac2b33b5c2afb16232028cb2"] = "MarketPlace Link";
 
 $_MODULE["<{netseasy}prestashop>netseasy_ea9cf7e47ff33b2be14e6dd07cbcefc6"] = "Shipping";
 $_MODULE["<{netseasy}prestashop>netseasy_e2b7dec8fa4b498156dfee6e4c84b156"] = "This payment method is not available.";
