@@ -517,7 +517,7 @@ class Netseasy extends PaymentModule {
         }
 
         // Gift wrapping item
-        if ($cart->getGiftWrappingPrice()) {
+        if ($cart->getGiftWrappingPrice() > 0) {
             $giftWrappingAmount = $cart->getGiftWrappingPrice() * 100;
             $itemsArray[] = array(
                 'reference' => 'wrapping',
