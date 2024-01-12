@@ -506,7 +506,7 @@ class Netseasy extends PaymentModule {
             $itemsArray[] = array(
                 'reference' => 'discount',
                 'name' => 'Discount',
-                'quantity' => '1',
+                'quantity' => 1,
                 'unit' => 'pcs',
                 'unitPrice' => -$discountAmount,
                 'taxRate' => 0,
@@ -519,10 +519,11 @@ class Netseasy extends PaymentModule {
         // Gift wrapping item
         if ($cart->getGiftWrappingPrice() > 0) {
             $giftWrappingAmount = $cart->getGiftWrappingPrice() * 100;
+
             $itemsArray[] = array(
-                'reference' => 'wrapping',
-                'name' => 'Wrapping',
-                'quantity' => '1',
+                'reference' => 'gift_wrapping',
+                'name' => $this->trans('Gift wrapping', [], 'Shop.Theme.Checkout'),
+                'quantity' => 1,
                 'unit' => 'pcs',
                 'unitPrice' => $giftWrappingAmount,
                 'taxRate' => 0,
