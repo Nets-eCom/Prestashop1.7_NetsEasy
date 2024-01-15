@@ -439,6 +439,7 @@ class Netseasy extends PaymentModule {
             $netAmount = round($quantity * $unitPrice);
             $grossAmount = round($quantity * ($product * 100));
             $taxAmount = $grossAmount - $netAmount;
+
             $itemsProductArray[] = array(
                 'reference' => !empty($item['reference']) ? $item['reference'] : $item['name'],
                 'name' => $item['name'],
@@ -480,6 +481,7 @@ class Netseasy extends PaymentModule {
             } else {
                 $carrierReference = $this->l('Shipping');
             }
+
             $itemsArray[] = array(
                 'reference' => $carrierReference,
                 'name' => 'Shipping',
@@ -503,6 +505,7 @@ class Netseasy extends PaymentModule {
         $couponTotalData = $cart->getDiscountSubtotalWithoutGifts();
         if (!empty($couponTotalData) && $couponTotalData > 0) {
             $discountAmount = round(round($couponTotalData, 2) * 100);
+
             $itemsArray[] = array(
                 'reference' => 'discount',
                 'name' => 'Discount',
@@ -517,7 +520,7 @@ class Netseasy extends PaymentModule {
         }
 
         // Gift wrapping item
-        if ($cart->getGiftWrappingPrice() > 0) {
+        if ($cart->gift) {
             $giftWrappingAmount = $cart->getGiftWrappingPrice() * 100;
 
             $itemsArray[] = array(
@@ -539,6 +542,7 @@ class Netseasy extends PaymentModule {
             $itemsGrossSumma += $total['grossTotalAmount'];
         }
         $requestRefId = 'ps_' . Tools::passwdGen(12);
+
         //Compile datastring
         $data = array(
             'order' => array(
