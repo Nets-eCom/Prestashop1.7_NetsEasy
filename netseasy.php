@@ -521,7 +521,7 @@ class Netseasy extends PaymentModule {
 
         // Gift wrapping item
         if ($cart->gift) {
-            $giftWrappingAmount = $cart->getGiftWrappingPrice() * 100;
+            $giftWrappingAmount = round($cart->getGiftWrappingPrice(), 2) * 100;
 
             $itemsArray[] = array(
                 'reference' => 'gift_wrapping',
@@ -536,18 +536,13 @@ class Netseasy extends PaymentModule {
             );
         }
 
-        // items total sum
-        $itemsGrossSumma = 0;
-        foreach ($itemsArray as $total) {
-            $itemsGrossSumma += $total['grossTotalAmount'];
-        }
         $requestRefId = 'ps_' . Tools::passwdGen(12);
 
-        //Compile datastring
+        //Compile data string
         $data = array(
             'order' => array(
                 'items' => $itemsArray,
-                'amount' => floatval($itemsGrossSumma),
+                'amount' => round($cart->getCartTotalPrice(), 2) * 100,
                 'currency' => $currency->iso_code,
                 'reference' => $requestRefId
             ),
