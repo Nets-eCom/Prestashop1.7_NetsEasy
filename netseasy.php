@@ -146,7 +146,7 @@ class Netseasy extends PaymentModule {
         foreach($currency_list as $key => $value) {
             $currency_list[$key] = (array)$value;
         }
-        
+
         $this->context->smarty->assign($this->getConfigFormValues());
         foreach (self::PAY_METHODS as $key => $value) {
             $data = $this->getConfigFormValues($value);
@@ -239,7 +239,7 @@ class Netseasy extends PaymentModule {
 
         if (Configuration::get('NETS_INTEGRATION_TYPE') === 'REDIRECT') {
             if(Configuration::get('NETS_PAYMENT_SPLIT')) {
-                foreach (self::PAY_METHODS as $key => $value) {   
+                foreach (self::PAY_METHODS as $key => $value) {
                     if ($this->is_valid_paymethod($value)) {
                         $split_enabled = true;
                         ${$value . "Option"} = new PaymentOption();
@@ -291,7 +291,7 @@ class Netseasy extends PaymentModule {
             return true;
         }
     }
-    
+
     public function hookHeader() {
         if (Configuration::get('NETS_INTEGRATION_TYPE') === 'EMBEDDED') {
             $this->context->controller->addJS(array($this->_path . 'views/js/nets_checkout.js'));
@@ -300,7 +300,7 @@ class Netseasy extends PaymentModule {
     }
 
     /**
-     *  Template form information and cart fetched 
+     *  Template form information and cart fetched
      * */
     public function getTemplateVarInfos() {
         $configValues = $this->getConfigFormValues();
@@ -329,7 +329,7 @@ class Netseasy extends PaymentModule {
         }
     }
 
-    // get list of module configuration 
+    // get list of module configuration
     public function getConfigFormValues($paytype = null) {
         if ($paytype != null) {
             return array(
@@ -363,7 +363,7 @@ class Netseasy extends PaymentModule {
     }
 
     /**
-     * To create curl request 
+     * To create curl request
      * @param void $url
      * @param array $data
      * @param void $method
@@ -428,9 +428,10 @@ class Netseasy extends PaymentModule {
 
         //Product items
         $products = $cart->getProducts();
+
         foreach ($products as $item) {
             // easy calc method
-            $product = $item['price_with_reduction']; // product price incl. VAT in DB format 
+            $product = $item['price_with_reduction']; // product price incl. VAT in DB format
             $quantity = $item['quantity'];
             $tax = $item['rate']; // Tax rate in DB format
             $taxFormat = '1' . str_pad(number_format((float) $tax, 2, '.', ''), 5, '0', STR_PAD_LEFT);
@@ -438,6 +439,7 @@ class Netseasy extends PaymentModule {
             $netAmount = round($quantity * $unitPrice);
             $grossAmount = round($quantity * ($product * 100));
             $taxAmount = $grossAmount - $netAmount;
+
             $itemsProductArray[] = array(
                 'reference' => !empty($item['reference']) ? $item['reference'] : $item['name'],
                 'name' => $item['name'],
@@ -457,6 +459,7 @@ class Netseasy extends PaymentModule {
         $carrierNetAmount = 0;
         $carrier = new Carrier($cart->id_carrier);
         $carrierShipping = $cart->getPackageShippingCost($cart->id_carrier, $use_tax = true);
+
         if ($carrierShipping > 0) {
             $carrierName = $carrier->name;
             $carrierTax = Tax::getCarrierTaxRate((int) $carrier->id, $cart->id_address_delivery);
@@ -478,6 +481,7 @@ class Netseasy extends PaymentModule {
             } else {
                 $carrierReference = $this->l('Shipping');
             }
+
             $itemsArray[] = array(
                 'reference' => $carrierReference,
                 'name' => 'Shipping',
@@ -497,14 +501,15 @@ class Netseasy extends PaymentModule {
             $itemsGrossPriceSumma += $total['grossTotalAmount'];
         }
 
-        //Discount items   
+        //Discount items
         $couponTotalData = $cart->getDiscountSubtotalWithoutGifts();
         if (!empty($couponTotalData) && $couponTotalData > 0) {
             $discountAmount = round(round($couponTotalData, 2) * 100);
+
             $itemsArray[] = array(
                 'reference' => 'discount',
                 'name' => 'Discount',
-                'quantity' => '1',
+                'quantity' => 1,
                 'unit' => 'pcs',
                 'unitPrice' => -$discountAmount,
                 'taxRate' => 0,
@@ -514,17 +519,30 @@ class Netseasy extends PaymentModule {
             );
         }
 
-        // items total sum
-        $itemsGrossSumma = 0;
-        foreach ($itemsArray as $total) {
-            $itemsGrossSumma += $total['grossTotalAmount'];
+        // Gift wrapping item
+        if ($cart->gift) {
+            $giftWrappingAmount = round($cart->getGiftWrappingPrice(), 2) * 100;
+
+            $itemsArray[] = array(
+                'reference' => 'gift_wrapping',
+                'name' => $this->trans('Gift wrapping', [], 'Shop.Theme.Checkout'),
+                'quantity' => 1,
+                'unit' => 'pcs',
+                'unitPrice' => $giftWrappingAmount,
+                'taxRate' => 0,
+                'taxAmount' => 0,
+                'grossTotalAmount' => $giftWrappingAmount,
+                'netTotalAmount' => $giftWrappingAmount
+            );
         }
+
         $requestRefId = 'ps_' . Tools::passwdGen(12);
-        //Compile datastring
+
+        //Compile data string
         $data = array(
             'order' => array(
                 'items' => $itemsArray,
-                'amount' => floatval($itemsGrossSumma),
+                'amount' => round($cart->getCartTotalPrice(), 2) * 100,
                 'currency' => $currency->iso_code,
                 'reference' => $requestRefId
             ),
@@ -535,7 +553,7 @@ class Netseasy extends PaymentModule {
             ),
         );
 
-        //Checkout type switch     
+        //Checkout type switch
         if (Configuration::get('NETS_INTEGRATION_TYPE') === 'REDIRECT') {
             $data['checkout']['integrationType'] = 'HostedPaymentPage';
             $data['checkout']['returnUrl'] = $this->context->link->getModuleLink($this->name, 'return', array('id_cart' => $cartId));
@@ -598,7 +616,7 @@ class Netseasy extends PaymentModule {
 
         $data['checkout']['consumer'] = $consumerData;
 
-        // Webhooks 
+        // Webhooks
         if ($_SERVER['SERVER_NAME'] != 'localhost') {
             if (Configuration::get('NETS_WEBHOOK_AUTHORIZATION') != '0') {
                 $webHookUrl = (Configuration::get('NETS_WEBHOOK_URL') ? Configuration::get('NETS_WEBHOOK_URL') : '');
@@ -722,7 +740,7 @@ class Netseasy extends PaymentModule {
     public function hookDisplayPaymentTop() {
         $nets_payment_selected = @$_COOKIE['nets_payment_selected'];
         $payment_split_type = @$_COOKIE['split_type'];
-        
+
         if (Configuration::get('NETS_INTEGRATION_TYPE') === 'EMBEDDED' && $nets_payment_selected) {
 
             $payload = $this->createRequestObject($this->context->cart->id, $payment_split_type);
@@ -795,16 +813,16 @@ class Netseasy extends PaymentModule {
     }
 
     public function addNetsTable() {
-        DB::getInstance()->execute("CREATE TABLE IF NOT EXISTS `" . _DB_PREFIX_ . "nets_payment_id` 
-            ( `id_nets_payment` INT(10) NOT NULL AUTO_INCREMENT , 
-             `id_order` INT(10) NOT NULL , 
-             `order_reference_id` VARCHAR(9) NOT NULL , 
-             `payment_id` VARCHAR(75) NOT NULL , 
-             `created_date` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP, 
+        DB::getInstance()->execute("CREATE TABLE IF NOT EXISTS `" . _DB_PREFIX_ . "nets_payment_id`
+            ( `id_nets_payment` INT(10) NOT NULL AUTO_INCREMENT ,
+             `id_order` INT(10) NOT NULL ,
+             `order_reference_id` VARCHAR(9) NOT NULL ,
+             `payment_id` VARCHAR(75) NOT NULL ,
+             `created_date` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
              PRIMARY KEY (`id_nets_payment`))");
 
         DB::getInstance()->execute("CREATE TABLE IF NOT EXISTS " . _DB_PREFIX_ . "nets_payment (
-            `id` int(10) unsigned NOT NULL auto_increment,		
+            `id` int(10) unsigned NOT NULL auto_increment,
             `payment_id` varchar(50) default NULL,
             `charge_id` varchar(50) default NULL,
             `product_ref` varchar(55) collate latin1_general_ci default NULL,
@@ -817,10 +835,10 @@ class Netseasy extends PaymentModule {
             )");
 
         DB::getInstance()->execute("CREATE TABLE IF NOT EXISTS `" . _DB_PREFIX_ . "nets_payment_status` (
-            `id` int(10) unsigned NOT NULL auto_increment,		
+            `id` int(10) unsigned NOT NULL auto_increment,
             `order_id` varchar(50) default NULL,
             `payment_id` varchar(50) default NULL,
-            `status` varchar(50) default NULL,	
+            `status` varchar(50) default NULL,
             `updated` int(2) unsigned default '0',
             `created` datetime NOT NULL,
             `timestamp` timestamp NOT NULL default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP,
