@@ -542,7 +542,7 @@ class Netseasy extends PaymentModule {
         $data = array(
             'order' => array(
                 'items' => $itemsArray,
-                'amount' => round($cart->getCartTotalPrice(), 2) * 100,
+                'amount' => round(round($cart->getCartTotalPrice(), 2) * 100),
                 'currency' => $currency->iso_code,
                 'reference' => $requestRefId
             ),
