@@ -2,6 +2,11 @@
 <xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" version="1.2">
   <file original="admin541hfxisr" source-language="en-US" target-language="en-US" datatype="plaintext">
     <body>
+      <trans-unit id="75ec8d268087485da2668367ff5548be">
+        <source>payment_amount_error</source>
+        <target>Payment amount incorrect</target>
+        <note>Line: </note>
+      </trans-unit>
       <trans-unit id="f8d8e2649e1a97116a5bf28e9d066e5d">
         <source>payment_id_error</source>
         <target>Unable to create payment ID</target>

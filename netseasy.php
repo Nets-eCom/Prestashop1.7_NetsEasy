@@ -735,8 +735,6 @@ class Netseasy extends PaymentModule {
         }
     }
 
-
-
     public function hookDisplayPaymentTop() {
         $nets_payment_selected = @$_COOKIE['nets_payment_selected'];
         $payment_split_type = @$_COOKIE['split_type'];
@@ -768,6 +766,11 @@ class Netseasy extends PaymentModule {
                 return $this->display(__FILE__, 'views/templates/hook/paymentEmbedded.tpl');
             } else {
                 $this->logger->logError('Invalid request created due to error ' . json_encode($response));
+
+                $this->context->smarty->assign([
+                    'error_message' => $response->errors ?? null
+                ]);
+
                 return $this->display(__FILE__, '/views/templates/front/payment_error.tpl');
             }
         }
