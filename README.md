@@ -2,12 +2,12 @@
 ============================================
 
 |Module       | Nets Easy Payment Module for Prestashop 1.7 to 8
-|----------------------------------------------------
+|-------------|---------------------------------------
 |Author       | `Nets eCom`
 |Prefix       | `EASY-PS1.7`
 |Shop Version | `1.7+ to 8.0.2`
 |Version      | `1.1.7`
-|Guide        | (https://developers.nets.eu/nets-easy/en-EU/docs/nets-easy-for-prestashop/nets-easy-for-prestashop-prestashop-17/)
+|Guide        | https://developer.nexigroup.com/nexi-checkout/en-EU/docs/checkout-for-prestashop-prestashop-17/
 |Github       | https://github.com/Nets-eCom/prestashop1.7_easy
 
 ## INSTALLATION
