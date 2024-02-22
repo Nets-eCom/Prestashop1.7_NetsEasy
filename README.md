@@ -1,5 +1,4 @@
 # NETS A/S - Prestashop 1.7 to 8 Payment Module
-============================================
 
 |Module       | Nets Easy Payment Module for Prestashop 1.7 to 8
 |-------------|---------------------------------------
