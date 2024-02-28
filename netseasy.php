@@ -618,7 +618,7 @@ class Netseasy extends PaymentModule {
 
         // Webhooks
         $host = parse_url(Configuration::get('NETS_WEBHOOK_URL'), PHP_URL_HOST);
-        if (!empty($host) || $host != 'localhost') {
+        if ($host !== 'localhost') {
             if (Configuration::get('NETS_WEBHOOK_AUTHORIZATION') != '0') {
                 $webHookUrl = (Configuration::get('NETS_WEBHOOK_URL') ? Configuration::get('NETS_WEBHOOK_URL') : '');
                 $authKey = Configuration::get('NETS_WEBHOOK_AUTHORIZATION');

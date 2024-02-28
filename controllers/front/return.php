@@ -93,8 +93,7 @@ class netseasyReturnModuleFrontController extends ModuleFrontController {
             Tools::redirect('index.php');
         }
 
-        $orderDetails = $order;
-        $orderReference = $orderDetails->reference;
+        $orderReference = $order->reference;
 
         // @todo use DB::getInstance()->insert
         DB::getInstance()->execute('INSERT INTO ' . _DB_PREFIX_ . 'nets_payment_id (`id_order`, `order_reference_id`, `payment_id`) VALUES (' . (int) $order->id . ', "' . $orderReference . '", "' . pSQL($paymentId) . '")');
