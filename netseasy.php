@@ -95,9 +95,15 @@ class Netseasy extends PaymentModule {
             Configuration::set('NETS_WEBHOOK_AUTHORIZATION', 'AZ-12345678-az');
         }
         if (!Configuration::get('NETS_WEBHOOK_URL')) {
-            Configuration::updateValue('NETS_WEBHOOK_URL', $this->context->link->getModuleLink($this->name, 'webhook', array(), true));
+            Configuration::updateValue('NETS_WEBHOOK_URL', Context::getContext()->link->getModuleLink($this->name, 'webhook', array(), true));
         }
-        return parent::install() && $this->addNetsTable() && $this->registerHook('actionAdminControllerSetMedia') && $this->registerHook('displayAdminOrderTop') && $this->registerHook('displayPaymentTop') && $this->registerHook('header') && $this->registerHook('paymentOptions') && $this->registerHook('paymentReturn');
+        return parent::install()
+            && $this->addNetsTable()
+            && $this->registerHook('actionAdminControllerSetMedia')
+            && $this->registerHook('displayAdminOrderTop')
+            && $this->registerHook('displayPaymentTop')
+            && $this->registerHook(substr(_PS_VERSION_, 0, 3) === '1.7' ? 'header' : 'displayHeader')
+            && $this->registerHook('paymentOptions');
     }
 
     /**
@@ -292,7 +298,14 @@ class Netseasy extends PaymentModule {
         }
     }
 
+    /**
+     * Hook needed for PrestaShop 1.7
+     */
     public function hookHeader() {
+        $this->hookDisplayHeader();
+    }
+
+    public function hookDisplayHeader() {
         if (Configuration::get('NETS_INTEGRATION_TYPE') === 'EMBEDDED') {
             $this->context->controller->addJS(array($this->_path . 'views/js/nets_checkout.js'));
             $this->context->controller->addCSS($this->_path . 'views/css/front.css');
