@@ -9,7 +9,7 @@
     border: 1px solid #abbedb;
 }
 .frame-wrapper.nets .frame-content {
-    padding: 0px;
+    padding: 0;
 }
 .frame-head.nets {
     background-color: #3473aa !important;
@@ -19,8 +19,8 @@
 }
 .nets-container {
     margin-top: -10px;
-    padding: 0px;
-    border: 0px solid #ddd;
+    padding: 0;
+    border: 0 solid #ddd;
     text-align:left;
 }
 .nets-container li {
@@ -108,7 +108,7 @@ td.edittext:first-child {
     padding: 6px 16px !important;
     line-height: 20px;
     color:#fff !important;
-    border: 0px !important;
+    border: 0 !important;
     border-radius: 3px !important;
     cursor: pointer !important;
     text-transform: uppercase;
@@ -132,7 +132,7 @@ td.edittext:first-child {
     background:#0096f0 !important;
 }
 .nets-status {
-    padding: 0px;
+    padding: 0;
     color: #055b79;
     font-size: 14px;
     font-weight: 600;
@@ -175,7 +175,7 @@ textarea {
     padding-right: 20px;
 }
 td.listing {
-    padding: 5px 20px 0px 0px;
+    padding: 5px 20px 0 0;
     font-size: 11px;
 }
 td.listing.bottom {
@@ -221,7 +221,7 @@ td.listing.top.partial-charge .nets-status {
     color: #399b15;
 }
 td.listing.partial-charge {
-    padding: 0px 12px;
+    padding: 0 12px;
     background: #f6ffee;
     border-top: 1px solid #e9f0e1;
 }
@@ -229,7 +229,7 @@ td.listing.partial-charge {
 .qty-box {
     width: 100%;
     margin:0;
-    padding:0px;
+    padding:0;
     text-transform:uppercase;
 }
 
@@ -243,8 +243,8 @@ td.listing.partial-charge {
     margin: 0;
     text-align:center;
     border:1px solid #b6b6b6;
-    border-left:0px;
-    border-right:0px;
+    border-left:0;
+    border-right:0;
     border-radius:0;
     background:#fff;
 }
@@ -276,8 +276,8 @@ input[class*="plus"] {
 }
 input.single.qty.value:focus-visible {
     border: 1px solid #b6b6b6;
-    border-left: 0px;
-    border-right: 0px;
+    border-left: 0;
+    border-right: 0;
     outline: none !important;
 }
 
@@ -289,12 +289,12 @@ input.single.qty.value:focus-visible {
 }
 
 input[class*="minus"] {
-    border-radius:3px 0px 0px 3px !important;
-    border-right: 0px !important;
+    border-radius:3px 0 0 3px !important;
+    border-right: 0 !important;
 }
 input[class*="plus"] {
-    border-radius:0px 3px 3px 0px !important;
-    border-left: 0px !important;
+    border-radius:0 3px 3px 0 !important;
+    border-left: 0 !important;
 }
 .is-disabled,
 .is-disabled:hover,
@@ -319,7 +319,7 @@ input[type="button"]:hover {
 .item-listing {
     background: #f6f7f8;
     padding: 6px 10px;
-    margin: 15px 0px 10px 0px;
+    margin: 15px 0 10px 0;
     border-radius: 3px;
 }
 .item-listing.charged {
