@@ -583,13 +583,13 @@ class AdminNetseasyOrderController extends ModuleAdminController {
         //save charge details in db for partial refund
         if ((isset($ref) && !empty($ref)) && isset($response['chargeId'])) {
             $charge_query = "insert into " . _DB_PREFIX_ . "nets_payment (`payment_id`, `charge_id`,  `product_ref`, `charge_qty`, `charge_left_qty`,`created`) "
-                    . "values ('" . $this->paymentId . "', '" . $response['chargeId'] . "', '" . $ref . "', '" . $chargeQty . "', '" . $chargeQty . "',now())";
+                    . "values ('" . $this->paymentId . "', '" . pSql($response['chargeId']) . "', '" . pSql($ref) . "', '" . (int) $chargeQty . "', '" . (int) $chargeQty . "',now())";
             DB::getInstance()->execute($charge_query);
         } else {
             if (isset($response['chargeId'])) {
                 foreach ($data['order']['items'] as $key => $value) {
                     $charge_query = "insert into " . _DB_PREFIX_ . "nets_payment (`payment_id`, `charge_id`,  `product_ref`, `charge_qty`, `charge_left_qty`,`created`) "
-                            . "values ('" . $this->paymentId . "', '" . $response['chargeId'] . "', '" . $value['reference'] . "', '" . $value['quantity'] . "', '" . $value['quantity'] . "',now())";
+                            . "values ('" . $this->paymentId . "', '" . pSql($response['chargeId']) . "', '" . pSql($value['reference']) . "', '" . (int) $value['quantity'] . "', '" . (int) $value['quantity'] . "',now())";
                     DB::getInstance()->execute($charge_query);
                 }
             }
@@ -632,7 +632,7 @@ class AdminNetseasyOrderController extends ModuleAdminController {
 
                 if ($refExist) {
                     $charge_query = DB::getInstance()->executeS(
-                            "SELECT `payment_id`, `charge_id`,  `product_ref`, `charge_qty`, `charge_left_qty` FROM " . _DB_PREFIX_ . "nets_payment WHERE payment_id = '" . $this->paymentId . "' AND charge_id = '" . $val['chargeId'] . "' AND product_ref = '" . $ref . "' AND charge_left_qty !=0"
+                            "SELECT `payment_id`, `charge_id`,  `product_ref`, `charge_qty`, `charge_left_qty` FROM " . _DB_PREFIX_ . "nets_payment WHERE payment_id = '" . $this->paymentId . "' AND charge_id = '" . pSql($val['chargeId']) . "' AND product_ref = '" . pSql($ref) . "' AND charge_left_qty !=0"
                     );
 
                     if (!empty(DB::getInstance()->numRows($charge_query))) {
@@ -655,12 +655,12 @@ class AdminNetseasyOrderController extends ModuleAdminController {
                             $refundUrl = $this->getRefundPaymentUrl($key);
 
                             $this->logger->logInfo("[Refund Process][" . $this->paymentId . "] Admin Partial Refund Payment Request : " . json_encode($body));
-                            $api_return = $this->getCurlResponse1($refundUrl, 'POST', json_encode($body));
+                            $api_return = $this->getCurlResponse($refundUrl, 'POST', json_encode($body));
                             $this->logger->logInfo("[Refund Process][" . $this->paymentId . "] Admin Partial Refund Payment Response : " . $api_return);
 
                             //update for left charge quantity
                             $singlecharge_query = DB::getInstance()->executeS(
-                                    "SELECT  `charge_left_qty` FROM " . _DB_PREFIX_ . "nets_payment WHERE payment_id = '" . $this->paymentId . "' AND charge_id = '" . $key . "' AND product_ref = '" . $ref . "' AND charge_left_qty !=0 "
+                                    "SELECT  `charge_left_qty` FROM " . _DB_PREFIX_ . "nets_payment WHERE payment_id = '" . $this->paymentId . "' AND charge_id = '" . pSql($key) . "' AND product_ref = '" . pSql($ref) . "' AND charge_left_qty !=0 "
                             );
                             if (!empty(DB::getInstance()->numRows($singlecharge_query))) {
                                 foreach ($singlecharge_query as $scrows) {
@@ -672,7 +672,7 @@ class AdminNetseasyOrderController extends ModuleAdminController {
                                 $charge_left_qty = -$charge_left_qty;
                             }
                             $qresult = DB::getInstance()->execute(
-                                    "UPDATE " . _DB_PREFIX_ . "nets_payment SET charge_left_qty = $charge_left_qty WHERE payment_id = '" . $this->paymentId . "' AND charge_id = '" . $key . "' AND product_ref = '" . $ref . "'"
+                                    "UPDATE " . _DB_PREFIX_ . "nets_payment SET charge_left_qty = ". (int) $charge_left_qty . " WHERE payment_id = '" . $this->paymentId . "' AND charge_id = '" . pSql($key) . "' AND product_ref = '" . pSql($ref) . "'"
                             );
                         }
                         break;
@@ -697,7 +697,7 @@ class AdminNetseasyOrderController extends ModuleAdminController {
                         'netTotalAmount' => $value['netTotalAmount'],
                     );
                     $qresult = DB::getInstance()->execute(
-                            "UPDATE " . _DB_PREFIX_ . "nets_payment SET charge_left_qty = 0 WHERE payment_id = '" . $this->paymentId . "' AND charge_id = '" . $val['chargeId'] . "' AND product_ref = '" . $value['reference'] . "'"
+                            "UPDATE " . _DB_PREFIX_ . "nets_payment SET charge_left_qty = 0 WHERE payment_id = '" . $this->paymentId . "' AND charge_id = '" . pSql($val['chargeId']) . "' AND product_ref = '" . pSql($value['reference']) . "'"
                     );
                 }
                 $itemsGrossPriceSumma = 0;
@@ -773,44 +773,6 @@ class AdminNetseasyOrderController extends ModuleAdminController {
 
         $response = json_decode($api_return, true);
         Tools::redirectAdmin('sell/orders/' . $orderid . '/view?_token=' . $token);
-    }
-
-    public function getCurlResponse1($url, $method = "POST", $bodyParams = NULL) {
-        $result = '';
-        // initiating curl request to call api's
-        $oCurl = curl_init();
-        curl_setopt($oCurl, CURLOPT_URL, $url);
-        curl_setopt($oCurl, CURLOPT_CUSTOMREQUEST, $method);
-        curl_setopt($oCurl, CURLOPT_RETURNTRANSFER, 1);
-        curl_setopt($oCurl, CURLOPT_HTTPHEADER, $this->getHeaders());
-        if ($method == "POST" || $method == "PUT") {
-            curl_setopt($oCurl, CURLOPT_POSTFIELDS, $bodyParams);
-        }
-
-        $result = curl_exec($oCurl);
-        $info = curl_getinfo($oCurl);
-
-        switch ($info['http_code']) {
-            case 401:
-                $message = 'NETS Easy authorization failed. Check your keys';
-                break;
-            case 400:
-                $message = 'NETS Easy. Bad request: ' . $result;
-                break;
-            case 404:
-                $message = 'Payment or charge not found';
-                break;
-            case 500:
-                $message = 'Unexpected error';
-                break;
-        }
-        if (!empty($message)) {
-            $this->logger->logError("Response Error : " . $message);
-        }
-
-        curl_close($oCurl);
-
-        return $result;
     }
 
     public function getCurlResponse($url, $method = "POST", $bodyParams = NULL) {
@@ -954,12 +916,12 @@ class AdminNetseasyOrderController extends ModuleAdminController {
 
             foreach ($response['payment']['charges'] as $key => $values) {
                 $charge_query = DB::getInstance()->executeS(
-                        "SELECT `charge_id` FROM " . _DB_PREFIX_ . "nets_payment WHERE payment_id = '" . $this->paymentId . "' AND charge_id = '" . $values['chargeId'] . "' "
+                        "SELECT `charge_id` FROM " . _DB_PREFIX_ . "nets_payment WHERE payment_id = '" . $this->paymentId . "' AND charge_id = '" . pSql($values['chargeId']) . "' "
                 );
                 if (empty(DB::getInstance()->numRows($charge_query))) {
                     for ($i = 0; $i < count($values['orderItems']); $i++) {
                         $charge_iquery = "insert into " . _DB_PREFIX_ . "nets_payment (`payment_id`, `charge_id`,  `product_ref`, `charge_qty`, `charge_left_qty`,`created`) "
-                                . "values ('" . $this->paymentId . "', '" . $values['chargeId'] . "', '" . $values['orderItems'][$i]['reference'] . "', '" . $values['orderItems'][$i]['quantity'] . "', '" . $values['orderItems'][$i]['quantity'] . "',now())";
+                                . "values ('" . $this->paymentId . "', '" . pSql($values['chargeId']) . "', '" . pSql($values['orderItems'][$i]['reference']) . "', '" . (int) $values['orderItems'][$i]['quantity'] . "', '" . (int) $values['orderItems'][$i]['quantity'] . "',now())";
                         DB::getInstance()->execute($charge_iquery);
                     }
                 }

@@ -113,7 +113,7 @@ class netseasyReturnModuleFrontController extends ModuleFrontController {
                         if (isset($val->chargeId)) {
                             // @todo use DB::getInstance()->insert
                             $charge_query = "insert into " . _DB_PREFIX_ . "nets_payment (`payment_id`, `charge_id`,  `product_ref`, `charge_qty`, `charge_left_qty`,`created`) "
-                                    . "values ('" . pSQL($paymentId) . "', '" . $val->chargeId . "', '" . $value->reference . "', '" . $value->quantity . "', '" . $value->quantity . "',now())";
+                                    . "values ('" . pSQL($paymentId) . "', '" . $val->chargeId . "', '" . $value->reference . "', '" . (int) $value->quantity . "', '" . (int) $value->quantity . "',now())";
                             DB::getInstance()->execute($charge_query);
                             $logger->logInfo("[Order Response][" . $paymentId . "] Updated Data for Auto Charge");
                         }
