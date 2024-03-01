@@ -800,7 +800,6 @@ class Netseasy extends PaymentModule {
 
         if ($order->module == $this->name) {
 
-            $order_token = Tools::getAdminToken('AdminOrders' . (int) Tab::getIdFromClassName('AdminOrders') . (int) $this->context->employee->id);
             $nets = Db::getInstance()->getRow('SELECT * FROM ' . _DB_PREFIX_ . 'nets_payment_status WHERE order_id = ' . (int) $orderId);
 
             require_once(_PS_MODULE_DIR_ . $this->name . '/controllers/admin/AdminNetseasyOrderController.php');
@@ -810,7 +809,6 @@ class Netseasy extends PaymentModule {
             $this->context->smarty->assign(array(
                 'ps_version' => _PS_VERSION_,
                 'id_order' => $orderId,
-                'order_token' => $order_token,
                 'nets' => $nets,
                 'url' => $url,
                 'path' => $this->_path,
