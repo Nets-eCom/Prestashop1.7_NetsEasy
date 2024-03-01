@@ -817,7 +817,7 @@ class Netseasy extends PaymentModule {
                 'module' => $this->name,
                 'moduleName' => $this->displayPaymentName,
                 'user_token' => Tools::getAdminTokenLite('AdminNetseasyOrder'),
-                'order_token' => $_GET['_token'],
+                'order_token' => Tools::getValue('_token'),
                 'adminurl' => Tools::getHttpHost(true) . __PS_BASE_URI__ . basename(_PS_ADMIN_DIR_),
                 'data' => $netsOrderObj->data
             ));
