@@ -655,7 +655,7 @@ class AdminNetseasyOrderController extends ModuleAdminController {
                             $refundUrl = $this->getRefundPaymentUrl($key);
 
                             $this->logger->logInfo("[Refund Process][" . $this->paymentId . "] Admin Partial Refund Payment Request : " . json_encode($body));
-                            $api_return = $this->getCurlResponse1($refundUrl, 'POST', json_encode($body));
+                            $api_return = $this->getCurlResponse($refundUrl, 'POST', json_encode($body));
                             $this->logger->logInfo("[Refund Process][" . $this->paymentId . "] Admin Partial Refund Payment Response : " . $api_return);
 
                             //update for left charge quantity
@@ -773,44 +773,6 @@ class AdminNetseasyOrderController extends ModuleAdminController {
 
         $response = json_decode($api_return, true);
         Tools::redirectAdmin('sell/orders/' . $orderid . '/view?_token=' . $token);
-    }
-
-    public function getCurlResponse1($url, $method = "POST", $bodyParams = NULL) {
-        $result = '';
-        // initiating curl request to call api's
-        $oCurl = curl_init();
-        curl_setopt($oCurl, CURLOPT_URL, $url);
-        curl_setopt($oCurl, CURLOPT_CUSTOMREQUEST, $method);
-        curl_setopt($oCurl, CURLOPT_RETURNTRANSFER, 1);
-        curl_setopt($oCurl, CURLOPT_HTTPHEADER, $this->getHeaders());
-        if ($method == "POST" || $method == "PUT") {
-            curl_setopt($oCurl, CURLOPT_POSTFIELDS, $bodyParams);
-        }
-
-        $result = curl_exec($oCurl);
-        $info = curl_getinfo($oCurl);
-
-        switch ($info['http_code']) {
-            case 401:
-                $message = 'NETS Easy authorization failed. Check your keys';
-                break;
-            case 400:
-                $message = 'NETS Easy. Bad request: ' . $result;
-                break;
-            case 404:
-                $message = 'Payment or charge not found';
-                break;
-            case 500:
-                $message = 'Unexpected error';
-                break;
-        }
-        if (!empty($message)) {
-            $this->logger->logError("Response Error : " . $message);
-        }
-
-        curl_close($oCurl);
-
-        return $result;
     }
 
     public function getCurlResponse($url, $method = "POST", $bodyParams = NULL) {
