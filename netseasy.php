@@ -727,17 +727,6 @@ class Netseasy extends PaymentModule {
         return true;
     }
 
-    function randomString($length = 8) {
-        $str = "";
-        $characters = array_merge(range('A', 'Z'), range('a', 'z'), range('0', '9'));
-        $max = count($characters) - 1;
-        for ($i = 0; $i < $length; $i++) {
-            $rand = mt_rand(0, $max);
-            $str .= $characters[$rand];
-        }
-        return $str;
-    }
-
     public function isUpdating() {
         $dbVersion = Db::getInstance()->getValue('SELECT `version` FROM `' . _DB_PREFIX_ . 'module` WHERE `name` = \'' . pSQL($this->name) . '\'');
         return version_compare($this->version, $dbVersion, '>');
