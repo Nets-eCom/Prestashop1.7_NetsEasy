@@ -95,9 +95,15 @@ class Netseasy extends PaymentModule {
             Configuration::set('NETS_WEBHOOK_AUTHORIZATION', 'AZ-12345678-az');
         }
         if (!Configuration::get('NETS_WEBHOOK_URL')) {
-            Configuration::updateValue('NETS_WEBHOOK_URL', $this->context->link->getModuleLink($this->name, 'webhook', array(), true));
+            Configuration::updateValue('NETS_WEBHOOK_URL', Context::getContext()->link->getModuleLink($this->name, 'webhook', array(), true));
         }
-        return parent::install() && $this->addNetsTable() && $this->registerHook('actionAdminControllerSetMedia') && $this->registerHook('displayAdminOrderTop') && $this->registerHook('displayPaymentTop') && $this->registerHook('header') && $this->registerHook('paymentOptions') && $this->registerHook('paymentReturn');
+        return parent::install()
+            && $this->addNetsTable()
+            && $this->registerHook('actionAdminControllerSetMedia')
+            && $this->registerHook('displayAdminOrderTop')
+            && $this->registerHook('displayPaymentTop')
+            && $this->registerHook(substr(_PS_VERSION_, 0, 3) === '1.7' ? 'header' : 'displayHeader')
+            && $this->registerHook('paymentOptions');
     }
 
     /**
@@ -292,7 +298,14 @@ class Netseasy extends PaymentModule {
         }
     }
 
+    /**
+     * Hook needed for PrestaShop 1.7
+     */
     public function hookHeader() {
+        $this->hookDisplayHeader();
+    }
+
+    public function hookDisplayHeader() {
         if (Configuration::get('NETS_INTEGRATION_TYPE') === 'EMBEDDED') {
             $this->context->controller->addJS(array($this->_path . 'views/js/nets_checkout.js'));
             $this->context->controller->addCSS($this->_path . 'views/css/front.css');
@@ -617,7 +630,8 @@ class Netseasy extends PaymentModule {
         $data['checkout']['consumer'] = $consumerData;
 
         // Webhooks
-        if ($_SERVER['SERVER_NAME'] != 'localhost') {
+        $host = parse_url(Configuration::get('NETS_WEBHOOK_URL'), PHP_URL_HOST);
+        if ($host !== 'localhost') {
             if (Configuration::get('NETS_WEBHOOK_AUTHORIZATION') != '0') {
                 $webHookUrl = (Configuration::get('NETS_WEBHOOK_URL') ? Configuration::get('NETS_WEBHOOK_URL') : '');
                 $authKey = Configuration::get('NETS_WEBHOOK_AUTHORIZATION');
@@ -713,17 +727,6 @@ class Netseasy extends PaymentModule {
         return true;
     }
 
-    function randomString($length = 8) {
-        $str = "";
-        $characters = array_merge(range('A', 'Z'), range('a', 'z'), range('0', '9'));
-        $max = count($characters) - 1;
-        for ($i = 0; $i < $length; $i++) {
-            $rand = mt_rand(0, $max);
-            $str .= $characters[$rand];
-        }
-        return $str;
-    }
-
     public function isUpdating() {
         $dbVersion = Db::getInstance()->getValue('SELECT `version` FROM `' . _DB_PREFIX_ . 'module` WHERE `name` = \'' . pSQL($this->name) . '\'');
         return version_compare($this->version, $dbVersion, '>');
@@ -786,7 +789,6 @@ class Netseasy extends PaymentModule {
 
         if ($order->module == $this->name) {
 
-            $order_token = Tools::getAdminToken('AdminOrders' . (int) Tab::getIdFromClassName('AdminOrders') . (int) $this->context->employee->id);
             $nets = Db::getInstance()->getRow('SELECT * FROM ' . _DB_PREFIX_ . 'nets_payment_status WHERE order_id = ' . (int) $orderId);
 
             require_once(_PS_MODULE_DIR_ . $this->name . '/controllers/admin/AdminNetseasyOrderController.php');
@@ -796,14 +798,13 @@ class Netseasy extends PaymentModule {
             $this->context->smarty->assign(array(
                 'ps_version' => _PS_VERSION_,
                 'id_order' => $orderId,
-                'order_token' => $order_token,
                 'nets' => $nets,
                 'url' => $url,
                 'path' => $this->_path,
                 'module' => $this->name,
                 'moduleName' => $this->displayPaymentName,
                 'user_token' => Tools::getAdminTokenLite('AdminNetseasyOrder'),
-                'order_token' => $_GET['_token'],
+                'order_token' => Tools::getValue('_token'),
                 'adminurl' => Tools::getHttpHost(true) . __PS_BASE_URI__ . basename(_PS_ADMIN_DIR_),
                 'data' => $netsOrderObj->data
             ));
