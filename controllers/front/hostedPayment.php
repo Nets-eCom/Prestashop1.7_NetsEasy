@@ -69,7 +69,6 @@ class netseasyHostedPaymentModuleFrontController extends ModuleFrontController {
                 Tools::redirect($response->hostedPaymentPageUrl);
             }
         } else {
-            setcookie("nets_transaction_error", 'Unable to create payment request for you. Try again with different data', time() + 3600,'/');
             $nets->logger->logError('Invalid request created for hosted payment redirecting to order controller step 1'. json_encode($requestObj));
             $errorMessage = Context::getContext()->getTranslator()->trans('payment_id_error', [], 'Modules.Netseasy.Payment_error');
             if (isset($response->errors->amount[0])) {
