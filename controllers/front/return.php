@@ -55,6 +55,11 @@ class netseasyReturnModuleFrontController extends ModuleFrontController {
         $paymentDetails = $nets->MakeCurl($nets->getApiUrl()['backend'] . $paymentId, array(), 'GET');
         $logger->logInfo("[Order Payment Method][" . $paymentId . "] Retrieve Payment Response : " . json_encode($paymentDetails));
 
+        if ($cart->secure_key !== $paymentDetails->payment->myReference) {
+            $logger->logError("[Order Response][" . $paymentId . "] Cart secure_key mismatch : " . $cart->secure_key);
+            Tools::redirect('index.php');
+        }
+
         if (!$cart->orderExists()) {
 
             try {
@@ -62,7 +67,7 @@ class netseasyReturnModuleFrontController extends ModuleFrontController {
                 $add_order = $this->module->validateOrder(
                         (int) $cartId,
                         Configuration::get('PS_OS_PAYMENT'),
-                        (float) $this->context->cart->getOrderTotal(true, Cart::BOTH),
+                        (float) ($paymentDetails->payment->orderDetails->amount/100),
                         $this->getPaymentMethod($paymentDetails),
                         null,
                         null,
