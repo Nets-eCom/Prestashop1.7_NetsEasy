@@ -44,7 +44,7 @@ class AdminNetseasyOrderController extends ModuleAdminController {
         $this->logger->logInfo("[Payment Request][" . $this->paymentId . "] Admin Retrieve Payment Response : " . $api_return);
         $response = json_decode($api_return, true);
         $this->data['responseItems'] = $this->checkPartialItems($this->orderId, $api_return);
-        $status = $this->is_easy($this->orderId);
+        $status = $this->processNetseasyStatus($this->orderId);
         $this->data['status'] = $status;
         //Handle charge and refund done from portal
         $this->managePortalChargeAndRefund($api_return);
@@ -414,119 +414,108 @@ class AdminNetseasyOrderController extends ModuleAdminController {
     }
 
     /**
-     * Function to check the nets payment status and display in admin order list backend page
+     * Function to check and process the nets payment status and display in admin order list backend page
      *
-     * @return Payment Status
+     * @return array|string|null retuns string in case of error or array ['payStatus' => string] on success
      */
-    public function is_easy($oder_id) {
-        if (!empty($oder_id)) {
-            // Get order db status from orders_status_history if cancelled          
-            $query = DB::getInstance()->executeS("SELECT current_state FROM `" . _DB_PREFIX_ . "orders`  WHERE id_order = '" . (int) $oder_id . "'");
-            $current_state = reset($query)['current_state'];
-            // if order is cancelled and payment is not updated as cancelled, call nets cancel payment api
-            if ($current_state === '6') {
-                $data = $this->getOrderItems($oder_id);
-                // call cancel api here
-                $cancelUrl = $this->getVoidPaymentUrl($this->paymentId);
-                $cancelBody = [
-                    'amount' => $data['order']['amount'] * 100,
-                    'orderItems' => $data['order']['items']
-                ];
-                try {
-                    $this->logger->logInfo("[Check Payment Status][" . $this->paymentId . "] Admin Cancel Payment Request : " . json_encode($cancelBody));
-                    $this->getCurlResponse($cancelUrl, 'POST', json_encode($cancelBody));
-                    $this->logger->logInfo("[Check Payment Status][" . $this->paymentId . "] Admin Cancel Payment Response");
-                } catch (Exception $e) {
-                    $this->logger->logError("[Check Payment Status][" . $this->paymentId . "] Admin Cancel Payment Exception : " . json_encode($e->getMessage()));
-                    return $e->getMessage();
-                }
-            }
+    private function processNetseasyStatus(int $orderId) {
 
+        if (empty($orderId)) {
+            return;
+        }
+
+        // Get order db status from orders_status_history if cancelled
+        $query = DB::getInstance()->executeS("SELECT current_state FROM `" . _DB_PREFIX_ . "orders`  WHERE id_order = '" . (int) $orderId . "'");
+        $current_state = reset($query)['current_state'];
+        // if order is cancelled and payment is not updated as cancelled, call nets cancel payment api
+        // @todo call cancel payment api in actionOrderStatusPostUpdate instead
+        if ($current_state === Configuration::get('PS_OS_CANCELED')) {
+            $data = $this->getOrderItems($orderId);
+            // call cancel api here
+            $cancelUrl = $this->getVoidPaymentUrl($this->paymentId);
+            $cancelBody = [
+                'amount' => $data['order']['amount'] * 100,
+                'orderItems' => $data['order']['items']
+            ];
             try {
-                // Get payment status from nets payments api
-                $this->logger->logInfo("[Check Payment Status][" . $this->paymentId . "] Admin Retrieve Payment Request");
-                $api_return = $this->getCurlResponse($this->getApiUrl() . $this->paymentId, 'GET');
-                $this->logger->logInfo("[Check Payment Status][" . $this->paymentId . "] Admin Retrieve Payment Response");
-                $response = json_decode($api_return, true);
+                $this->logger->logInfo("[Check Payment Status][" . $this->paymentId . "] Admin Cancel Payment Request : " . json_encode($cancelBody));
+                $this->getCurlResponse($cancelUrl, 'POST', json_encode($cancelBody));
+                $this->logger->logInfo("[Check Payment Status][" . $this->paymentId . "] Admin Cancel Payment Response");
             } catch (Exception $e) {
-                $this->logger->logError("[Check Payment Status][" . $this->paymentId . "] Admin Retrieve Payment Exception : " . json_encode($e->getMessage()));
+                $this->logger->logError("[Check Payment Status][" . $this->paymentId . "] Admin Cancel Payment Exception : " . json_encode($e->getMessage()));
                 return $e->getMessage();
             }
-            $dbPayStatus = '';
-            $paymentStatus = $cancelled = $reserved = $charged = $refunded = $pending = $chargeid = $chargedate = '';
-            $paymentType = isset($response['payment']['paymentDetails']['paymentType']) ? $response['payment']['paymentDetails']['paymentType'] : '';
-
-            if (isset($response['payment']['summary']['cancelledAmount'])) {
-                $cancelled = $response['payment']['summary']['cancelledAmount'];
-            }
-            if (isset($response['payment']['summary']['reservedAmount'])) {
-                $reserved = $response['payment']['summary']['reservedAmount'];
-            }
-            if (isset($response['payment']['summary']['chargedAmount'])) {
-                $charged = $response['payment']['summary']['chargedAmount'];
-            }
-            if (isset($response['payment']['summary']['refundedAmount'])) {
-                $refunded = $response['payment']['summary']['refundedAmount'];
-            }
-            if (isset($response['payment']['refunds'][0]['state']) && $response['payment']['refunds'][0]['state'] == 'Pending') {
-                $pending = "Pending";
-            }
-             $partialc = $reserved - (int)$charged;
-            $partialr = $reserved - (int)$refunded;
-            if (isset($response['payment']['charges'][0]['chargeId'])) {
-                $chargeid = $response['payment']['charges'][0]['chargeId'];
-            }
-            if (isset($response['payment']['charges'][0]['created'])) {
-                $chargedate = $response['payment']['charges'][0]['created'];
-            }
-
-            if ($reserved || $paymentType == "A2A") {
-                if ($cancelled) {
-                    $langStatus = "cancel";
-                    $paymentStatus = "Cancelled";
-                    $dbPayStatus = 1; // For payment status as cancelled in psnets_payment db table
-                } elseif ($charged && $pending !== 'Pending') {
-                    if ($reserved != $charged && $paymentType != "A2A") {
-                        $paymentStatus = "Partial Charged";
-                        $langStatus = "partial_charge";
-                        $dbPayStatus = 3; // For payment status as Partial Charged in psnets_payment db table                         
-                    } else if ($refunded) {
-                        if ($reserved != $refunded && $paymentType != "A2A") {
-                            $paymentStatus = "Partial Refunded";
-                            $langStatus = "partial_refund";
-                            $dbPayStatus = 5; // For payment status as Partial Charged in psnets_payment db table                             
-                        } else if ($paymentType == "A2A" && $refunded != $charged) {
-                            $paymentStatus = "Partial Refunded";
-                            $langStatus = "partial_refund";
-                            $dbPayStatus = 5;
-                        } else {
-                            $paymentStatus = "Refunded";
-                            $langStatus = "refunded";
-                            $dbPayStatus = 6; // For payment status as Refunded in psnets_payment db table
-                        }
-                    } else {
-                        $paymentStatus = "Charged";
-                        $langStatus = "charged";
-                        $dbPayStatus = 4; // For payment status as Charged in psnets_payment db table
-                    }
-                } else if ($pending) {
-                    $paymentStatus = "Refund Pending";
-                    $langStatus = "refund_pending";
-                } else {
-                    $paymentStatus = 'Reserved';
-                    $langStatus = "reserved";
-                    $dbPayStatus = 2; // For payment status as Authorized in psnets_payment db table
-                }
-            } else {
-                $paymentStatus = "Failed";
-                $langStatus = "failed";
-                $dbPayStatus = 0; // For payment status as Failed in psnets_payment db table
-            }
-            return array(
-                'payStatus' => $paymentStatus,
-                'langStatus' => $langStatus
-            );
         }
+
+        try {
+            // Get payment status from nets payments api
+            $this->logger->logInfo("[Check Payment Status][" . $this->paymentId . "] Admin Retrieve Payment Request");
+            $api_return = $this->getCurlResponse($this->getApiUrl() . $this->paymentId, 'GET');
+            $this->logger->logInfo("[Check Payment Status][" . $this->paymentId . "] Admin Retrieve Payment Response");
+            $response = json_decode($api_return, true);
+        } catch (Exception $e) {
+            $this->logger->logError("[Check Payment Status][" . $this->paymentId . "] Admin Retrieve Payment Exception : " . json_encode($e->getMessage()));
+            return $e->getMessage();
+        }
+
+        $pending = '';
+        $cancelled = $reserved = $charged = $refunded = 0;
+        $paymentType = isset($response['payment']['paymentDetails']['paymentType']) ? $response['payment']['paymentDetails']['paymentType'] : '';
+
+        if (isset($response['payment']['summary']['cancelledAmount'])) {
+            $cancelled = $response['payment']['summary']['cancelledAmount'];
+        }
+        if (isset($response['payment']['summary']['reservedAmount'])) {
+            $reserved = $response['payment']['summary']['reservedAmount'];
+        }
+        if (isset($response['payment']['summary']['chargedAmount'])) {
+            $charged = $response['payment']['summary']['chargedAmount'];
+        }
+        if (isset($response['payment']['summary']['refundedAmount'])) {
+            $refunded = $response['payment']['summary']['refundedAmount'];
+        }
+        if (isset($response['payment']['refunds'][0]['state']) && $response['payment']['refunds'][0]['state'] == 'Pending') {
+            $pending = 'Pending';
+        }
+
+        if ($reserved === 0 && $charged === 0) {
+            return ['payStatus' => 'Failed'];
+        }
+
+        if ($cancelled) {
+            return ['payStatus' => 'Cancelled'];
+        }
+
+        if ($charged > 0 && $reserved !== $charged && $paymentType !== 'A2A') {
+            return ['payStatus' => 'Partial Charged'];
+        }
+
+        if ($refunded > 0 && $paymentType !== 'A2A' && $reserved > $refunded) {
+            return ['payStatus' => 'Partial Refunded'];
+        }
+
+        if ($refunded > 0 && $paymentType === 'A2A' && $charged > $refunded) {
+            return ['payStatus' => 'Partial Refunded'];
+        }
+
+        if ($refunded > 0 && ($reserved === $refunded || $charged === $refunded)) {
+            return ['payStatus' => 'Refunded'];
+        }
+
+        if ($pending) {
+            return ['payStatus' => 'Refund Pending'];
+        }
+
+        if ($charged) {
+            return ['payStatus' => 'Charged'];
+        }
+
+        if ($reserved) {
+            return ['payStatus' => 'Reserved'];
+        }
+
+        return ['payStatus' => 'Invalid payment status'];
+
     }
 
     /*
@@ -840,8 +829,8 @@ class AdminNetseasyOrderController extends ModuleAdminController {
         return $response['payment']['charges'][0]['chargeId'];
     }
 
-    public function getResponse($oder_id) {
-        $api_return = $this->getCurlResponse($this->getApiUrl() . $this->getPaymentId($oder_id), 'GET');
+    public function getResponse($order_id) {
+        $api_return = $this->getCurlResponse($this->getApiUrl() . $this->getPaymentId($order_id), 'GET');
         $response = json_decode($api_return, true);
         $result = json_encode($response, JSON_PRETTY_PRINT);
         return $result;
