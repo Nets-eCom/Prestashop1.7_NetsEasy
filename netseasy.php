@@ -670,9 +670,9 @@ class Netseasy extends PaymentModule {
                     )
                 );
             }
-            $logger = new FileLogger();
-            $logger->setFilename(_PS_ROOT_DIR_ . "/var/logs/nets_webhook.log");
         }
+
+        $data['myReference'] = $cart->secure_key;
 
         if (!empty($split_payment)) {
             $paymentMethodName = $this->getMethodName($split_payment);

@@ -14,24 +14,21 @@ class netseasyReturnModuleFrontController extends ModuleFrontController {
         $logger->logInfo("Response Received : " . json_encode($_GET));
 
         if (!Tools::getIsset('id_cart')) {
-            // @todo change setcookie
-            setcookie("nets_transaction_error", 'Something went wrong with your order please try again later', time() + 3600, '/');
             $logger->logError("[Order Response] Empty payment response received." . json_encode($_GET));
-            Tools::redirect('index.php');
+            $this->errors[] = $this->trans('Something went wrong with your order please try again later', [], 'Modules.Netseasy.Payment_error');
+            $this->redirectWithNotifications('index.php?controller=order&step=1');
         }
 
         if (!Tools::getIsset('paymentId') && !Tools::getIsset('paymentid')) {
-            // @todo change setcookie
-            setcookie("nets_transaction_error", 'Something went wrong with your order please try again later', time() + 3600, '/');
             $logger->logError("[Order Response] Empty payment response received." . json_encode($_GET));
-            Tools::redirect('index.php');
+            $this->errors[] = $this->trans('Something went wrong with your order please try again later', [], 'Modules.Netseasy.Payment_error');
+            $this->redirectWithNotifications('index.php?controller=order&step=1');
         }
 
         if (Tools::getIsset('paymentFailed')) {
-            // @todo change setcookie
-            setcookie("nets_transaction_error", 'Something went wrong with your order please try again later', time() + 3600, '/');
             $logger->logError("[Order Response] Empty payment response received." . json_encode($_GET));
-            Tools::redirect('index.php');
+            $this->errors[] = $this->trans('Something went wrong with your order please try again later', [], 'Modules.Netseasy.Payment_error');
+            $this->redirectWithNotifications('index.php?controller=order&step=1');
         }
 
         $cartId = (int) Tools::getValue('id_cart', 0);
@@ -55,6 +52,12 @@ class netseasyReturnModuleFrontController extends ModuleFrontController {
         $paymentDetails = $nets->MakeCurl($nets->getApiUrl()['backend'] . $paymentId, array(), 'GET');
         $logger->logInfo("[Order Payment Method][" . $paymentId . "] Retrieve Payment Response : " . json_encode($paymentDetails));
 
+        if ($cart->secure_key !== $paymentDetails->payment->myReference) {
+            $logger->logError("[Order Response][" . $paymentId . "] Cart secure_key mismatch : " . $cart->secure_key);
+            $this->errors[] = $this->trans('Something went wrong with your order please try again later', [], 'Modules.Netseasy.Payment_error');
+            $this->redirectWithNotifications('index.php');
+        }
+
         if (!$cart->orderExists()) {
 
             try {
@@ -62,7 +65,7 @@ class netseasyReturnModuleFrontController extends ModuleFrontController {
                 $add_order = $this->module->validateOrder(
                         (int) $cartId,
                         Configuration::get('PS_OS_PAYMENT'),
-                        (float) $this->context->cart->getOrderTotal(true, Cart::BOTH),
+                        (float) ($paymentDetails->payment->orderDetails->amount/100),
                         $this->getPaymentMethod($paymentDetails),
                         null,
                         null,
@@ -88,9 +91,9 @@ class netseasyReturnModuleFrontController extends ModuleFrontController {
         }
 
         if (!Validate::isLoadedObject($order)) {
-            setcookie("nets_transaction_error", 'Something went wrong with your order please try again later', time() + 3600, '/');
             $logger->logError("[Order Response][" . $paymentId . "] Empty Order Id from order details : ".json_encode($order)); // @todo check if json_encode($order) is valid code
-            Tools::redirect('index.php');
+            $this->errors[] = $this->trans('Something went wrong with your order please try again later', [], 'Modules.Netseasy.Payment_error');
+            $this->redirectWithNotifications('index.php?controller=order&step=1');
         }
 
         $orderReference = $order->reference;
@@ -124,7 +127,6 @@ class netseasyReturnModuleFrontController extends ModuleFrontController {
         //update reference in portal
         $this->orderRefUpdate($order, $paymentId, $paymentDetails);
 
-        setcookie("nets_payment_selected", "", time() - 3600);
         $logger->logInfo("[Order Response][" . $paymentId . "] Redirect to confirmation page");
         Tools::redirect('index.php?controller=order-confirmation&id_cart=' . $cartId . '&id_module=' . $this->module->id . '&id_order=' . $order->id . '&key=' . $customer->secure_key);
     }
@@ -182,9 +184,9 @@ class netseasyReturnModuleFrontController extends ModuleFrontController {
         $this->module->MakeCurl($this->module->getApiUrl()['backend'] . $paymentId . "/cancels", $data, 'POST');
         $logger->logInfo("[Order Cancel][" . $paymentId . "] Cancel Payment Response");
 
-        setcookie("nets_transaction_error", 'Something went wrong with your order please try again later', time() + 3600, '/');
         $logger->logError('order cancelled redirecting to order page');
-        Tools::redirect('index.php?controller=order&step=1');
+        $this->errors[] = $this->trans('Something went wrong with your order please try again later', [], 'Modules.Netseasy.Payment_error');
+        $this->redirectWithNotifications('index.php?controller=order&step=1');
     }
 
 }
