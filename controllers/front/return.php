@@ -26,7 +26,7 @@ class netseasyReturnModuleFrontController extends ModuleFrontController {
         }
 
         if (Tools::getIsset('paymentFailed')) {
-            $logger->logError("[Order Response] Empty payment response received." . json_encode($_GET));
+            $logger->logError("[Order Response] Payment failed payment response received." . json_encode($_GET));
             $this->errors[] = $this->trans('Something went wrong with your order please try again later', [], 'Modules.Netseasy.Payment_error');
             $this->redirectWithNotifications('index.php?controller=order&step=1');
         }
