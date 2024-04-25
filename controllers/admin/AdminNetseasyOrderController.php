@@ -115,10 +115,10 @@ class AdminNetseasyOrderController extends ModuleAdminController {
         $order_total = reset($query)['total_paid'];
         $id_carrier = reset($query)['id_carrier'];
 
-        $query = DB::getInstance()->executeS("SELECT name FROM `" . _DB_PREFIX_ . "carrier` WHERE id_carrier = '" . (int) $id_carrier . "'");
-        $shippingReference = reset($query)['name'];
-
         if (!empty($shippingCost) && $shippingCost > 0) {
+            $query = DB::getInstance()->executeS("SELECT name FROM `" . _DB_PREFIX_ . "carrier` WHERE id_carrier = '" . (int) $id_carrier . "'");
+            $shippingReference = reset($query)['name'];
+
             //easy calc method  
             $quantity = 1;
             $shipping = (isset($shippingCost)) ? $shippingCost : 0; // shipping price incl. VAT in DB format 
@@ -245,6 +245,7 @@ class AdminNetseasyOrderController extends ModuleAdminController {
                             'name' => $values['orderItems'][$i]['name'],
                             'quantity' => $qty,
                             'taxRate' => $values['orderItems'][$i]['taxRate'] / 100,
+                            'netprice' => $netprice,
                             'grossprice' => $priceGross,
                             'currency' => $response['payment']['orderDetails']['currency']
                         );
@@ -287,6 +288,7 @@ class AdminNetseasyOrderController extends ModuleAdminController {
                             'reference' => $values['orderItems'][$i]['reference'],
                             'name' => $values['orderItems'][$i]['name'],
                             'quantity' => $qty,
+                            'netprice' => $netprice,
                             'grossprice' => number_format((float) (($grossprice)), 2, '.', ''),
                             'currency' => $response['payment']['orderDetails']['currency']
                         );
@@ -344,6 +346,7 @@ class AdminNetseasyOrderController extends ModuleAdminController {
             if (array_key_exists($key, $chargedItems) && array_key_exists($key, $refundedItems)) {
                 if ($chargedItems[$key]['quantity'] == $refundedItems[$key]['quantity']) {
                     unset($chargedItems[$key]);
+                    continue;
                 }
             }
 
@@ -429,7 +432,7 @@ class AdminNetseasyOrderController extends ModuleAdminController {
         $current_state = reset($query)['current_state'];
         // if order is cancelled and payment is not updated as cancelled, call nets cancel payment api
         // @todo call cancel payment api in actionOrderStatusPostUpdate instead
-        if ($current_state === Configuration::get('PS_OS_CANCELED')) {
+        if ($current_state == Configuration::get('PS_OS_CANCELED')) {
             $data = $this->getOrderItems($orderId);
             // call cancel api here
             $cancelUrl = $this->getVoidPaymentUrl($this->paymentId);
