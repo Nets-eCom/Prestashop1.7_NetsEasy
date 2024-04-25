@@ -58,7 +58,7 @@ class netseasyHostedPaymentModuleFrontController extends ModuleFrontController {
         $split_payment = Tools::getValue('payType','');
         $requestObj = $nets->createRequestObject($this->context->cart->id, $split_payment);
         $nets->logger->logInfo("Payment Request for Host : " . json_encode($requestObj));
-        $response = $nets->MakeCurl($nets->getApiUrl()['backend'], $requestObj);
+        $response = $this->module->makeCreatePaymentCurl($requestObj);
         $nets->logger->logInfo("Payment Response for Host : " . json_encode($response));
         if ($response && !isset($response->errors)) {
             //$lang = @$this->context->language->locale;

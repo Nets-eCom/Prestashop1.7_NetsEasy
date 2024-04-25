@@ -56,7 +56,7 @@
                                 <!-- Table body functions -->
 
                                 <!-- Reserved Payment -->
-                                {if $data.responseItems.reservedItems != isset($data.responseItems.cancelledItems)}
+                                {if isset($data.responseItems.reservedItems)}
                                     {foreach key=nm item=listitem from=$data.responseItems.reservedItems}
 
                                     <form 
@@ -70,7 +70,7 @@
                                                     <div class="quantity">
                                                         <input type="hidden" name="quantity" class="quant" value="{{$listitem.quantity}}"/>
                                                         <input type="hidden" name="reference" class="reference" value="{{$listitem.reference}}"/>
-                                                        <input type="hidden" name="netprice" class="netprice" value="{{$listitem.netprice}}"/>
+                                                        <input type="hidden" name="netprice" class="netprice" value="{{$listitem.netprice|default:''}}"/>
                                                         <input type="hidden" name="grossprice" class="grossprice" value="{{$listitem.grossprice}}"/>
                                                         <input type="hidden" name="currency" class="currency" value="{{$listitem.currency}}"/>
                                                         <input type="hidden" name="taxrate" class="taxrate" value="{{$listitem.taxRate}}"/>
@@ -133,7 +133,7 @@
                                                         <input type="hidden" name="quantity" class="quant" value="{{$prodval.quantity}}"/>
                                                         <input type="hidden" name="reference" class="reference" value="{{$prodval.reference}}"/>
                                                         <input type="hidden" name="name" value="{{$prodval.name}}"/>
-                                                        <input type="hidden" name="netprice" class="netprice" value="{{$prodval.netprice}}"/>
+                                                        <input type="hidden" name="netprice" class="netprice" value="{{$prodval.netprice|default:''}}"/>
                                                         <input type="hidden" name="grossprice" class="grossprice" value="{{$prodval.grossprice}}"/>
                                                         <input type="hidden" name="currency" class="currency" value="{{$prodval.currency}}"/>
                                                         <input type="hidden" name="taxrate" class="taxrate" value="{{$prodval.taxRate}}"/>
@@ -264,7 +264,7 @@
                                 </tr>
 
                             {elseif $data.status.payStatus == "Charged"}
-                                {if not $data.responseItems.reservedItems} 
+                                {if not isset($data.responseItems.reservedItems)}
                                     <tr class="lining">
                                         <td class="listing top" colspan="1">&nbsp;</td>
                                         <td class="listing top charge" colspan="3" style="text-align: center;">
@@ -300,7 +300,7 @@
 
                             {elseif $data.status.payStatus == "Refund Pending"}
 
-                                {if $data.responseItems.chargedItems}
+                                {if isset($data.responseItems.chargedItems)}
                                     <tr class="">
                                         <td class="listing top refund" colspan="5" align="center">
                                             <div class="nets-status">{l s="nets_payment_refund_pending" d="Modules.Netseasy.Admin_content_order"}</div>
@@ -316,7 +316,7 @@
                                         <td class="listing right" colspan="2">{{$item.grossprice}} {{$item.currency}}</td>
                                     </tr>
                                 {/foreach}
-                                {if not $data.responseItems.chargedItems}
+                                {if not isset($data.responseItems.chargedItems)}
                                     <tr class="">
                                         <td class="topbg" colspan="5" align="center">
                                             <div class="nets-status">{l s="nets_payment_refund_pending" d="Modules.Netseasy.Admin_content_order"}</div>
@@ -355,7 +355,7 @@
                                 {/foreach}
 
                             {elseif $data.status.payStatus == "Partial Refunded"}
-                                {if $data.responseItems.chargedItems}
+                                {if isset($data.responseItems.chargedItems)}
                                     <tr class="">
                                         <td class="listing top refund" colspan="5" align="center">
                                             <div class="nets-status">{l s="nets_refunded_products" d="Modules.Netseasy.Admin_content_order"}</div>
