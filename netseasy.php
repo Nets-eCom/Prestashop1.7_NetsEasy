@@ -380,12 +380,14 @@ class Netseasy extends PaymentModule {
      * @param void $url
      * @param array $data
      * @param void $method
+     * @param array $extraHeaders
      * */
-    public function MakeCurl($url, $data, $method = 'POST') {
+    public function MakeCurl($url, $data, $method = 'POST', $extraHeaders = []) {
         $headers[] = 'Content-Type: application/json';
         $headers[] = 'Accept: application/json';
         $headers[] = 'Authorization: ' . $this->getApiKey()['secretKey'];
-        $headers[] = 'commercePlatformTag: Nets_Prestashop_1.7';
+
+        $headers += $extraHeaders;
 
         $postData = $data;
         $ch = curl_init();
@@ -415,8 +417,8 @@ class Netseasy extends PaymentModule {
                 break;
         }
 
-        if (curl_error($ch)) {
-            $this->logger->logError(curl_error("Response Error : " . $ch));
+        if (false === $response) {
+            $this->logger->logError('Response Error : ' . curl_error($ch));
         }
 
         if ($info['http_code'] == 200 || $info['http_code'] == 201 || $info['http_code'] == 400) {
@@ -425,6 +427,15 @@ class Netseasy extends PaymentModule {
                 return ($responseDecoded) ? $responseDecoded : null;
             }
         }
+    }
+
+    public function makeCreatePaymentCurl(array $payload) {
+        return $this->MakeCurl(
+            $this->getApiUrl()['backend'],
+            $payload,
+            'POST',
+            ['CommercePlatformTag: ' . $this->buildCommercePlatformTag()]
+        );
     }
 
     /**
@@ -670,9 +681,9 @@ class Netseasy extends PaymentModule {
                     )
                 );
             }
-            $logger = new FileLogger();
-            $logger->setFilename(_PS_ROOT_DIR_ . "/var/logs/nets_webhook.log");
         }
+
+        $data['myReference'] = $cart->secure_key;
 
         if (!empty($split_payment)) {
             $paymentMethodName = $this->getMethodName($split_payment);
@@ -745,14 +756,13 @@ class Netseasy extends PaymentModule {
         if (Configuration::get('NETS_INTEGRATION_TYPE') === 'EMBEDDED' && $nets_payment_selected) {
 
             $payload = $this->createRequestObject($this->context->cart->id, $payment_split_type);
-            $url = $this->getApiUrl()['backend'];
             $checkOut = array(
                 'url' => $this->getApiUrl()['frontend'],
                 'checkoutKey' => $this->getApiKey()['checkoutKey'],
             );
 
             $this->logger->logInfo("Payment Request for Embedded : " . json_encode($payload));
-            $response = $this->MakeCurl($url, $payload);
+            $response = $this->makeCreatePaymentCurl($payload);
             $this->logger->logInfo("Payment Response for Embedded : " . json_encode($response));
             if ($response && !isset($response->errors)) {
                 $this->context->smarty->assign([
@@ -914,4 +924,13 @@ class Netseasy extends PaymentModule {
         return $paymentName;
     }
 
+    private function buildCommercePlatformTag(): string
+    {
+        return sprintf('%s %s, %s, php%s',
+            'Prestashop', // @todo const
+            _PS_VERSION_,
+            $this->version,
+            PHP_VERSION
+        );
+    }
 }

@@ -1,10 +1,4 @@
 $(document).ready(function () {
-
-    //check if transaction_error
-    if (checkCookie('nets_transaction_error')) {
-        alert(decodeURI(getCookie('nets_transaction_error')))
-        deleteCookie("nets_transaction_error");
-    }
     
     var frame = document.getElementById('nets-checkout-iframe');
     var payment_option = document.querySelectorAll('input[type=radio][name="payment-option"]');
