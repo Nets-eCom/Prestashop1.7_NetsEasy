@@ -5,18 +5,16 @@
 |------|----------
 |Author | `Nets eCom`
 |Prefix | `EASY-PS1.7`
-|Shop Version | `1.7+ to 8.0.2`
+|Shop Version | `1.7 to 8.0`
 |Version | `1.1.8`
-|Guide | https://tech.nets.eu/shopmodules
-|Github | https://github.com/Nets-eCom/prestashop-PS1.7
 
 ## CHANGELOG
 
 ### Version 1.1.8 - Released 2024-03-06
-* Fix: Added generic font-family.
+* SecurityFix: Added generic font-family.
+* SecurityFix: Added pSQL method to SQL queries.
+* SecurityFix: URLs are no longer constructed with user-controlled data.
 * Fix: Pixel values are now unified and refactored.
-* Fix: Added pSQL method to SQL queries.
-* Fix: URLs are no longer constructed with user-controlled data.
 * Fix: Removed unused code.
 
 ### Version 1.1.7 - Released 2024-01-29
