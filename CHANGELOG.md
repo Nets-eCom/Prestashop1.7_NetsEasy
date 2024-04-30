@@ -6,9 +6,14 @@
 |Author | `Nets eCom`
 |Prefix | `EASY-PS1.7`
 |Shop Version | `1.7 to 8.0`
-|Version | `1.1.8`
+|Version | `1.1.9`
 
 ## CHANGELOG
+
+### Version 1.1.9 - Released 2024-04-30
+* SecurityFix: check cart secure_key in return.php
+* Update: improve error message displayed during checkout
+* Fix: error in admin panel for Swish payments
 
 ### Version 1.1.8 - Released 2024-03-06
 * SecurityFix: Added generic font-family.
