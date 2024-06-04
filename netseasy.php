@@ -162,63 +162,7 @@ class Netseasy extends PaymentModule {
         $this->context->smarty->assign('country_list', $country_list);
         $this->context->smarty->assign('currency_list', $currency_list);
 
-        // Call api for fetching latest plugin version.
-        if (Configuration::get('NETS_MERCHANT_ID') && Configuration::get('NETS_MERCHANT_EMAIL_ID')) {
-            $returnResponse = $this->CallApi();
-            if (!empty($returnResponse)) {
-                $this->context->smarty->assign(['customData' => $returnResponse]);
-            }
-        }
         return $this->display(__FILE__, 'views/templates/admin/config.tpl');
-    }
-
-    /**
-     * This function used for Custom Api service to fetch plugin latest version with notification.
-     * @return type
-     */
-    public function CallApi() {
-        $headers[] = 'Content-Type: application/json';
-        $headers[] = 'Accept: application/json';
-
-        $dataArray = [
-            "merchant_id" => Configuration::get('NETS_MERCHANT_ID'),
-            "merchant_email_id" => Configuration::get('NETS_MERCHANT_EMAIL_ID'),
-            "plugin_name" => "Prestashop",
-            "plugin_version" => $this->version,
-            "integration_type" => Configuration::get('NETS_INTEGRATION_TYPE'),
-            "shop_url" => (_PS_BASE_URL_SSL_),
-            "timestamp" => date('Y-m-d H:i:s')
-        ];
-
-        $postData = json_encode($dataArray);
-
-        $ch = curl_init();
-        curl_setopt($ch, CURLOPT_URL, "https://reporting.sokoni.it/enquiry");
-        curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'POST');
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-        curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
-        if ($postData) {
-            curl_setopt($ch, CURLOPT_POSTFIELDS, $postData);
-        }
-        $this->logger->logInfo("API Request Data : " . $postData);
-        $response = curl_exec($ch);
-        $info = curl_getinfo($ch);
-        $responseData = '';
-        $this->logger->logInfo("API Response HTTP Code : " . $info['http_code']);
-        if (curl_error($ch)) {
-            $this->logger->logInfo("API Response Error Data : " . json_encode(curl_error($ch)));
-        }
-
-        if ($info['http_code'] == 200) {
-            if ($response) {
-                $this->logger->logInfo("API Response Data : " . stripslashes($response));
-                $responseDecoded = json_decode($response);
-                if ($responseDecoded->status == '00' || $responseDecoded->status == '11') {
-                    $responseData = array('status' => $responseDecoded->status, 'data' => json_decode($responseDecoded->data, true));
-                }
-            }
-        }
-        return $responseData;
     }
 
     /**
