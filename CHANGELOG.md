@@ -6,9 +6,13 @@
 |Author | `Nets eCom`
 |Prefix | `EASY-PS1.7`
 |Shop Version | `1.7 to 8.0`
-|Version | `1.1.9`
+|Version | `1.1.10`
 
 ## CHANGELOG
+
+### Version 1.1.10 - Released 2024-06-06
+* Fix: grossTotalAmount and netTotalAmount taken from item total and total_wt to prevent rounding problems
+* Fix: remove unused reporting code
 
 ### Version 1.1.9 - Released 2024-04-30
 * SecurityFix: check cart secure_key in return.php
