@@ -162,63 +162,7 @@ class Netseasy extends PaymentModule {
         $this->context->smarty->assign('country_list', $country_list);
         $this->context->smarty->assign('currency_list', $currency_list);
 
-        // Call api for fetching latest plugin version.
-        if (Configuration::get('NETS_MERCHANT_ID') && Configuration::get('NETS_MERCHANT_EMAIL_ID')) {
-            $returnResponse = $this->CallApi();
-            if (!empty($returnResponse)) {
-                $this->context->smarty->assign(['customData' => $returnResponse]);
-            }
-        }
         return $this->display(__FILE__, 'views/templates/admin/config.tpl');
-    }
-
-    /**
-     * This function used for Custom Api service to fetch plugin latest version with notification.
-     * @return type
-     */
-    public function CallApi() {
-        $headers[] = 'Content-Type: application/json';
-        $headers[] = 'Accept: application/json';
-
-        $dataArray = [
-            "merchant_id" => Configuration::get('NETS_MERCHANT_ID'),
-            "merchant_email_id" => Configuration::get('NETS_MERCHANT_EMAIL_ID'),
-            "plugin_name" => "Prestashop",
-            "plugin_version" => $this->version,
-            "integration_type" => Configuration::get('NETS_INTEGRATION_TYPE'),
-            "shop_url" => (_PS_BASE_URL_SSL_),
-            "timestamp" => date('Y-m-d H:i:s')
-        ];
-
-        $postData = json_encode($dataArray);
-
-        $ch = curl_init();
-        curl_setopt($ch, CURLOPT_URL, "https://reporting.sokoni.it/enquiry");
-        curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'POST');
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-        curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
-        if ($postData) {
-            curl_setopt($ch, CURLOPT_POSTFIELDS, $postData);
-        }
-        $this->logger->logInfo("API Request Data : " . $postData);
-        $response = curl_exec($ch);
-        $info = curl_getinfo($ch);
-        $responseData = '';
-        $this->logger->logInfo("API Response HTTP Code : " . $info['http_code']);
-        if (curl_error($ch)) {
-            $this->logger->logInfo("API Response Error Data : " . json_encode(curl_error($ch)));
-        }
-
-        if ($info['http_code'] == 200) {
-            if ($response) {
-                $this->logger->logInfo("API Response Data : " . stripslashes($response));
-                $responseDecoded = json_decode($response);
-                if ($responseDecoded->status == '00' || $responseDecoded->status == '11') {
-                    $responseData = array('status' => $responseDecoded->status, 'data' => json_decode($responseDecoded->data, true));
-                }
-            }
-        }
-        return $responseData;
     }
 
     /**
@@ -453,76 +397,76 @@ class Netseasy extends PaymentModule {
         //Product items
         $products = $cart->getProducts();
 
+        $itemsArray = [];
         foreach ($products as $item) {
-            // easy calc method
-            $product = $item['price_with_reduction']; // product price incl. VAT in DB format
-            $quantity = $item['quantity'];
-            $tax = $item['rate']; // Tax rate in DB format
-            $taxFormat = '1' . str_pad(number_format((float) $tax, 2, '.', ''), 5, '0', STR_PAD_LEFT);
-            $unitPrice = round(round(($product * 100) / $taxFormat, 2) * 100);
-            $netAmount = round($quantity * $unitPrice);
-            $grossAmount = round($quantity * ($product * 100));
+            $unitPrice = round($item['price_with_reduction_without_tax'] * 100);
+            $netAmount = round($item['total'] * 100);
+            $grossAmount = round($item['total_wt'] * 100);
             $taxAmount = $grossAmount - $netAmount;
 
-            $itemsProductArray[] = array(
+            $itemsArray[] = [
                 'reference' => !empty($item['reference']) ? $item['reference'] : $item['name'],
                 'name' => $item['name'],
-                'quantity' => $quantity,
+                'quantity' => $item['quantity'],
                 'unit' => 'pcs',
                 'unitPrice' => $unitPrice,
                 'taxRate' => $item['rate'] * 100,
                 'taxAmount' => $taxAmount,
                 'grossTotalAmount' => $grossAmount,
                 'netTotalAmount' => $netAmount
-            );
-            $itemsArray = $itemsTotalProduct = $itemsProductArray;
+            ];
         }
 
         //Shipping items
-        $carrierGrossAmount = 0;
-        $carrierNetAmount = 0;
         $carrier = new Carrier($cart->id_carrier);
-        $carrierShipping = $cart->getPackageShippingCost($cart->id_carrier, $use_tax = true);
+        $carrierAmount = $cart->getPackageShippingCost($cart->id_carrier, true);
 
-        if ($carrierShipping > 0) {
-            $carrierName = $carrier->name;
+        if ($carrierAmount > 0) {
             $carrierTax = Tax::getCarrierTaxRate((int) $carrier->id, $cart->id_address_delivery);
-            $carrierQuantity = 1;
-            $carrierTaxFormat = 0;
-            $carrierUnitPrice = round($carrierShipping * 100);
-
-            //if tax is not selected for shipping
-            if ($carrierTax > 0) {
-                $carrierTaxFormat = '1' . str_pad(number_format((float) $carrierTax, 2, '.', ''), 5, '0', STR_PAD_LEFT);
-                $carrierUnitPrice = round(round(($carrierShipping * 100) / $carrierTaxFormat, 2) * 100);
-            }
-            $carrierNetAmount = round($carrierQuantity * $carrierUnitPrice);
-            $carrierGrossAmount = round($carrierQuantity * ($carrierShipping * 100));
+            $carrierAmountExclTax = $cart->getPackageShippingCost($cart->id_carrier, false);
+            $carrierNetAmount = round($carrierAmountExclTax * 100);
+            $carrierGrossAmount = round($carrierAmount * 100);
             $carrierTaxAmount = $carrierGrossAmount - $carrierNetAmount;
 
-            if ($carrierName != '') {
-                $carrierReference = $carrierName;
-            } else {
-                $carrierReference = $this->l('Shipping');
-            }
-
-            $itemsArray[] = array(
-                'reference' => $carrierReference,
-                'name' => 'Shipping',
-                'quantity' => $carrierQuantity,
+            $itemsArray[] = [
+                'reference' => $carrier->name ?: 'shipping',
+                'name' => $this->trans('Shipping', [], 'Shop.Theme.Checkout'),
+                'quantity' => 1,
                 'unit' => 'pcs',
-                'unitPrice' => $carrierUnitPrice,
-                'taxRate' => $carrierTax * 100,
+                'unitPrice' => $carrierNetAmount,
+                'taxRate' => round($carrierTax * 100),
                 'taxAmount' => $carrierTaxAmount,
                 'grossTotalAmount' => $carrierGrossAmount,
                 'netTotalAmount' => $carrierNetAmount
-            );
+            ];
         }
 
-        //Total product sum items
-        $itemsGrossPriceSumma = 0;
-        foreach ($itemsTotalProduct as $total) {
-            $itemsGrossPriceSumma += $total['grossTotalAmount'];
+        // Gift wrapping item
+        if ($cart->gift) {
+            $giftWrappingGrossAmount = round($cart->getGiftWrappingPrice() * 100);
+            $giftWrappingNetAmount = round($cart->getGiftWrappingPrice(false) * 100);
+            $giftWrappingTaxAmount = $giftWrappingGrossAmount - $giftWrappingNetAmount;
+
+            $giftWrappingTaxRate = 0;
+            // With PS_ATCP_SHIPWRAP, wrapping fee is by default tax included
+            // @see: CartCore::getGiftWrappingPrice
+            if (!Configuration::get('PS_ATCP_SHIPWRAP')) {
+                $tax_manager = TaxManagerFactory::getManager($addressOBJ, (int) Configuration::get('PS_GIFT_WRAPPING_TAX_RULES_GROUP'));
+                $tax_calculator = $tax_manager->getTaxCalculator();
+                $giftWrappingTaxRate = $tax_calculator->getTotalRate();
+            }
+
+            $itemsArray[] = array(
+                'reference' => 'gift_wrapping',
+                'name' => $this->trans('Gift wrapping', [], 'Shop.Theme.Checkout'),
+                'quantity' => 1,
+                'unit' => 'pcs',
+                'unitPrice' => $giftWrappingNetAmount,
+                'taxRate' => round($giftWrappingTaxRate * 100),
+                'taxAmount' => $giftWrappingTaxAmount,
+                'grossTotalAmount' => $giftWrappingGrossAmount,
+                'netTotalAmount' => $giftWrappingNetAmount
+            );
         }
 
         //Discount items
@@ -532,7 +476,7 @@ class Netseasy extends PaymentModule {
 
             $itemsArray[] = array(
                 'reference' => 'discount',
-                'name' => 'Discount',
+                'name' => $this->trans('Discount', [], 'Shop.Navigation'),
                 'quantity' => 1,
                 'unit' => 'pcs',
                 'unitPrice' => -$discountAmount,
@@ -540,23 +484,6 @@ class Netseasy extends PaymentModule {
                 'taxAmount' => 0,
                 'grossTotalAmount' => -$discountAmount,
                 'netTotalAmount' => -$discountAmount
-            );
-        }
-
-        // Gift wrapping item
-        if ($cart->gift) {
-            $giftWrappingAmount = round(round($cart->getGiftWrappingPrice(), 2) * 100);
-
-            $itemsArray[] = array(
-                'reference' => 'gift_wrapping',
-                'name' => $this->trans('Gift wrapping', [], 'Shop.Theme.Checkout'),
-                'quantity' => 1,
-                'unit' => 'pcs',
-                'unitPrice' => $giftWrappingAmount,
-                'taxRate' => 0,
-                'taxAmount' => 0,
-                'grossTotalAmount' => $giftWrappingAmount,
-                'netTotalAmount' => $giftWrappingAmount
             );
         }
 
