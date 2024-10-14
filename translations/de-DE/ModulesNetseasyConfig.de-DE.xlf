@@ -162,16 +162,6 @@
         <target>Frontend Debugmodus</target>
         <note>Line: </note>
       </trans-unit>
-      <trans-unit id="2b93ce0a965a2522a6d13c9a236db31f">
-        <source>webhook_url</source>
-        <target>Webhook-URL</target>
-        <note>Line: </note>
-      </trans-unit>
-      <trans-unit id="8a625ee9b5bfe7c26e1b6920d13f3352">
-        <source>nets_webhook_url_error</source>
-        <target>Tragen Sie bitte die Webhookadresse ein</target>
-        <note>Line: </note>
-      </trans-unit>
       <trans-unit id="f0250d35ea63056adcdf1ced221587d2">
         <source>webhook_authorization</source>
         <target>Webhookauthorisierung</target>
@@ -241,62 +231,62 @@
                 <source>NETS_RATEPAY_INSTALLMENT</source>
                 <target>Ratepay Rechnungskauf</target>
                 <note>Line: </note>
-            </trans-unit>            
+            </trans-unit>
             <trans-unit id="03ae80ce4bf52f901a93e7f2e2020b23">
                 <source>NETS_MOBILEPAY</source>
                 <target>MobilePay</target>
                 <note>Line: </note>
-            </trans-unit>            
+            </trans-unit>
             <trans-unit id="9996923c4059f201fc2b9f66dc2ad483">
                 <source>NETS_VIPPS</source>
                 <target>Vipps</target>
                 <note>Line: </note>
-            </trans-unit>            
+            </trans-unit>
             <trans-unit id="9ab1b37d825d4d8b299b685e979c690d">
                 <source>NETS_SWISH</source>
                 <target>Swish</target>
                 <note>Line: </note>
-            </trans-unit>            
+            </trans-unit>
             <trans-unit id="817cad28dc0ab3b0eaa6d6f6ef2694e3">
                 <source>NETS_SOFORT</source>
                 <target>Sofortüberweisung</target>
                 <note>Line: </note>
-            </trans-unit>            
+            </trans-unit>
             <trans-unit id="1fad0fa581e58816117816bc9d7fa3f5">
                 <source>NETS_TRUSTLY</source>
                 <target>Trustly</target>
                 <note>Line: </note>
-            </trans-unit>            
+            </trans-unit>
             <trans-unit id="6670df9c4bdd1b8723ca55ccfc5f6485">
                 <source>NETS_PAYPAL</source>
                 <target>PayPal</target>
                 <note>Line: </note>
-            </trans-unit>           
+            </trans-unit>
             <trans-unit id="5f8ffb19719f01745d356213c84d4338">
                 <source>Payment_Option</source>
                 <target>Zahlmethode</target>
                 <note>Line: </note>
-            </trans-unit>            
+            </trans-unit>
             <trans-unit id="2faec1f9f8cc7f8f40d521c4dd574f49">
                 <source>Enable</source>
                 <target>Enable</target>
                 <note>Line: </note>
-            </trans-unit>           
+            </trans-unit>
             <trans-unit id="36adbe056f388c6e195d6dfeaf2261f0">
                 <source>Select_Country</source>
                 <target>Länder auswählen für</target>
                 <note>Line: </note>
-            </trans-unit>           
+            </trans-unit>
             <trans-unit id="949d86bfa33e7071e8061ee15ecbe3ee">
                 <source>Select_Currency</source>
                 <target>Währung auswählen für</target>
                 <note>Line: </note>
-            </trans-unit>           
+            </trans-unit>
             <trans-unit id="13bd6e8a348477be7a9b0d12793306fe">
                 <source>form_success</source>
                 <target>Einstellungen erfolgreich gespeichert</target>
                 <note>Line: </note>
-            </trans-unit>         
+            </trans-unit>
             <trans-unit id="7dc22b2c6a992f0232345df41303f5ea">
                 <source>setting</source>
                 <target>Einstellung</target>
