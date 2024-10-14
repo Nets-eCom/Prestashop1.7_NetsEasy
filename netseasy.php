@@ -562,7 +562,7 @@ class Netseasy extends PaymentModule {
         }
 
         $data['checkout']['consumer'] = $consumerData;
-        $urlWebhook =  $this->context->link->getModuleLink($this->name, 'webhook', array(), true);
+        $urlWebhook = $this->context->link->getModuleLink($this->name, 'webhook', array(), true);
         // Webhooks
         $host = parse_url($urlWebhook, PHP_URL_HOST);
         if ($host !== 'localhost') {
