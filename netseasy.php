@@ -20,6 +20,8 @@ require_once(_PS_ROOT_DIR_ . '/modules/netseasy/Locale.php');
 
 class Netseasy extends PaymentModule {
 
+    const NETS_WEBHOOK_URL = 'module/netseasy/webhook';
+
     public $address;
     public $logger;
 
@@ -94,9 +96,7 @@ class Netseasy extends PaymentModule {
         if (!Configuration::hasKey('NETS_WEBHOOK_AUTHORIZATION')) {
             Configuration::set('NETS_WEBHOOK_AUTHORIZATION', 'AZ-12345678-az');
         }
-        if (!Configuration::get('NETS_WEBHOOK_URL')) {
-            Configuration::updateValue('NETS_WEBHOOK_URL', Context::getContext()->link->getModuleLink($this->name, 'webhook', array(), true));
-        }
+
         return parent::install()
             && $this->addNetsTable()
             && $this->registerHook('actionAdminControllerSetMedia')
@@ -143,9 +143,6 @@ class Netseasy extends PaymentModule {
 
         if (!Configuration::get('NETS_WEBHOOK_AUTHORIZATION')) {
             Configuration::updateValue('NETS_WEBHOOK_AUTHORIZATION', 'AZ-12345678-az');
-        }
-        if (!Configuration::get('NETS_WEBHOOK_URL')) {
-            Configuration::updateValue('NETS_WEBHOOK_URL', $this->context->link->getModuleLink($this->name, 'webhook', array(), true));
         }
         $country_list = Country::getCountries((int) Context::getContext()->language->id, false);
         $currency_list = Currency::getCurrencies(true, false, true);
@@ -313,7 +310,6 @@ class Netseasy extends PaymentModule {
                 'NETS_FRONTEND_DEBUG_MODE' => Configuration::get('NETS_FRONTEND_DEBUG_MODE'),
                 'NETS_PAYMENT_SPLIT' => Configuration::get('NETS_PAYMENT_SPLIT'),
                 'NETS_AUTO_CAPTURE' => Configuration::get('NETS_AUTO_CAPTURE'),
-                'NETS_WEBHOOK_URL' => Configuration::get('NETS_WEBHOOK_URL'),
                 'NETS_WEBHOOK_AUTHORIZATION' => Configuration::get('NETS_WEBHOOK_AUTHORIZATION')
             );
         }
@@ -568,10 +564,10 @@ class Netseasy extends PaymentModule {
         $data['checkout']['consumer'] = $consumerData;
 
         // Webhooks
-        $host = parse_url(Configuration::get('NETS_WEBHOOK_URL'), PHP_URL_HOST);
+        $host = parse_url(Context::getContext()->shop->getBaseURL(true), PHP_URL_HOST);
         if ($host !== 'localhost') {
             if (Configuration::get('NETS_WEBHOOK_AUTHORIZATION') != '0') {
-                $webHookUrl = (Configuration::get('NETS_WEBHOOK_URL') ? Configuration::get('NETS_WEBHOOK_URL') : '');
+                $webHookUrl = Context::getContext()->shop->getBaseURL(true) . self::NETS_WEBHOOK_URL;
                 $authKey = Configuration::get('NETS_WEBHOOK_AUTHORIZATION');
                 $data['notifications'] = array(
                     'webhooks' => array(
