@@ -562,12 +562,12 @@ class Netseasy extends PaymentModule {
         }
 
         $data['checkout']['consumer'] = $consumerData;
-
+        $urlWebhook =  $this->context->link->getModuleLink($this->name, 'webhook', array(), true);
         // Webhooks
-        $host = parse_url(Context::getContext()->shop->getBaseURL(true), PHP_URL_HOST);
+        $host = parse_url($urlWebhook, PHP_URL_HOST);
         if ($host !== 'localhost') {
             if (Configuration::get('NETS_WEBHOOK_AUTHORIZATION') != '0') {
-                $webHookUrl = Context::getContext()->shop->getBaseURL(true) . self::NETS_WEBHOOK_URL;
+                $webHookUrl = $urlWebhook . self::NETS_WEBHOOK_URL;
                 $authKey = Configuration::get('NETS_WEBHOOK_AUTHORIZATION');
                 $data['notifications'] = array(
                     'webhooks' => array(
