@@ -20,8 +20,6 @@ require_once(_PS_ROOT_DIR_ . '/modules/netseasy/Locale.php');
 
 class Netseasy extends PaymentModule {
 
-    const NETS_WEBHOOK_URL = 'module/netseasy/webhook';
-
     public $address;
     public $logger;
 
@@ -562,12 +560,11 @@ class Netseasy extends PaymentModule {
         }
 
         $data['checkout']['consumer'] = $consumerData;
-        $urlWebhook = $this->context->link->getModuleLink($this->name, 'webhook', array(), true);
+        $webHookUrl = $this->context->link->getModuleLink($this->name, 'webhook', array(), true);
         // Webhooks
-        $host = parse_url($urlWebhook, PHP_URL_HOST);
+        $host = parse_url($webHookUrl, PHP_URL_HOST);
         if ($host !== 'localhost') {
             if (Configuration::get('NETS_WEBHOOK_AUTHORIZATION') != '0') {
-                $webHookUrl = $urlWebhook . self::NETS_WEBHOOK_URL;
                 $authKey = Configuration::get('NETS_WEBHOOK_AUTHORIZATION');
                 $data['notifications'] = array(
                     'webhooks' => array(
