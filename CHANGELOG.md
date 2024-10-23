@@ -5,10 +5,13 @@
 |------|----------
 |Author | `Nets eCom`
 |Prefix | `EASY-PS1.7`
-|Shop Version | `1.7 to 8.0`
-|Version | `1.1.10`
+|Shop Version | `1.7 to 8.1`
+|Version | `1.1.11`
 
 ## CHANGELOG
+
+### Version 1.1.11 - Released 2024-10-23
+* Fixed: Remove webhook URL in plugin settings
 
 ### Version 1.1.10 - Released 2024-06-06
 * Fix: grossTotalAmount and netTotalAmount taken from item total and total_wt to prevent rounding problems
