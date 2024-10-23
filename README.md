@@ -5,8 +5,8 @@
 |----------------------------------------------------
 |Author       | `Nets eCom`
 |Prefix       | `EASY-PS1.7`
-|Shop Version | `1.7+ to 8.0.2`
-|Version      | `1.1.10`
+|Shop Version | `1.7+ to 8.1`
+|Version      | `1.1.11`
 |Guide        | (https://developer.nexigroup.com/nexi-checkout/en-EU/docs/checkout-for-prestashop-prestashop-17/)
 |Github       | https://github.com/Nets-eCom/Prestashop1.7_NetsEasy
 
