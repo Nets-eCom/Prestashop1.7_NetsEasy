@@ -25,7 +25,7 @@
     <div class="panel" id="fieldset_0">
 
         <div class="panel-heading">
-            <i class="icon-cogs"></i>{l s="configuration" d="Modules.Netseasy.Config"}                    
+            <i class="icon-cogs"></i>{l s="configuration" d="Modules.Netseasy.Config"}
         </div>
         <div class="form-wrapper">
             <div class="form-group">
@@ -165,13 +165,6 @@
             </div>
             <!-- /webhook Config start-->
             <div class="form-group">
-                <label class="control-label col-lg-4">{l s="webhook_url" d="Modules.Netseasy.Config"}</label>
-                <div class="col-lg-4">
-                    <input type="text" name="NETS_WEBHOOK_URL" id="NETS_WEBHOOK_URL" value="{$NETS_WEBHOOK_URL}" class="">
-                    <p class="error text-danger">{l s="nets_webhook_url_error" d="Modules.Netseasy.Config"}</p>
-                </div>
-            </div>
-            <div class="form-group">
                 <label class="control-label col-lg-4">{l s="webhook_authorization" d="Modules.Netseasy.Config"}</label>
                 <div class="col-lg-4">
                     <input type="text" name="NETS_WEBHOOK_AUTHORIZATION" onkeyup="this.value = this.value.replace(/[^a-z0-9-]/gi, '');" id="NETS_WEBHOOK_AUTHORIZATION" value="{$NETS_WEBHOOK_AUTHORIZATION}"  class="required">
@@ -189,7 +182,7 @@
         <!-- /split payment -->
         <div class="panel-footer">
             <button type="submit" value="1" id="module_form_submit_btn" name="submitNetsModule" class="btn btn-default pull-right">
-                <i class="process-icon-save"></i> 
+                <i class="process-icon-save"></i>
                 {l s="save" d="Modules.Netseasy.Config"}
             </button>
         </div>
@@ -206,7 +199,7 @@
             <li class="nav-item
                 {if $i == 0}
                     active
-                {/if}"> 
+                {/if}">
                 <a class="nav-link" id="{$pay_type}" data-toggle="tab" href="#{$pay_type}_maintab" role="tab" aria-controls="{$pay_type}" aria-selected="true">{l s="$pay_type" d="Modules.Netseasy.Config"}</a>
             </li>
         {/foreach}
@@ -264,7 +257,7 @@
                                         {/foreach}
                                     </select>
                                     <p class="help-block">
-                                        {l s="Select_Country_Info" d="Modules.Netseasy.Config"}                                        
+                                        {l s="Select_Country_Info" d="Modules.Netseasy.Config"}
                                     </p>
                                 </div>
                             </div>
@@ -287,14 +280,14 @@
                                         {/foreach}
                                     </select>
                                     <p class="help-block">
-                                        {l s="Select_Currency_Info" d="Modules.Netseasy.Config"}                                        
+                                        {l s="Select_Currency_Info" d="Modules.Netseasy.Config"}
                                     </p>
                                 </div>
                             </div>
                         </div>
                         <div class="panel-footer">
                             <button type="submit" value="1" id="{$pay_type}_submit_btn" name="submit_{$pay_type}" class="btn btn-default pull-right">
-                                <i class="process-icon-save"></i>                                
+                                <i class="process-icon-save"></i>
                                 {l s="save" d="Modules.Netseasy.Config"}
                             </button>
                         </div>

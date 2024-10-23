@@ -6,7 +6,7 @@ $(document).ready(function () {
     $('input').on('keyup', function () {
         $(this).next('.error').css('display', 'none');
     });
-    
+
     $('input[name="NETS_PAYMENT_SPLIT"]').on('click', function () {
         pay_split_check = $('#NETS_PAYMENT_SPLIT_on').is(':checked');
         if(pay_split_check) {
@@ -15,14 +15,14 @@ $(document).ready(function () {
             $('.pay_split').css('display', 'none');
         }
     });
-    
+
     payment_split = $('#NETS_PAYMENT_SPLIT_on').prop('checked');
     if(payment_split == true) {
         $('.pay_split').css('display', 'block');
     } else {
         $('.pay_split').css('display', 'none');
     }
-    
+
     $('#module_form').on('submit', function (e) {
         e.preventDefault();
         merchant_id = $.trim($('#NETS_MERCHANT_ID').val());
@@ -35,7 +35,6 @@ $(document).ready(function () {
         live_secret_key = $.trim($('#NETS_LIVE_SECRET_KEY').val());
         terms_url = $.trim($('#NETS_TERMS_URL').val());
         merchant_terms_url = $.trim($('#NETS_MERCHANT_TERMS_URL').val());
-        webhook_url = $.trim($('#NETS_WEBHOOK_URL').val());
         webhook_authorization = $.trim($('#NETS_WEBHOOK_AUTHORIZATION').val());
         if (merchant_id == '') {
             $('#NETS_MERCHANT_ID').focus().next('.error').css('display', 'inline-block');
@@ -55,8 +54,6 @@ $(document).ready(function () {
             $('#NETS_TERMS_URL').focus().next('.error').css('display', 'inline-block');
         } else if (merchant_terms_url == '' || validateUrl(merchant_terms_url) == false) {
             $('#NETS_MERCHANT_TERMS_URL').focus().next('.error').css('display', 'inline-block');
-        } else if (webhook_url == '' || validateUrl(webhook_url, true) == false) {
-            $('#NETS_WEBHOOK_URL').focus().next('.error').css('display', 'inline-block');
         } else if (webhook_authorization == '' || validateAUTH(webhook_authorization) == false) {
             $('#NETS_WEBHOOK_AUTHORIZATION').focus().next('.error').css('display', 'inline-block');
         } else {
