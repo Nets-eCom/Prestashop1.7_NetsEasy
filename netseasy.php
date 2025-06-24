@@ -786,6 +786,7 @@ class Netseasy extends PaymentModule {
         $localeArray = array(
             'GB' => 'en-GB',
             'DK' => 'da-DK',
+            'DA' => 'da-DK',
             'NL' => 'nl-NL',
             'EE' => 'ee-EE',
             'FI' => 'fi-FI',
