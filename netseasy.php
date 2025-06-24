@@ -800,7 +800,8 @@ class Netseasy extends PaymentModule {
             'PL' => 'pl-PL',
             'ES' => 'es-ES',
             'SK' => 'sk-SK',
-            'SE' => 'sv-SE'
+            'SE' => 'sv-SE',
+            'SV' => 'sv-SE'
         );
         $localeCode = 'en-GB';
         if (array_key_exists(strtoupper($iso_code), $localeArray)) {
