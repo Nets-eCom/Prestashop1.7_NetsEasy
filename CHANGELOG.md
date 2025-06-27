@@ -1,14 +1,18 @@
 # NETS A/S - Prestashop 1.7 to 8 Payment Module
 ============================================
 
-|Module | Nets Easy Payment Module for Prestashop 1.7 to 8
-|------|----------
-|Author | `Nets eCom`
-|Prefix | `EASY-PS1.7`
-|Shop Version | `1.7 to 8.1`
-|Version | `1.1.11`
+| Module         | Nets Easy Payment Module for Prestashop 1.7 to 8                                                  |
+|----------------|--------------------------------------------------------------------------------------------|
+| Shop Version   | `1.7 to 8.2`                                                                               |
+| Plugin Version | `1.1.12`                                                                                   |
+| PHP Version    | `8.1+`                                                                                     |
+| Guide          | https://developer.nexigroup.com/nexi-checkout/en-EU/docs/checkout-for-prestashop-prestashop-17/|
+| Github         | https://github.com/Nets-eCom/Prestashop1.7_NetsEasy                                      |
 
 ## CHANGELOG
+
+### Version 1.1.12 - Released 2025-06-27
+* Fixed: Danish language on checkout
 
 ### Version 1.1.11 - Released 2024-10-23
 * Fixed: Remove webhook URL in plugin settings
