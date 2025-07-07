@@ -1,4 +1,4 @@
-# Nets Easy Payment Module for Prestashop 1.7 to 8
+# Nets Easy Payment Module for Prestashop 1.7 to 9.0
 
 Enhance your Prestashop store with the Nets Easy Checkout, a comprehensive solution for seamless payment integration.
 
