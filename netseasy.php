@@ -742,14 +742,20 @@ class Netseasy extends PaymentModule {
 
     private function _getSession()
     {
-        $requestStack = SymfonyContainer::getInstance()->get('request_stack');
-        $request = $requestStack->getCurrentRequest();
+        $container = SymfonyContainer::getInstance();
 
-        if (!$request) {
-            throw new \RuntimeException('Cannot access the current request to retrieve the session.');
+        if ($container->has('request_stack')) {
+            $request = $container->get('request_stack')->getCurrentRequest();
+            if ($request && $request->hasSession()) {
+                return $request->getSession();
+            }
         }
 
-        return $request->getSession();
+        if ($container->has('session')) {
+            return $container->get('session');
+        }
+
+        throw new \RuntimeException('Cannot retrieve session from container or request stack.');
     }
 
     public function addNetsTable() {
