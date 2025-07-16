@@ -370,10 +370,9 @@ class AdminNetseasyOrderController extends ModuleAdminController {
                     'currency' => $response['payment']['orderDetails']['currency']
                 );
             }
-            if ($chargedItems) {
-                if ($chargedItems[$key]['quantity'] > $prod['quantity']) {
+
+            if (array_key_exists($key, $chargedItems) && $chargedItems[$key]['quantity'] > $prod['quantity']) {
                     $chargedItems[$key]['quantity'] = $prod['quantity'];
-                }
             }
         }
         $reserved = $charged = $cancelled = $refunded = '';
