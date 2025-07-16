@@ -7,10 +7,8 @@
  *
  * @license https://opensource.org/licenses/afl-3.0.php
  */
-use PHPSQLParser\builders\ReservedBuilder;
-use PrestaShopBundle\Form\Admin\Sell\Product\Shipping\ShippingType;
+use PrestaShop\PrestaShop\Adapter\SymfonyContainer;
 use PrestaShop\PrestaShop\Core\Payment\PaymentOption;
-use PrestaShop\PrestaShop\Adapter\Presenter\Cart\CartPresenter;
 
 //use netseasy\controllers\front\OrderInfo;
 if (!defined('_PS_VERSION_')) {
@@ -742,8 +740,22 @@ class Netseasy extends PaymentModule {
         }
     }
 
-    private function _getSession() {
-        return \PrestaShop\PrestaShop\Adapter\SymfonyContainer::getInstance()->get('session');
+    private function _getSession()
+    {
+        $container = SymfonyContainer::getInstance();
+
+        if ($container->has('request_stack')) {
+            $request = $container->get('request_stack')->getCurrentRequest();
+            if ($request && $request->hasSession()) {
+                return $request->getSession();
+            }
+        }
+
+        if ($container->has('session')) {
+            return $container->get('session');
+        }
+
+        throw new \RuntimeException('Cannot retrieve session from container or request stack.');
     }
 
     public function addNetsTable() {

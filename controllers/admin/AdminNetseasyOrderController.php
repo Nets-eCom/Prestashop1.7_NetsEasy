@@ -1,5 +1,7 @@
 <?php
 
+use PrestaShop\PrestaShop\Adapter\SymfonyContainer;
+
 class AdminNetseasyOrderController extends ModuleAdminController {
 
     const ENDPOINT_TEST = 'https://test.api.dibspayment.eu/v1/payments/';
@@ -368,10 +370,9 @@ class AdminNetseasyOrderController extends ModuleAdminController {
                     'currency' => $response['payment']['orderDetails']['currency']
                 );
             }
-            if ($chargedItems) {
-                if ($chargedItems[$key]['quantity'] > $prod['quantity']) {
+
+            if (array_key_exists($key, $chargedItems) && $chargedItems[$key]['quantity'] > $prod['quantity']) {
                     $chargedItems[$key]['quantity'] = $prod['quantity'];
-                }
             }
         }
         $reserved = $charged = $cancelled = $refunded = '';
@@ -921,8 +922,21 @@ class AdminNetseasyOrderController extends ModuleAdminController {
         }
     }
 
-    private function _getSession() {
-        return \PrestaShop\PrestaShop\Adapter\SymfonyContainer::getInstance()->get('session');
-    }
+    private function _getSession()
+    {
+        $container = SymfonyContainer::getInstance();
 
+        if ($container->has('request_stack')) {
+            $request = $container->get('request_stack')->getCurrentRequest();
+            if ($request && $request->hasSession()) {
+                return $request->getSession();
+            }
+        }
+
+        if ($container->has('session')) {
+            return $container->get('session');
+        }
+
+        throw new \RuntimeException('Cannot retrieve session from container or request stack.');
+    }
 }
