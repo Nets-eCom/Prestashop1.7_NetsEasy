@@ -4,12 +4,15 @@
 | Module         | Nets Easy Payment Module for Prestashop 1.7 to 9                                                |
 |----------------|-------------------------------------------------------------------------------------------------|
 | Shop Version   | `1.7 to 9.0`                                                                                    |
-| Plugin Version | `1.1.12`                                                                                        |
+| Plugin Version | `1.1.13`                                                                                        |
 | PHP Version    | `8.1+`                                                                                          |
 | Guide          | https://developer.nexigroup.com/nexi-checkout/en-EU/docs/checkout-for-prestashop-prestashop-17/ |
 | Github         | https://github.com/Nets-eCom/Prestashop1.7_NetsEasy                                             |
 
 ## CHANGELOG
+
+### Version 1.1.13 - Released 2025-07-16
+* Update: Compatibility with Prestashop9
 
 ### Version 1.1.12 - Released 2025-06-27
 * Fixed: Danish language on checkout

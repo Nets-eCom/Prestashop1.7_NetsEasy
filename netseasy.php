@@ -41,7 +41,7 @@ class Netseasy extends PaymentModule {
     public function __construct() {
         $this->name = 'netseasy';
         $this->tab = 'payments_gateways';
-        $this->version = '1.1.12';
+        $this->version = '1.1.13';
         $this->author = 'Nets Easy';
         $this->displayPaymentName = 'Nets Easy';
         $this->controllers = array('hostedPayment', 'return');
