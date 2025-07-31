@@ -20,6 +20,7 @@ class Netseasy extends PaymentModule {
 
     public $address;
     public $logger;
+    public $displayPaymentName;
 
     const PAY_METHODS = array(
         'NETS_CARD',
