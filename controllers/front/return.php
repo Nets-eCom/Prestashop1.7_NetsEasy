@@ -1,8 +1,23 @@
 <?php
-
 /**
- * @property Netseasy $module
+ * Copyright since 2007 PrestaShop SA and Contributors
+ * PrestaShop is an International Registered Trademark & Property of PrestaShop SA
+ *
+ * NOTICE OF LICENSE
+ *
+ * This source file is subject to the Academic Free License version 3.0
+ * that is bundled with this package in the file LICENSE.md.
+ * It is also available through the world-wide-web at this URL:
+ * https://opensource.org/licenses/AFL-3.0
+ * If you did not receive a copy of the license and are unable to
+ * obtain it through the world-wide-web, please send an email
+ * to license@prestashop.com so we can send you a copy immediately.
+ *
+ * @author    PrestaShop SA and Contributors <contact@prestashop.com>
+ * @copyright Since 2007 PrestaShop SA and Contributors
+ * @license   https://opensource.org/licenses/AFL-3.0 Academic Free License version 3.0
  */
+
 class netseasyReturnModuleFrontController extends ModuleFrontController {
 
     /**
@@ -81,8 +96,8 @@ class netseasyReturnModuleFrontController extends ModuleFrontController {
                     $this->cancelOrder($paymentId, $paymentDetails);
                 }
             } catch (Exception $e) {
-                $this->cancelOrder($paymentId, $paymentDetails);
                 $logger->logError("[Order Response][" . $paymentId . "] Order Creation Exception : " . json_encode($e->getMessage()));
+                $this->cancelOrder($paymentId, $paymentDetails);
             }
 
             $order = Order::getByCartId((int) $cart->id);
@@ -98,8 +113,8 @@ class netseasyReturnModuleFrontController extends ModuleFrontController {
 
         $orderReference = $order->reference;
 
-        // @todo use DB::getInstance()->insert
-        DB::getInstance()->execute('INSERT INTO ' . _DB_PREFIX_ . 'nets_payment_id (`id_order`, `order_reference_id`, `payment_id`) VALUES (' . (int) $order->id . ', "' . $orderReference . '", "' . pSQL($paymentId) . '")');
+        // @todo use \Db::getInstance()->insert
+        \Db::getInstance()->execute('INSERT INTO ' . _DB_PREFIX_ . 'nets_payment_id (`id_order`, `order_reference_id`, `payment_id`) VALUES (' . (int) $order->id . ', "' . $orderReference . '", "' . pSQL($paymentId) . '")');
         //save charge payment details in ps_nets_payment if auto capture is enabled
         if (Configuration::get('NETS_AUTO_CAPTURE')) {
             if ($paymentDetails) {
@@ -114,10 +129,10 @@ class netseasyReturnModuleFrontController extends ModuleFrontController {
                 foreach ($chargeResponse->payment->charges as $ky => $val) {
                     foreach ($val->orderItems as $key => $value) {
                         if (isset($val->chargeId)) {
-                            // @todo use DB::getInstance()->insert
+                            // @todo use \Db::getInstance()->insert
                             $charge_query = "insert into " . _DB_PREFIX_ . "nets_payment (`payment_id`, `charge_id`,  `product_ref`, `charge_qty`, `charge_left_qty`,`created`) "
                                     . "values ('" . pSQL($paymentId) . "', '" . $val->chargeId . "', '" . $value->reference . "', '" . (int) $value->quantity . "', '" . (int) $value->quantity . "',now())";
-                            DB::getInstance()->execute($charge_query);
+                            \Db::getInstance()->execute($charge_query);
                             $logger->logInfo("[Order Response][" . $paymentId . "] Updated Data for Auto Charge");
                         }
                     }

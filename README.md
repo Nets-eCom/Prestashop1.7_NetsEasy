@@ -28,7 +28,7 @@ Nexi provides support for both test and live accounts. For assistance, visit our
 ## For Developers
 
 ### Documentation
-For complete documentation, visit our [developer.nexigroup docs](https://developer.nexigroup.com/nexi-checkout/en-EU/docs/checkout-for-prestashop-prestashop-17/).
+For complete documentation, visit our [developer.nexigroup docs](https://developer.nexigroup.com/nexi-checkout/en-EU/docs/checkout-for-prestashop-prestashop/).
 
 ### Setup & Testing
 

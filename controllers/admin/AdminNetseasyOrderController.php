@@ -1,4 +1,22 @@
 <?php
+/**
+ * Copyright since 2007 PrestaShop SA and Contributors
+ * PrestaShop is an International Registered Trademark & Property of PrestaShop SA
+ *
+ * NOTICE OF LICENSE
+ *
+ * This source file is subject to the Academic Free License version 3.0
+ * that is bundled with this package in the file LICENSE.md.
+ * It is also available through the world-wide-web at this URL:
+ * https://opensource.org/licenses/AFL-3.0
+ * If you did not receive a copy of the license and are unable to
+ * obtain it through the world-wide-web, please send an email
+ * to license@prestashop.com so we can send you a copy immediately.
+ *
+ * @author    PrestaShop SA and Contributors <contact@prestashop.com>
+ * @copyright Since 2007 PrestaShop SA and Contributors
+ * @license   https://opensource.org/licenses/AFL-3.0 Academic Free License version 3.0
+ */
 
 use PrestaShop\PrestaShop\Adapter\SymfonyContainer;
 
@@ -19,7 +37,7 @@ class AdminNetseasyOrderController extends ModuleAdminController {
         $this->logger = new FileLogger();
         $this->logger->setFilename(_PS_ROOT_DIR_ . "/var/logs/nets.log");
         // IF NOT EXISTS !!
-        DB::getInstance()->execute("CREATE TABLE IF NOT EXISTS " . _DB_PREFIX_ . "nets_payment (
+        \Db::getInstance()->execute("CREATE TABLE IF NOT EXISTS " . _DB_PREFIX_ . "nets_payment (
 		`id` int(10) unsigned NOT NULL auto_increment,		
 		`payment_id` varchar(50) default NULL,
 		`charge_id` varchar(50) default NULL,
@@ -64,7 +82,7 @@ class AdminNetseasyOrderController extends ModuleAdminController {
      */
 
     public function getPaymentId($order_id) {
-        $query = DB::getInstance()->executeS("SELECT payment_id FROM `" . _DB_PREFIX_ . "nets_payment_id`  WHERE id_order = '" . (int) $order_id . "'");
+        $query = \Db::getInstance()->executeS("SELECT payment_id FROM `" . _DB_PREFIX_ . "nets_payment_id`  WHERE id_order = '" . (int) $order_id . "'");
         $this->paymentId = reset($query)['payment_id'];
         return $this->paymentId;
     }
@@ -78,11 +96,11 @@ class AdminNetseasyOrderController extends ModuleAdminController {
     public function getOrderItems($orderId) {
         //get order products          
         $taxRateShipping = $order_total = 0;
-        $product_query = DB::getInstance()->executeS(
+        $product_query = \Db::getInstance()->executeS(
                 "SELECT product_id,product_reference,product_name,product_price,tax_rate,product_quantity,total_price_tax_incl,total_shipping_price_tax_incl FROM " . _DB_PREFIX_ . "order_detail WHERE id_order = '" . (int) $orderId . "'"
         );
 
-        if (!empty(DB::getInstance()->numRows($product_query))) {
+        if (!empty(\Db::getInstance()->numRows($product_query))) {
             foreach ($product_query as $prows) {
                 //get product tax rate                 
                 $quantity = (int) $prows['product_quantity'];
@@ -112,13 +130,13 @@ class AdminNetseasyOrderController extends ModuleAdminController {
 
         //shipping items
         $shippingCost = '';
-        $query = DB::getInstance()->executeS("SELECT total_shipping,total_paid,id_carrier FROM `" . _DB_PREFIX_ . "orders`  WHERE id_order = '" . (int) $orderId . "'");
+        $query = \Db::getInstance()->executeS("SELECT total_shipping,total_paid,id_carrier FROM `" . _DB_PREFIX_ . "orders`  WHERE id_order = '" . (int) $orderId . "'");
         $shippingCost = reset($query)['total_shipping'];
         $order_total = reset($query)['total_paid'];
         $id_carrier = reset($query)['id_carrier'];
 
         if (!empty($shippingCost) && $shippingCost > 0) {
-            $query = DB::getInstance()->executeS("SELECT name FROM `" . _DB_PREFIX_ . "carrier` WHERE id_carrier = '" . (int) $id_carrier . "'");
+            $query = \Db::getInstance()->executeS("SELECT name FROM `" . _DB_PREFIX_ . "carrier` WHERE id_carrier = '" . (int) $id_carrier . "'");
             $shippingReference = reset($query)['name'];
 
             //easy calc method  
@@ -145,8 +163,8 @@ class AdminNetseasyOrderController extends ModuleAdminController {
         }
         
         //discount items     
-        $discountQuery = DB::getInstance()->executeS("SELECT name, value, value_tax_excl  FROM `" . _DB_PREFIX_ . "order_cart_rule` WHERE id_order = '" . (int) $orderId . "'");
-        if (!empty(DB::getInstance()->numRows($discountQuery))) {
+        $discountQuery = \Db::getInstance()->executeS("SELECT name, value, value_tax_excl  FROM `" . _DB_PREFIX_ . "order_cart_rule` WHERE id_order = '" . (int) $orderId . "'");
+        if (!empty(\Db::getInstance()->numRows($discountQuery))) {
             //easy calc method  
             $quantity = 1;
             $unitPrice = 0;
@@ -429,7 +447,7 @@ class AdminNetseasyOrderController extends ModuleAdminController {
         }
 
         // Get order db status from orders_status_history if cancelled
-        $query = DB::getInstance()->executeS("SELECT current_state FROM `" . _DB_PREFIX_ . "orders`  WHERE id_order = '" . (int) $orderId . "'");
+        $query = \Db::getInstance()->executeS("SELECT current_state FROM `" . _DB_PREFIX_ . "orders`  WHERE id_order = '" . (int) $orderId . "'");
         $current_state = reset($query)['current_state'];
         // if order is cancelled and payment is not updated as cancelled, call nets cancel payment api
         // @todo call cancel payment api in actionOrderStatusPostUpdate instead
@@ -577,13 +595,13 @@ class AdminNetseasyOrderController extends ModuleAdminController {
         if ((isset($ref) && !empty($ref)) && isset($response['chargeId'])) {
             $charge_query = "insert into " . _DB_PREFIX_ . "nets_payment (`payment_id`, `charge_id`,  `product_ref`, `charge_qty`, `charge_left_qty`,`created`) "
                     . "values ('" . $this->paymentId . "', '" . pSql($response['chargeId']) . "', '" . pSql($ref) . "', '" . (int) $chargeQty . "', '" . (int) $chargeQty . "',now())";
-            DB::getInstance()->execute($charge_query);
+            \Db::getInstance()->execute($charge_query);
         } else {
             if (isset($response['chargeId'])) {
                 foreach ($data['order']['items'] as $key => $value) {
                     $charge_query = "insert into " . _DB_PREFIX_ . "nets_payment (`payment_id`, `charge_id`,  `product_ref`, `charge_qty`, `charge_left_qty`,`created`) "
                             . "values ('" . $this->paymentId . "', '" . pSql($response['chargeId']) . "', '" . pSql($value['reference']) . "', '" . (int) $value['quantity'] . "', '" . (int) $value['quantity'] . "',now())";
-                    DB::getInstance()->execute($charge_query);
+                    \Db::getInstance()->execute($charge_query);
                 }
             }
         }
@@ -624,11 +642,11 @@ class AdminNetseasyOrderController extends ModuleAdminController {
                 }
 
                 if ($refExist) {
-                    $charge_query = DB::getInstance()->executeS(
+                    $charge_query = \Db::getInstance()->executeS(
                             "SELECT `payment_id`, `charge_id`,  `product_ref`, `charge_qty`, `charge_left_qty` FROM " . _DB_PREFIX_ . "nets_payment WHERE payment_id = '" . $this->paymentId . "' AND charge_id = '" . pSql($val['chargeId']) . "' AND product_ref = '" . pSql($ref) . "' AND charge_left_qty !=0"
                     );
 
-                    if (!empty(DB::getInstance()->numRows($charge_query))) {
+                    if (!empty(\Db::getInstance()->numRows($charge_query))) {
                         foreach ($charge_query as $crows) {
                             $table_charge_left_qty = $refundEachQtyArr[$val['chargeId']] = $crows['charge_left_qty'];
                         }
@@ -652,10 +670,10 @@ class AdminNetseasyOrderController extends ModuleAdminController {
                             $this->logger->logInfo("[Refund Process][" . $this->paymentId . "] Admin Partial Refund Payment Response : " . $api_return);
 
                             //update for left charge quantity
-                            $singlecharge_query = DB::getInstance()->executeS(
+                            $singlecharge_query = \Db::getInstance()->executeS(
                                     "SELECT  `charge_left_qty` FROM " . _DB_PREFIX_ . "nets_payment WHERE payment_id = '" . $this->paymentId . "' AND charge_id = '" . pSql($key) . "' AND product_ref = '" . pSql($ref) . "' AND charge_left_qty !=0 "
                             );
-                            if (!empty(DB::getInstance()->numRows($singlecharge_query))) {
+                            if (!empty(\Db::getInstance()->numRows($singlecharge_query))) {
                                 foreach ($singlecharge_query as $scrows) {
                                     $charge_left_qty = $scrows['charge_left_qty'];
                                 }
@@ -664,7 +682,7 @@ class AdminNetseasyOrderController extends ModuleAdminController {
                             if ($charge_left_qty < 0) {
                                 $charge_left_qty = -$charge_left_qty;
                             }
-                            $qresult = DB::getInstance()->execute(
+                            $qresult = \Db::getInstance()->execute(
                                     "UPDATE " . _DB_PREFIX_ . "nets_payment SET charge_left_qty = ". (int) $charge_left_qty . " WHERE payment_id = '" . $this->paymentId . "' AND charge_id = '" . pSql($key) . "' AND product_ref = '" . pSql($ref) . "'"
                             );
                         }
@@ -689,7 +707,7 @@ class AdminNetseasyOrderController extends ModuleAdminController {
                         'grossTotalAmount' => $value['grossTotalAmount'],
                         'netTotalAmount' => $value['netTotalAmount'],
                     );
-                    $qresult = DB::getInstance()->execute(
+                    $qresult = \Db::getInstance()->execute(
                             "UPDATE " . _DB_PREFIX_ . "nets_payment SET charge_left_qty = 0 WHERE payment_id = '" . $this->paymentId . "' AND charge_id = '" . pSql($val['chargeId']) . "' AND product_ref = '" . pSql($value['reference']) . "'"
                     );
                 }
@@ -821,18 +839,6 @@ class AdminNetseasyOrderController extends ModuleAdminController {
         }
     }
 
-    /*
-     * Function to fetch charge id from databse table psnets_payment
-     * @param $orderid
-     * @return nets charge id
-     */
-
-    private function getChargeId($orderid) {
-        $api_return = $this->getCurlResponse($this->getApiUrl() . $this->getPaymentId($orderid), 'GET');
-        $response = json_decode($api_return, true);
-        return $response['payment']['charges'][0]['chargeId'];
-    }
-
     public function getResponse($order_id) {
         $api_return = $this->getCurlResponse($this->getApiUrl() . $this->getPaymentId($order_id), 'GET');
         $response = json_decode($api_return, true);
@@ -908,14 +914,14 @@ class AdminNetseasyOrderController extends ModuleAdminController {
         if (!empty($response['payment']['charges'])) {
 
             foreach ($response['payment']['charges'] as $key => $values) {
-                $charge_query = DB::getInstance()->executeS(
+                $charge_query = \Db::getInstance()->executeS(
                         "SELECT `charge_id` FROM " . _DB_PREFIX_ . "nets_payment WHERE payment_id = '" . $this->paymentId . "' AND charge_id = '" . pSql($values['chargeId']) . "' "
                 );
-                if (empty(DB::getInstance()->numRows($charge_query))) {
+                if (empty(\Db::getInstance()->numRows($charge_query))) {
                     for ($i = 0; $i < count($values['orderItems']); $i++) {
                         $charge_iquery = "insert into " . _DB_PREFIX_ . "nets_payment (`payment_id`, `charge_id`,  `product_ref`, `charge_qty`, `charge_left_qty`,`created`) "
                                 . "values ('" . $this->paymentId . "', '" . pSql($values['chargeId']) . "', '" . pSql($values['orderItems'][$i]['reference']) . "', '" . (int) $values['orderItems'][$i]['quantity'] . "', '" . (int) $values['orderItems'][$i]['quantity'] . "',now())";
-                        DB::getInstance()->execute($charge_iquery);
+                        \Db::getInstance()->execute($charge_iquery);
                     }
                 }
             }

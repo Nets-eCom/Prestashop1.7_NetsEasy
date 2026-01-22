@@ -6,7 +6,7 @@
 | Shop Version   | `1.7 to 9.0`                                                                                    |
 | Plugin Version | `1.1.14`                                                                                        |
 | PHP Version    | `8.1+`                                                                                          |
-| Guide          | https://developer.nexigroup.com/nexi-checkout/en-EU/docs/checkout-for-prestashop-prestashop-17/ |
+| Guide          | https://developer.nexigroup.com/nexi-checkout/en-EU/docs/checkout-for-prestashop-prestashop/    |
 | Github         | https://github.com/Nets-eCom/Prestashop1.7_NetsEasy                                             |
 
 ## CHANGELOG

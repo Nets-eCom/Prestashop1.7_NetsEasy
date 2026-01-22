@@ -1,12 +1,23 @@
 <?php
-
 /**
- * Nets easy - A Nets secure payment module for PrestaShop 1.7
+ * Copyright since 2007 PrestaShop SA and Contributors
+ * PrestaShop is an International Registered Trademark & Property of PrestaShop SA
  *
- * This file is the declaration of the module.
+ * NOTICE OF LICENSE
  *
- * @license https://opensource.org/licenses/afl-3.0.php
+ * This source file is subject to the Academic Free License version 3.0
+ * that is bundled with this package in the file LICENSE.md.
+ * It is also available through the world-wide-web at this URL:
+ * https://opensource.org/licenses/AFL-3.0
+ * If you did not receive a copy of the license and are unable to
+ * obtain it through the world-wide-web, please send an email
+ * to license@prestashop.com so we can send you a copy immediately.
+ *
+ * @author    PrestaShop SA and Contributors <contact@prestashop.com>
+ * @copyright Since 2007 PrestaShop SA and Contributors
+ * @license   https://opensource.org/licenses/AFL-3.0 Academic Free License version 3.0
  */
+
 use PrestaShop\PrestaShop\Adapter\SymfonyContainer;
 use PrestaShop\PrestaShop\Core\Payment\PaymentOption;
 
@@ -49,15 +60,18 @@ class Netseasy extends PaymentModule {
         $this->currencies = true;
         $this->currencies_mode = 'checkbox';
         $this->bootstrap = true;
-        $this->displayName = empty(Configuration::get('NETS_PAYMENT_NAME')) ? 'Nets Easy' : Configuration::get('NETS_PAYMENT_NAME');
+
+        parent::__construct();
+
+        $displayName = empty(Configuration::get('NETS_PAYMENT_NAME')) ? 'Nets Easy' : Configuration::get('NETS_PAYMENT_NAME');
+        $this->displayName = $displayName;
         $this->description = 'Nets Secure Payment Made Easy';
         $this->confirmUninstall = 'Are you sure you want to uninstall this module?';
-        $this->ps_versions_compliancy = array('min' => '1.7.0', 'max' => _PS_VERSION_);
+        $this->ps_versions_compliancy = array('min' => '1.7.0.0', 'max' => '9.99.99');
 
         $this->logger = new FileLogger();
         $this->logger->setFilename(_PS_ROOT_DIR_ . "/var/logs/nets.log");
 
-        parent::__construct();
     }
 
     // delete config of module
@@ -162,7 +176,6 @@ class Netseasy extends PaymentModule {
     /**
      * Display this module as a payment option during the checkout
      *
-     * @param array $params
      * @return array|void
      */
     public function hookPaymentOptions() {
@@ -266,7 +279,7 @@ class Netseasy extends PaymentModule {
             $formValues = $this->getConfigFormValues($paytype);
             foreach (array_keys($formValues) as $key) {
                 if (is_array(Tools::getValue($key))) {
-                    $ids = strval(implode(',', Tools::getValue($key)));
+                    $ids = implode(',', Tools::getValue($key));
                     Configuration::updateValue($key, $ids);
                 } else {
                     Configuration::updateValue($key, Tools::getValue($key));
@@ -658,7 +671,7 @@ class Netseasy extends PaymentModule {
     }
 
     public function isUpdating() {
-        $dbVersion = Db::getInstance()->getValue('SELECT `version` FROM `' . _DB_PREFIX_ . 'module` WHERE `name` = \'' . pSQL($this->name) . '\'');
+        $dbVersion = \Db::getInstance()->getValue('SELECT `version` FROM `' . _DB_PREFIX_ . 'module` WHERE `name` = \'' . pSQL($this->name) . '\'');
         return version_compare($this->version, $dbVersion, '>');
     }
 
@@ -718,7 +731,7 @@ class Netseasy extends PaymentModule {
 
         if ($order->module == $this->name) {
 
-            $nets = Db::getInstance()->getRow('SELECT * FROM ' . _DB_PREFIX_ . 'nets_payment_status WHERE order_id = ' . (int) $orderId);
+            $nets = \Db::getInstance()->getRow('SELECT * FROM ' . _DB_PREFIX_ . 'nets_payment_status WHERE order_id = ' . (int) $orderId);
 
             require_once(_PS_MODULE_DIR_ . $this->name . '/controllers/admin/AdminNetseasyOrderController.php');
             $netsOrderObj = new AdminNetseasyOrderController();
@@ -760,7 +773,7 @@ class Netseasy extends PaymentModule {
     }
 
     public function addNetsTable() {
-        DB::getInstance()->execute("CREATE TABLE IF NOT EXISTS `" . _DB_PREFIX_ . "nets_payment_id`
+        \Db::getInstance()->execute("CREATE TABLE IF NOT EXISTS `" . _DB_PREFIX_ . "nets_payment_id`
             ( `id_nets_payment` INT(10) NOT NULL AUTO_INCREMENT ,
              `id_order` INT(10) NOT NULL ,
              `order_reference_id` VARCHAR(9) NOT NULL ,
@@ -768,7 +781,7 @@ class Netseasy extends PaymentModule {
              `created_date` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
              PRIMARY KEY (`id_nets_payment`))");
 
-        DB::getInstance()->execute("CREATE TABLE IF NOT EXISTS " . _DB_PREFIX_ . "nets_payment (
+        \Db::getInstance()->execute("CREATE TABLE IF NOT EXISTS " . _DB_PREFIX_ . "nets_payment (
             `id` int(10) unsigned NOT NULL auto_increment,
             `payment_id` varchar(50) default NULL,
             `charge_id` varchar(50) default NULL,
@@ -781,7 +794,7 @@ class Netseasy extends PaymentModule {
             PRIMARY KEY (`id`)
             )");
 
-        DB::getInstance()->execute("CREATE TABLE IF NOT EXISTS `" . _DB_PREFIX_ . "nets_payment_status` (
+        \Db::getInstance()->execute("CREATE TABLE IF NOT EXISTS `" . _DB_PREFIX_ . "nets_payment_status` (
             `id` int(10) unsigned NOT NULL auto_increment,
             `order_id` varchar(50) default NULL,
             `payment_id` varchar(50) default NULL,

@@ -1,4 +1,22 @@
 <?php
+/**
+ * Copyright since 2007 PrestaShop SA and Contributors
+ * PrestaShop is an International Registered Trademark & Property of PrestaShop SA
+ *
+ * NOTICE OF LICENSE
+ *
+ * This source file is subject to the Academic Free License version 3.0
+ * that is bundled with this package in the file LICENSE.md.
+ * It is also available through the world-wide-web at this URL:
+ * https://opensource.org/licenses/AFL-3.0
+ * If you did not receive a copy of the license and are unable to
+ * obtain it through the world-wide-web, please send an email
+ * to license@prestashop.com so we can send you a copy immediately.
+ *
+ * @author    PrestaShop SA and Contributors <contact@prestashop.com>
+ * @copyright Since 2007 PrestaShop SA and Contributors
+ * @license   https://opensource.org/licenses/AFL-3.0 Academic Free License version 3.0
+ */
 
 class netseasyWebhookModuleFrontController extends ModuleFrontController {
     public $logger;
@@ -12,7 +30,7 @@ class netseasyWebhookModuleFrontController extends ModuleFrontController {
         $this->content_only = true;
 
         // IF NOT EXISTS ps_nets_payment_status table create it!!
-        DB::getInstance()->execute("CREATE TABLE IF NOT EXISTS `" . _DB_PREFIX_ . "nets_payment_status` (
+        \Db::getInstance()->execute("CREATE TABLE IF NOT EXISTS `" . _DB_PREFIX_ . "nets_payment_status` (
 		`id` int(10) unsigned NOT NULL auto_increment,
 		`order_id` varchar(50) default NULL,
 		`payment_id` varchar(50) default NULL,
@@ -60,28 +78,28 @@ class netseasyWebhookModuleFrontController extends ModuleFrontController {
             }
 
             //Insert or update order status
-            $orderResult = DB::getInstance()->executeS(
+            $orderResult = \Db::getInstance()->executeS(
                 "SELECT id_order FROM `" . _DB_PREFIX_ . "orders` WHERE note =  '" . pSQL($paymentId) . "' limit 0,1"
             );
 
-            if (!empty(DB::getInstance()->numRows($orderResult))) {
+            if (!empty(\Db::getInstance()->numRows($orderResult))) {
                 $orderId = reset($orderResult)['id_order'];
             }
 
-            $statusResult = DB::getInstance()->executeS(
+            $statusResult = \Db::getInstance()->executeS(
                 "SELECT id, status FROM `" . _DB_PREFIX_ . "nets_payment_status` WHERE  payment_id =  '" . pSQL($paymentId) . "' limit 0,1"
             );
 
-            if (empty(DB::getInstance()->numRows($statusResult))) {
+            if (empty(\Db::getInstance()->numRows($statusResult))) {
                 $query = "insert into `" . _DB_PREFIX_ . "nets_payment_status` (`order_id`, `payment_id`,  `status`, `created`) "
                     . "values ('" . (int)$orderId . "', '" . pSQL($paymentId) . "', '" . $webhookOrder . "', now())";
-                DB::getInstance()->execute($query);
+                \Db::getInstance()->execute($query);
             } else {
 
                 //compare with previous $order and update only if it is greater than previous
                 $status = reset($statusResult)['status'];
                 if ($webhookOrder > $status) {
-                    DB::getInstance()->execute(
+                    \Db::getInstance()->execute(
                         "UPDATE `" . _DB_PREFIX_ . "nets_payment_status` SET status = $webhookOrder, order_id = '" . (int)$orderId . "', updated = '1' where  payment_id =  '" . pSQL($paymentId) . "' "
                     );
                 }
