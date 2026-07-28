@@ -4,12 +4,15 @@
 | Module         | Nets Easy Payment Module for Prestashop 1.7 to 9                                             |
 |----------------|----------------------------------------------------------------------------------------------|
 | Shop Version   | `1.7 to 9.0`                                                                                 |
-| Plugin Version | `1.1.15`                                                                                     |
+| Plugin Version | `1.1.16`                                                                                     |
 | PHP Version    | `8.1+`                                                                                       |
 | Guide          | https://developer.nexigroup.com/nexi-checkout/en-EU/docs/checkout-for-prestashop-prestashop/ |
 | Github         | https://github.com/Nets-eCom/Prestashop1.7_NetsEasy                                          |
 
 ## CHANGELOG
+### Version 1.1.16 - Released 2027-07-28
+* Fixed: discount calculated from cart rule
+
 ### Version 1.1.15 - Released 2026-01-22
 * Fixed: error logging in case of order cancellation
 * Fixed: findings related to Security Licenses and Optimizations
