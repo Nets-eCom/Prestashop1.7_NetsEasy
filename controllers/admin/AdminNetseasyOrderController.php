@@ -130,10 +130,11 @@ class AdminNetseasyOrderController extends ModuleAdminController {
 
         //shipping items
         $shippingCost = '';
-        $query = \Db::getInstance()->executeS("SELECT total_shipping,total_paid,id_carrier FROM `" . _DB_PREFIX_ . "orders`  WHERE id_order = '" . (int) $orderId . "'");
-        $shippingCost = reset($query)['total_shipping'];
-        $order_total = reset($query)['total_paid'];
-        $id_carrier = reset($query)['id_carrier'];
+        $query = \Db::getInstance()->executeS("SELECT total_shipping,total_paid,id_carrier,id_cart FROM `" . _DB_PREFIX_ . "orders`  WHERE id_order = '" . (int) $orderId . "'");
+        $orderData = reset($query);
+        $shippingCost = $orderData['total_shipping'];
+        $order_total = $orderData['total_paid'];
+        $id_carrier = $orderData['id_carrier'];
 
         if (!empty($shippingCost) && $shippingCost > 0) {
             $query = \Db::getInstance()->executeS("SELECT name FROM `" . _DB_PREFIX_ . "carrier` WHERE id_carrier = '" . (int) $id_carrier . "'");
@@ -162,39 +163,21 @@ class AdminNetseasyOrderController extends ModuleAdminController {
             );
         }
         
-        //discount items     
-        $discountQuery = \Db::getInstance()->executeS("SELECT name, value, value_tax_excl  FROM `" . _DB_PREFIX_ . "order_cart_rule` WHERE id_order = '" . (int) $orderId . "'");
-        if (!empty(\Db::getInstance()->numRows($discountQuery))) {
-            //easy calc method  
-            $quantity = 1;
-            $unitPrice = 0;
-            $grossAmount = 0;
-            $netAmount = 0;
-            foreach ($discountQuery as $prows) {
-                $discountCost = $prows['value'];
-                    
-                if (!empty($discountCost) && $discountCost > 0) {
-                    $discount = (isset($discountCost)) ? -$discountCost : 0; // shipping price incl. VAT in DB format 
-                    $discountUnitPrice = round(($discount * 100));               
-                    $discountNetAmount = round($quantity * $discountUnitPrice);
-                    $discountGrossAmount = round($quantity * ($discount * 100));
-                    
-                    $unitPrice = $unitPrice + $discountUnitPrice;         
-                    $grossAmount = $grossAmount + $discountGrossAmount;       
-                    $netAmount = $netAmount + $discountNetAmount;         
-                    
-                }
-            }
+        //discount items
+        $cart = new Cart((int) $orderData['id_cart']);
+        $discountValue = $cart->getDiscountSubtotalWithoutGifts();
+        if ($discountValue > 0) {
+            $discountAmount = round(round($discountValue, 2) * 100);
             $itemsArray[] = array(
                 'reference' => 'discount',
                 'name' => 'Discount',
-                'quantity' => $quantity,
+                'quantity' => 1,
                 'unit' => 'pcs',
-                'unitPrice' => $unitPrice,
+                'unitPrice' => -$discountAmount,
                 'taxRate' => 0,
                 'taxAmount' => 0,
-                'grossTotalAmount' => $grossAmount,
-                'netTotalAmount' => $netAmount
+                'grossTotalAmount' => -$discountAmount,
+                'netTotalAmount' => -$discountAmount
             );
         }
         
